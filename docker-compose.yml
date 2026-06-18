@@ -1,0 +1,62 @@
+## Forklift Telemetri — geliştirme altyapısı
+## Çalıştır: docker compose up -d
+## Bu dosya VERİTABANI (PostgreSQL + TimescaleDB OSS) ve MQTT broker (Mosquitto)
+## servislerini ayağa kaldırır. Backend ve frontend geliştirme sırasında
+## `npm run dev` ile yerelde çalışır (aşağıda prod için örnek servisler yorumda).
+
+services:
+  db:
+    image: timescale/timescaledb:2.17.2-pg16
+    container_name: forklift-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: forklift
+      POSTGRES_PASSWORD: forklift_dev_pass
+      POSTGRES_DB: forklift
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forklift -d forklift"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: forklift-mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # MQTT over WebSocket (opsiyonel)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - mqtt_data:/mosquitto/data
+      - mqtt_log:/mosquitto/log
+
+  # --- Opsiyonel: veritabanı yönetim arayüzü ---
+  adminer:
+    image: adminer:4
+    container_name: forklift-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  # --- Prod için örnek (geliştirmede kullanmıyoruz) ---
+  # backend:
+  #   build: ./backend
+  #   env_file: ./backend/.env
+  #   ports: ["4000:4000"]
+  #   depends_on: { db: { condition: service_healthy }, mqtt: {} }
+  # frontend:
+  #   build: ./frontend
+  #   ports: ["5173:80"]
+  #   depends_on: [backend]
+
+volumes:
+  db_data:
+  mqtt_data:
+  mqtt_log:

@@ -1,0 +1,30 @@
+node_modules/
+dist/
+build/
+.env
+*.local
+.DS_Store
+*.log
+
+# Yerel geçici PostgreSQL kümesi (start-local.ps1)
+.localdb/
+pg_start.log
+
+# FTP parolası içerir — commit etme
+hostinger/deploy.ps1
+
+# DB kimlik bilgileri — commit etme (şablon: hostinger/secrets.example.php)
+hostinger/secrets.php
+
+# STM32 derleme çıktıları (CubeIDE Debug/)
+firmware/stm32/Debug/
+
+# Prisma
+backend/prisma/*.db
+
+# Vite
+frontend/dist/
+
+# PlatformIO
+firmware/.pio/
+firmware/.vscode/

@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMNİ TrackLink — Forklift Telemetri</title>
+<style>
+:root{
+  --red:#8e1616; --red2:#a81f1f; --red-d:#6d1010; --red-l:#fbeaea;
+  --bg:#eef1f4; --card:#fff; --line:#e5e7eb; --line2:#eceff3;
+  --txt:#283543; --muted:#7a8696; --muted2:#9aa6b4;
+  --green:#16a34a; --amber:#d97706; --red-w:#dc2626; --blue:#2563eb;
+  --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Segoe UI",system-ui,Roboto,Arial,sans-serif;color:var(--txt);background:var(--bg)}
+button{font-family:inherit}
+
+/* ===== LANDING (Ana Sayfa) ===== */
+#landing{position:fixed;inset:0;z-index:90;overflow-y:auto;background:#fff;color:#1f2937;display:block}
+.lnav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:18px;padding:14px 30px;background:#fff;border-bottom:1px solid var(--line)}
+.lnav .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+.lnav .brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--red2),var(--red-d));display:grid;place-items:center;color:#fff;font-size:18px}
+.lnav .brand span{color:var(--red2)}
+.lnav .lmenu{display:flex;gap:22px;margin-left:24px}
+.lnav .lmenu a{color:var(--muted);font-size:14px;font-weight:600;cursor:pointer}
+.lnav .lmenu a:hover{color:var(--red2)}
+.lnav .telemetri{margin-left:auto}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center;max-width:1180px;margin:0 auto;padding:54px 30px}
+.hero h1{font-size:40px;line-height:1.15;margin:0 0 16px}.hero h1 span{color:var(--red2)}
+.hero p{font-size:16px;color:var(--muted);line-height:1.7;margin:0 0 24px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero img{width:100%;max-height:360px;object-fit:contain;filter:drop-shadow(0 20px 30px #0002)}
+.sec{max-width:1180px;margin:0 auto;padding:10px 30px 60px}
+.sec h2{font-size:26px;text-align:center;margin:0 0 8px}
+.sec .ssub{text-align:center;color:var(--muted);margin:0 0 30px}
+.feats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.feat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow)}
+.feat .fi{width:48px;height:48px;border-radius:12px;background:var(--red-l);display:grid;place-items:center;font-size:24px;margin-bottom:12px}
+.feat h3{margin:0 0 8px;font-size:16px}.feat p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.6}
+.lfooter{background:#161616;color:#cfcfcf;text-align:center;padding:26px;font-size:13px}
+@media(max-width:860px){.hero{grid-template-columns:1fr}.feats{grid-template-columns:repeat(2,1fr)}.lnav .lmenu{display:none}}
+
+/* ===== LOGIN (split: sol görsel + sağ koyu form) ===== */
+#login{position:fixed;inset:0;z-index:100;display:none}
+#login .lleft{flex:1;background:radial-gradient(circle at 50% 38%,#ffffff,#e9edf2 68%,#f6dede);display:grid;place-items:center;position:relative;overflow:hidden}
+#login .lleft img{width:80%;max-width:720px;object-fit:contain;filter:drop-shadow(0 30px 45px #0003)}
+#login .lleft .wm{position:absolute;left:42px;bottom:30px;color:#00000012;font-size:60px;font-weight:900;letter-spacing:2px}
+#login .lright{width:520px;max-width:48vw;background:#141414;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 56px}
+#login .llogo{display:flex;flex-direction:column;align-items:flex-end;margin-bottom:38px;cursor:pointer}
+#login .llogo b{font-size:34px;font-weight:900;letter-spacing:1px}#login .llogo b span{color:var(--red2)}
+#login .llogo .tl{color:#8a8a8a;font-weight:600;font-size:17px;letter-spacing:3px}
+#login h2{font-size:24px;margin:0 0 8px}
+#login .lsub{color:#9a9a9a;font-size:13.5px;margin-bottom:30px}
+#login .lsub a{color:var(--red2);font-weight:700;cursor:pointer}
+.lfield{margin-bottom:24px}
+.lfield label{display:block;font-size:13px;color:#cfcfcf;margin-bottom:9px;font-weight:600}
+.lfield .inp{display:flex;align-items:center;gap:10px;border-bottom:1px solid #3a3a3a;padding:7px 2px;transition:border-color .2s}
+.lfield .inp:focus-within{border-color:var(--red2)}
+.lfield .inp .ic{color:#7a7a7a;font-size:15px}
+.lfield .inp input{flex:1;background:none;border:none;color:#fff;font-size:14px;outline:none}
+.lfield .inp input::placeholder{color:#666}
+.lrow{display:flex;align-items:center;justify-content:space-between;margin:4px 0 24px}
+.langpick{display:inline-flex;align-items:center;gap:7px;color:#cfcfcf;font-size:13px;border:1px solid #333;border-radius:8px;padding:7px 12px;cursor:pointer}
+.lforgot{color:#9a9a9a;font-size:13px;cursor:pointer}
+.lbtn{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--red2),var(--red-d));color:#fff;font-size:15px;font-weight:700}
+.lbtn:hover{filter:brightness(1.08)}
+@media(max-width:820px){#login .lleft{display:none}#login .lright{width:100%;max-width:100%}}
+
+/* ===== SHELL ===== */
+#app[hidden]{display:none}
+.topbar{position:sticky;top:0;z-index:40;height:58px;display:flex;align-items:center;gap:16px;padding:0 18px;color:#fff;background:linear-gradient(90deg,var(--red),var(--red2))}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.topbar .brand .mark{width:30px;height:30px;border-radius:8px;background:#ffffff22;display:grid;place-items:center;font-size:16px}
+.topbar .brand .tl{font-weight:400;opacity:.92;font-size:15px}
+.topbar .search{flex:1;max-width:340px;margin-left:14px;display:flex;align-items:center;gap:8px;background:#ffffff22;border-radius:9px;padding:8px 12px}
+.topbar .search input{border:none;background:none;color:#fff;font-size:13.5px;width:100%;outline:none}
+.topbar .search input::placeholder{color:#fff9}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.topbar .ic{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;cursor:pointer;position:relative;font-size:16px;background:transparent;border:none;color:#fff}
+.topbar .ic:hover{background:#ffffff1f}
+.topbar .ic .badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:9px;background:#fff;color:var(--red2);font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+.simchip{font-size:11px;font-weight:700;background:#ffffff26;padding:4px 9px;border-radius:999px}
+.layout{display:flex;min-height:calc(100vh - 58px)}
+.sidebar{width:92px;background:#fff;border-right:1px solid var(--line);padding:12px 8px}
+.navi{display:flex;flex-direction:column;gap:4px}
+.navi a{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:10px;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;border-left:3px solid transparent}
+.navi a .i{font-size:20px}
+.navi a:hover{background:#f6f7f9;color:var(--txt)}
+.navi a.active{background:var(--red-l);color:var(--red2);border-left-color:var(--red2)}
+.content{flex:1;padding:22px;min-width:0}
+
+/* ===== COMMON ===== */
+.h{font-size:18px;font-weight:700;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.pad{padding:18px}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.muted{color:var(--muted)}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.searchbar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow)}
+.searchbar input{border:none;outline:none;font-size:14px;width:100%}
+.btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:9px;cursor:pointer;background:linear-gradient(135deg,var(--red2),var(--red-d));color:#fff;padding:10px 18px;font-size:14px;font-weight:600}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:#fff;color:var(--txt);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--red2);color:var(--red2);filter:none}
+.btn.sm{padding:7px 12px;font-size:13px}
+.badge2{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700}
+.b-aktif{background:#e7f7ee;color:var(--green)}.b-kapali{background:#eef1f4;color:var(--muted)}
+.b-rolanti{background:#fef3e2;color:var(--amber)}.b-uyari{background:#fde8e8;color:var(--red-w)}
+.b-sim{background:#eef2ff;color:var(--blue)}.b-real{background:#e7f7ee;color:var(--green)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+/* CAN parametre paneli (detay sağ sütun) */
+.cansec{margin-top:10px}
+.canttl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:6px 0 4px;border-bottom:1px solid var(--line2);margin-bottom:2px}
+.canrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px;border-bottom:1px dashed var(--line2)}
+.canrow:last-child{border-bottom:none}
+.canrow b{font-weight:700;font-variant-numeric:tabular-nums}
+.canrow .cu{font-size:11px;color:var(--muted);font-weight:500}
+.na{display:inline-block;padding:1px 7px;border-radius:6px;background:#eef1f4;color:#90a0b0;font-size:11px;font-weight:700;letter-spacing:.03em}
+.cv-on{color:var(--green)}.cv-off{color:var(--muted)}.cv-alarm{color:var(--red-w);font-weight:800}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:12px 14px;border-bottom:1px solid var(--line)}
+tbody td{padding:10px 14px;font-size:13.5px;border-bottom:1px solid var(--line2)}
+tbody tr.clk{cursor:pointer}
+tbody tr.clk:hover{background:#f8fafc}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1050px){.grid2{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}}
+
+/* machine image */
+.mimg{display:inline-grid;place-items:center;overflow:hidden;border-radius:8px;background:#fff}
+.mimg img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.mimg .ph{display:none;font-size:60%}
+.mimg.sm{width:64px;height:42px;background:#f1f5f9}.mimg.sm .ph{font-size:20px}
+.mimg.lg{width:100%;height:210px;background:#f8fafc;border:1px solid var(--line);padding:8px}.mimg.lg .ph{font-size:64px}
+
+/* stat / charts */
+.stat{display:flex;flex-direction:column;gap:6px}
+.stat .lab{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.stat .num{font-size:26px;font-weight:800}
+.bars{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:10px}
+.bars .bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bars .bcol .v{font-size:11px;color:var(--muted)}
+.bars .bcol .bar{width:60%;max-width:34px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--red2),var(--red))}
+.bars .bcol .bar.y{background:linear-gradient(180deg,#cf6a6a,#b34141)}
+.bars .bcol .lab{font-size:11px;color:var(--muted)}
+.donut{display:flex;align-items:center;gap:20px}
+.legend div{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.weather{display:flex;align-items:center;gap:16px}.weather .t{font-size:40px;font-weight:800}.weather .ico{font-size:46px}
+.qa{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px}
+.qa .qi{flex:0 0 auto;width:150px;cursor:pointer}.qa .qi .nm{font-size:12.5px;font-weight:600;margin-top:7px;text-align:center}
+
+/* detail widgets */
+.detail-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.detail-head .back{cursor:pointer;font-size:22px;color:var(--muted)}
+.detail-head .mtitle b{font-size:20px}.detail-head .mtitle div{font-size:13px;color:var(--muted)}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.wgrid.editing .wcard{cursor:move;outline:2px dashed var(--red2);outline-offset:-2px}
+.wcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 14px 14px;box-shadow:var(--shadow);min-height:172px;display:flex;flex-direction:column;align-items:center}
+.wcard.dragging{opacity:.4}
+.wcard .acc{position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--accent,#8e1616)}
+.wcard .rm{position:absolute;top:8px;right:9px;width:22px;height:22px;border-radius:6px;border:none;background:#f1f5f9;color:var(--muted);cursor:pointer;font-size:13px;display:none}
+.wcard:hover .rm,.wgrid.editing .wcard .rm{display:grid;place-items:center}
+.wcard .rm:hover{background:#fde8e8;color:var(--red-w)}
+.wlabel{font-size:13px;font-weight:600;margin-top:6px;text-align:center}
+.wsub{font-size:10.5px;color:var(--muted2);margin-top:3px}
+.gauge{position:relative;width:100%}
+.gauge svg{width:100%;height:auto;display:block;overflow:visible}
+.track{fill:none;stroke:#edf0f3;stroke-width:13;stroke-linecap:round}
+.fill{fill:none;stroke:#8e1616;stroke-width:13;stroke-linecap:round;transition:stroke .3s}
+.gdot{stroke:#fff;stroke-width:2;fill:#8e1616;transition:fill .3s}
+.ctick{stroke:#94a3b8;stroke-width:2}
+.read{position:absolute;left:0;right:0;bottom:0;text-align:center}
+.read .val{font:800 26px/1 "Segoe UI",sans-serif}.read .unit{font-size:12px;color:var(--muted);margin-left:2px;font-weight:600}
+.scale{display:flex;justify-content:space-between;color:var(--muted2);font-size:10px;padding:0 8px;margin-top:-2px}
+.counter{display:flex;align-items:baseline;gap:5px;justify-content:center;padding:26px 0 12px}
+.counter .cval{font:800 36px/1 "Segoe UI",sans-serif}.counter .unit{font-size:13px;color:var(--muted)}
+.cbar{width:100%;height:7px;border-radius:999px;background:#eef1f4;overflow:hidden}
+.cbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red2),var(--red));transition:width .3s}
+.status{display:grid;place-items:center;padding:30px 0}
+.pill{font-size:16px;font-weight:800;padding:11px 24px;border-radius:11px;border:1px solid var(--line)}
+.pill.on{color:var(--green);background:#e7f7ee;border-color:#bbe9cc}.pill.off{color:var(--muted);background:#f1f5f9}
+.modes{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;padding:28px 0}
+.mode{font-size:13px;font-weight:700;padding:10px 14px;border-radius:9px;color:var(--muted);background:#f1f5f9;border:1px solid var(--line)}
+.mode.active{color:#fff;background:linear-gradient(135deg,var(--red2),var(--red-d));border-color:var(--red2)}
+.addcard{border:2px dashed var(--line);background:#fafbfc;border-radius:14px;min-height:172px;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.addcard:hover{border-color:var(--red2);color:var(--red2);background:var(--red-l)}
+.addcard .plus{font-size:34px}
+.map{height:100%;min-height:240px;border-radius:12px;background:repeating-linear-gradient(45deg,#cfe0c6 0 12px,#d6e6cd 12px 24px);position:relative;overflow:hidden}
+.map .road{position:absolute;left:0;right:0;top:55%;height:14px;background:#aebfea;transform:rotate(-8deg)}
+.map .pin{position:absolute;font-size:30px;filter:drop-shadow(0 2px 3px #0003)}
+
+/* modals */
+.overlay{position:fixed;inset:0;background:#0b1220aa;backdrop-filter:blur(2px);z-index:60;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{width:820px;max-width:94vw;max-height:90vh;background:#fff;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px #00000055}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:18px 22px}
+.mhead h2{margin:0;font-size:18px;color:var(--muted);font-weight:600}
+.mhead .x{cursor:pointer;border:none;background:none;font-size:22px;color:var(--muted)}
+.msearch{padding:0 22px 14px}
+.msearch input{width:100%;padding:13px 16px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+.transfer{display:grid;grid-template-columns:1fr 44px 1fr;padding:0 22px;flex:1;min-height:0}
+.tpanel{background:#f7f8fa;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0}
+.tpanel h3{font-size:15px;color:var(--muted);font-weight:600;padding:14px 16px;margin:0;border-bottom:1px solid var(--line)}
+.tlist{overflow-y:auto;padding:6px;max-height:46vh}
+.titem{padding:11px 14px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:9px}
+.titem:hover{background:#fff}.titem .gd{width:8px;height:8px;border-radius:50%}.titem .arr{margin-left:auto;color:var(--muted2)}
+.tmid{display:grid;place-items:center;color:var(--muted2);font-size:20px}
+.mfoot{display:flex;justify-content:flex-end;gap:12px;padding:18px 22px;border-top:1px solid var(--line);margin-top:16px}
+.mbody{padding:0 22px 6px;overflow-y:auto}
+.frow{margin-bottom:14px}
+.frow > label{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:7px}
+.frow input[type=text],.frow input[type=number]{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;font-size:14px}
+.opts{display:flex;gap:10px;flex-wrap:wrap}
+.opt{display:flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:14px}
+.opt input{accent-color:var(--red2)}
+.opt.sel{border-color:var(--red2);background:var(--red-l);color:var(--red2);font-weight:600}
+.placeholder{display:grid;place-items:center;height:320px;color:var(--muted);border:1px dashed var(--line);border-radius:14px;background:#fff}
+.mapbox{border-radius:12px;overflow:hidden;z-index:0;border:1px solid var(--line)}
+.leaflet-container{font:inherit}
+/* Canlı (deneme) */
+.gcard{position:absolute;width:190px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 10px 6px;touch-action:none}
+.gcard .ghandle{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px;user-select:none;cursor:move}
+.fnrow{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line2);font-size:14px}
+.fnrow:last-child{border-bottom:none}
+.fnval{min-width:42px;text-align:center;font-weight:800;border-radius:7px;padding:5px 0}
+.fnval.on{background:#e7f7ee;color:var(--green)}
+.fnval.off{background:#f1f5f9;color:var(--muted)}
+.trace{background:#0d1117;color:#cfe3ff;border:1px solid var(--line);border-radius:10px;padding:12px;font:12px/1.7 Consolas,monospace;max-height:220px;overflow:auto;white-space:pre-wrap;margin:0}
+.txin{padding:8px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+.hex{font-family:Consolas,monospace;letter-spacing:1px}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<!-- ===== ANA SAYFA (Landing) ===== -->
+<div id="landing">
+  <div class="lnav">
+    <div class="brand"><div class="mark">🚜</div>OMNİ<span>TRACE</span></div>
+    <div class="lmenu">
+      <a onclick="document.getElementById('landing').scrollTo({top:0,behavior:'smooth'})">Anasayfa</a>
+      <a onclick="document.getElementById('ozellikler').scrollIntoView({behavior:'smooth'})">Çözümler</a>
+      <a onclick="document.getElementById('iletisim').scrollIntoView({behavior:'smooth'})">İletişim</a>
+    </div>
+    <button class="btn telemetri" id="telemetriBtn">📡 Telemetri</button>
+  </div>
+  <div class="hero">
+    <div>
+      <h1>Elektrikli Forklift <span>Telemetri</span> Sistemi</h1>
+      <p>Filonuzdaki tüm forkliftleri tek ekrandan canlı izleyin: batarya şarjı, motor sıcaklıkları, akımlar, hız, pompa ve daha fazlası. Konum takibi, hata/bakım uyarıları ve geçmişe dönük raporlama hepsi tek panelde.</p>
+      <div class="cta"><button class="btn" onclick="document.getElementById('telemetriBtn').click()">📡 Telemetri Paneline Git</button>
+        <button class="btn ghost" onclick="document.getElementById('ozellikler').scrollIntoView({behavior:'smooth'})">Daha Fazla</button></div>
+    </div>
+    <img src="img/gorsel1.png" alt="Forklift" onerror="this.style.display='none'">
+  </div>
+  <div class="sec" id="ozellikler">
+    <h2>Neler Sunuyoruz?</h2><div class="ssub">Endüstriyel forklift filonuz için uçtan uca takip</div>
+    <div class="feats">
+      <div class="feat"><div class="fi">📊</div><h3>Canlı İzleme</h3><p>Batarya, sıcaklık, akım, RPM ve pompa değerleri saniyeler içinde panele düşer.</p></div>
+      <div class="feat"><div class="fi">📍</div><h3>Konum Takibi</h3><p>Tüm araçları harita üzerinde görün; hangi araç nerede anında belli olur.</p></div>
+      <div class="feat"><div class="fi">⚠️</div><h3>Hata & Bakım</h3><p>Arıza kodları ve bakım süreleri için otomatik uyarılar alın.</p></div>
+      <div class="feat"><div class="fi">📄</div><h3>Raporlama</h3><p>Çalışma süresi, enerji tüketimi ve geçmiş veriler için detaylı raporlar.</p></div>
+    </div>
+  </div>
+  <div class="lfooter" id="iletisim">© 2026 OMNİTRACE · omnitraceglobal.com · info@omnitraceglobal.com</div>
+</div>
+
+<!-- ===== LOGIN (split) ===== -->
+<div id="login">
+  <div class="lleft"><img src="img/gorsel1.png" alt="" onerror="this.style.display='none'"><div class="wm">OMNİTRACE</div></div>
+  <div class="lright">
+    <div class="llogo" id="loginBrand" title="Ana sayfaya dön"><b>OMNİ<span>TRACE</span></b><span class="tl">TrackLink 📶</span></div>
+    <h2>Giriş Yap</h2>
+    <div class="lsub">Hesabınız yoksa <a id="goRegister">buraya</a> tıklayarak kayıt olabilirsiniz.</div>
+    <form id="loginForm">
+      <div class="lfield"><label>Kullanıcı Adı</label><div class="inp"><span class="ic">✉</span><input type="text" placeholder="kullanıcı adınızı girin" value="admin"></div></div>
+      <div class="lfield"><label>Şifre</label><div class="inp"><span class="ic">🔒</span><input type="password" placeholder="şifrenizi girin" value="1234"></div></div>
+      <div class="lrow"><span class="langpick">🚩 TR ▾</span><a class="lforgot">Şifremi unuttum?</a></div>
+      <button class="lbtn" type="submit">Giriş Yap</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="brand"><div class="mark">🚜</div>OMNİTRACE <span class="tl">TrackLink</span></div>
+    <div class="search">🔍<input placeholder="Seri no, model ara…"></div>
+    <span class="simchip" id="simChip">● SİMÜLASYON</span>
+    <div class="right">
+      <button class="ic">TR</button>
+      <button class="ic">🔔<span class="badge">2</span></button>
+      <button class="ic">ℹ️</button>
+      <button class="ic" id="userBtn">👤</button>
+    </div>
+  </header>
+  <div class="layout">
+    <nav class="sidebar"><div class="navi" id="navi">
+      <a data-view="home" class="active"><span class="i">🏠</span>Anasayfa</a>
+      <a data-view="makineler"><span class="i">🚜</span>Makineler</a>
+      <a data-view="uyarilar"><span class="i">⚠️</span>Uyarılar</a>
+      <a data-view="raporlar"><span class="i">📄</span>Raporlar</a>
+      <a data-view="harita"><span class="i">📍</span>Harita</a>
+      <a data-view="servis"><span class="i">🔧</span>Servis</a>
+      <a data-view="canli"><span class="i">🟢</span>Canlı</a>
+      <a data-view="parametre"><span class="i">🎛️</span>Parametre</a>
+      <a data-view="vps"><span class="i">🖥️</span>VPS</a>
+    </div></nav>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<!-- ===== GÖSTERGE EKLE/KALDIR ===== -->
+<div class="overlay" id="ovWidgets"><div class="modal">
+  <div class="mhead"><h2>Gösterge Ekle/Kaldır</h2><button class="x" id="wClose">&times;</button></div>
+  <div class="msearch"><input id="wSearch" placeholder="Aramak için yazmaya başlayın"></div>
+  <div class="transfer">
+    <div class="tpanel"><h3>Kullanılabilir Parametreler</h3><div class="tlist" id="availList"></div></div>
+    <div class="tmid">⇄</div>
+    <div class="tpanel"><h3>Mevcut Parametreler</h3><div class="tlist" id="activeList"></div></div>
+  </div>
+  <div class="mfoot"><button class="btn ghost" id="wCancel">İptal</button><button class="btn" id="wSave">Kaydet</button></div>
+</div></div>
+
+<!-- ===== ARAÇ EKLE/DÜZENLE ===== -->
+<div class="overlay" id="ovMachine"><div class="modal" style="width:680px">
+  <div class="mhead"><h2 id="mTitle">Araç Ekle</h2><button class="x" id="aClose">&times;</button></div>
+  <div class="mbody" id="mBody"></div>
+  <div class="mfoot"><button class="btn ghost" id="aCancel">İptal</button><button class="btn" id="aSave">Kaydet</button></div>
+</div></div>
+
+<script>
+/* ====================================================================
+   PARAMETRELER  (tip: gauge|bipolar|counter|status|mode)
+   ==================================================================== */
+const PARAMS=[
+  {key:'batarya_soc',label:'Batarya Şarjı',group:'Genel',unit:'%',min:0,max:100,dec:0,type:'gauge',warn:'low',def:true},
+  {key:'calisma_saati',label:'Çalışma Saati',group:'Genel',unit:'saat',min:0,max:10000,dec:0,type:'counter',start:1140,def:true},
+  {key:'motor_sic_sag',label:'Motor Sıcaklığı Sağ',group:'Yürüyüş',unit:'°C',min:0,max:200,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'motor_sic_sol',label:'Motor Sıcaklığı Sol',group:'Yürüyüş',unit:'°C',min:0,max:200,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'surucu_sic',label:'Sürücü Sıcaklığı',group:'Yürüyüş',unit:'°C',min:0,max:200,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'motor_akim_sag',label:'Sağ Motor Akım',group:'Yürüyüş',unit:'A',min:0,max:500,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'motor_akim_sol',label:'Sol Motor Akım',group:'Yürüyüş',unit:'A',min:0,max:500,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'dc_akim',label:'DC Akım',group:'Yürüyüş',unit:'A',min:0,max:700,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'motor_rpm_sag',label:'Sağ Motor RPM',group:'Yürüyüş',unit:'rpm',min:0,max:10000,dec:0,type:'gauge',def:false},
+  {key:'motor_rpm_sol',label:'Sol Motor RPM',group:'Yürüyüş',unit:'rpm',min:0,max:10000,dec:0,type:'gauge',def:false},
+  {key:'gercek_hiz',label:'Gerçek Hız',group:'Yürüyüş',unit:'km/h',min:0,max:30,dec:1,type:'gauge',def:false},
+  {key:'gaz_talep',label:'Gaz Talep',group:'Yürüyüş',unit:'%',min:0,max:100,dec:0,type:'gauge',def:false},
+  {key:'aci_sensor',label:'Açı Sensörü',group:'Yürüyüş',unit:'',min:0,max:100,dec:0,type:'gauge',def:false},
+  {key:'aci_deger',label:'Açı Değeri',group:'Yürüyüş',unit:'°',min:-100,max:100,dec:0,type:'bipolar',def:false},
+  {key:'koltuk',label:'Koltuk Bilgisi',group:'Yürüyüş',type:'status',labels:['Boş','Dolu'],def:false},
+  {key:'hiz_modu',label:'Hız Modu',group:'Yürüyüş',type:'mode',options:[{l:'🐢 Yavaş'},{l:'🐇 Hızlı'}],def:false},
+  {key:'pompa_rpm',label:'Pompa Motor RPM',group:'Pompa',unit:'rpm',min:-10000,max:10000,dec:0,type:'bipolar',def:false},
+  {key:'pompa_motor_sic',label:'Pompa Motor Sıc.',group:'Pompa',unit:'°C',min:0,max:200,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'pompa_surucu_sic',label:'Pompa Sürücü Sıc.',group:'Pompa',unit:'°C',min:0,max:200,dec:0,type:'gauge',warn:'high',def:true},
+  {key:'lift',label:'Lift',group:'Pompa',unit:'%',min:0,max:100,dec:0,type:'gauge',def:false},
+  {key:'tilt',label:'Tilt',group:'Pompa',type:'status',labels:['Pasif','Aktif'],def:false},
+  {key:'side_shift',label:'Side Shift',group:'Pompa',type:'status',labels:['Pasif','Aktif'],def:false},
+  {key:'ops',label:'OPS',group:'Pompa',type:'status',labels:['Pasif','Aktif'],def:false},
+  {key:'pompa_mod',label:'Çalışma Modu',group:'Pompa',type:'mode',options:[{l:'E · Eco'},{l:'N · Normal'},{l:'H · High'}],def:false},
+];
+const GROUP_COLORS={'Genel':'#0d9488','Yürüyüş':'#2563eb','Pompa':'#b45309'};
+const COLORS={green:'#16a34a',amber:'#d97706',red:'#dc2626',accent:'#8e1616'};
+const ARC="M20 100 A80 80 0 0 1 180 100";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(v,d)=>Number(v).toFixed(d||0);
+
+/* ====================================================================
+   CAN MAP — müşteri CAN haritası (PDO_1 / PDO_2). Detay sayfasında
+   sağ tarafta liste olarak gösterilir. Değer gelmiyorsa "NA".
+   key  = bu CAN sinyalinin asıl DB kolonu
+   alt  = aynı anlama gelen mevcut kolon (canlı veri henüz bu adla geliyorsa)
+   info = byte/tip/ölçek bilgisi (satıra fareyle gelince çıkar)
+   ==================================================================== */
+const CAN_SIGNALS=[
+  /* PDO_1 — durum bitleri + sürüş değerleri */
+  {key:'f_input_status',       label:'İleri Giriş (F)',        kind:'bool',group:'PDO_1',on:'Aktif',off:'Pasif',     info:'PDO_1 byte0.bit0 · Boolean'},
+  {key:'r_input_status',       label:'Geri Giriş (R)',         kind:'bool',group:'PDO_1',on:'Aktif',off:'Pasif',     info:'PDO_1 byte0.bit1 · Boolean'},
+  {key:'seat_occupation',      label:'Koltuk Doluluk',         kind:'bool',group:'PDO_1',on:'Dolu',off:'Boş',alt:'koltuk',info:'PDO_1 byte0.bit2 · Boolean'},
+  {key:'magnetic_hand_brake',  label:'Manyetik El Freni',      kind:'bool',group:'PDO_1',on:'Çekili',off:'Bırakıldı',info:'PDO_1 byte0.bit3 · Boolean'},
+  {key:'battery_low_status',   label:'Düşük Batarya Uyarısı',  kind:'bool',group:'PDO_1',on:'Var',off:'Yok',warn:1,  info:'PDO_1 byte0.bit4 · Boolean'},
+  {key:'vehicle_alarm_status', label:'Araç Alarm Durumu',      kind:'bool',group:'PDO_1',on:'Var',off:'Yok',warn:1,  info:'PDO_1 byte0.bit5 · Boolean'},
+  {key:'seatbelt_status',      label:'Emniyet Kemeri',         kind:'bool',group:'PDO_1',on:'Takılı',off:'Takılı Değil',info:'PDO_1 byte0.bit6 · Boolean'},
+  {key:'accelerator_pedal',    label:'Gaz Pedalı Talebi',      kind:'val', group:'PDO_1',unit:'%',  dec:0,alt:'gaz_talep',   info:'PDO_1 byte1-2 · U16 BE · ölçek /4'},
+  {key:'ground_speed',         label:'Yer Hızı',               kind:'val', group:'PDO_1',unit:'km/h',dec:1,alt:'gercek_hiz', info:'PDO_1 byte3-4 · FP32 BE · ölçek /10'},
+  {key:'wheel_angle',          label:'Direksiyon Açısı',       kind:'val', group:'PDO_1',unit:'°',  dec:0,alt:'aci_deger',   info:'PDO_1 byte5-6 · S16 BE'},
+  {key:'battery_percentage',   label:'Batarya Yüzdesi',        kind:'val', group:'PDO_1',unit:'%',  dec:0,alt:'batarya_soc', info:'PDO_1 byte7 · U8'},
+  /* PDO_2 — alarm kodları */
+  {key:'traction_alarm_code',  label:'Çekiş / Sağ Motor Alarm',kind:'alarm',group:'PDO_2',                           info:'PDO_2 byte1-2 · U16 BE · Node 14'},
+  {key:'left_motor_alarm_code',label:'Sol Motor Alarm',        kind:'alarm',group:'PDO_2',                           info:'PDO_2 byte3-4 · U16 BE · Node 18'},
+  {key:'pump_alarm_code',      label:'Pompa Alarm',            kind:'alarm',group:'PDO_2',                           info:'PDO_2 byte5-6 · U16 BE · Node 22'},
+  {key:'vcu_alarm_code',       label:'VCU Alarm Kodu',         kind:'alarm',group:'PDO_2',                           info:'PDO_2 byte7 · U8 · VCU'},
+];
+/* Satır değeri DB'den oku: önce asıl kolon, yoksa alt kolon, yoksa null */
+function canRowVal(row,s){
+  if(!row)return null;
+  let v=row[s.key];if(v===undefined)v=row[s.key.toUpperCase()];
+  if((v===undefined||v===null||v==='')&&s.alt){v=row[s.alt];if(v===undefined)v=row[s.alt.toUpperCase()];}
+  if(v===undefined||v===null||v==='')return null;
+  return v;
+}
+/* Değeri tipine göre HTML'e çevir; null ise NA rozeti */
+function canFmt(s,v){
+  if(v===null)return '<span class="na">NA</span>';
+  if(s.kind==='bool'){const on=Number(v)!==0;const t=on?(s.on||'Aktif'):(s.off||'Pasif');
+    const cls=on?(s.warn?'cv-alarm':'cv-on'):'cv-off';return `<span class="${cls}">${t}</span>`;}
+  if(s.kind==='alarm'){const n=Number(v);if(isNaN(n))return '<span class="na">NA</span>';
+    return n>0?`<span class="cv-alarm">${n}</span>`:'<span class="cv-off">0</span>';}
+  const n=Number(v);if(isNaN(n))return '<span class="na">NA</span>';
+  return `${fmt(n,s.dec)}${s.unit?'<span class="cu"> '+s.unit+'</span>':''}`;
+}
+/* Detay sayfasındaki CAN kartının HTML'i */
+function canPanelHtml(){
+  const grp=g=>CAN_SIGNALS.filter(s=>s.group===g).map(s=>
+    `<div class="canrow" title="${s.info}"><span class="muted">${s.label}</span><b id="can_${s.key}"><span class="na">NA</span></b></div>`).join('');
+  return `<div class="card pad" style="margin-bottom:16px"><div class="between" style="margin-bottom:6px">
+      <h3 class="h" style="margin:0">CAN Parametreleri</h3><span class="muted" style="font-size:11px">PDO_1 · PDO_2</span></div>
+    <div class="cansec"><div class="canttl">PDO_1 — Durum & Sürüş</div>${grp('PDO_1')}</div>
+    <div class="cansec"><div class="canttl">PDO_2 — Alarm Kodları</div>${grp('PDO_2')}</div></div>`;
+}
+/* Canlı satırla kartı doldur (row=null → hepsi NA) */
+function fillCanPanel(row){
+  CAN_SIGNALS.forEach(s=>{const el=document.getElementById('can_'+s.key);if(!el)return;
+    el.innerHTML=canFmt(s,canRowVal(row,s));});
+}
+
+/* ====== GÖRSELLER (img/ klasörüne koyun; yoksa emoji fallback) ====== */
+const IMG={EP01:'img/gorsel1.png',EP02_3:'img/gorsel2.png',EP02_4:'img/gorsel3.png',batarya:'img/gorsel5.png'};
+function machineImg(m){
+  if(m.kategori==='batarya')return IMG.batarya;
+  if(m.model==='EP01')return IMG.EP01;
+  if(m.model==='EP02')return m.teker===3?IMG.EP02_3:IMG.EP02_4;
+  return IMG.EP01;
+}
+function mimg(m,cls){return `<span class="mimg ${cls}"><img src="${machineImg(m)}" alt=""
+  onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+  <span class="ph">${m.kategori==='batarya'?'🔋':'🚜'}</span></span>`;}
+
+/* ====== ARAÇLAR (localStorage'da kalıcı; sadece 2 varsayılan) ====== */
+const M_KEY='omni_machines_v3';
+function loadMachines(){try{const s=JSON.parse(localStorage.getItem(M_KEY));if(Array.isArray(s)&&s.length)return s;}catch(e){}return null;}
+let MACHINES=loadMachines()||[
+  {id:1,seri:'304MB100127',kategori:'forklift',model:'EP01',teker:4,source:'sim', deviceId:1,durum:'Aktif',saat:1140,operator:'Murat ESER',konum:'İstanbul, Türkiye',lat:41.0082,lng:28.9784,uyari:0},
+  {id:2,seri:'204MB100134',kategori:'forklift',model:'EP02',teker:3,source:'real',deviceId:1,durum:'Aktif',saat:980, operator:'Veli KAYA', konum:'Kocaeli, Türkiye',lat:40.7654,lng:29.9408,uyari:2},
+];
+function saveMachines(){localStorage.setItem(M_KEY,JSON.stringify(MACHINES));}
+function nextId(){return MACHINES.reduce((m,x)=>Math.max(m,x.id),0)+1;}
+let currentMachine=MACHINES[0];
+
+/* ====== SİMÜLASYON DURUMU ====== */
+const sim={};
+PARAMS.forEach(p=>{
+  if(p.type==='gauge'||p.type==='bipolar'){const mid=(p.min+p.max)/2;
+    sim[p.key]={value:clamp(p.key==='batarya_soc'?82:mid+(Math.random()-.5)*(p.max-p.min)*.3,p.min,p.max),target:mid};}
+  else if(p.type==='counter')sim[p.key]={value:p.start||0,target:p.start||0};
+  else if(p.type==='status')sim[p.key]={value:p.key==='koltuk'?1:0};
+  else if(p.type==='mode')sim[p.key]={value:0};
+});
+function defaultSet(){return new Set(PARAMS.filter(p=>p.def).map(p=>p.key));}
+const A_KEY='omni_widgets_v2',O_KEY='omni_order_v2';
+let active;try{const s=JSON.parse(localStorage.getItem(A_KEY));active=(Array.isArray(s)&&s.length)?new Set(s):defaultSet();}catch(e){active=defaultSet();}
+let order;try{order=JSON.parse(localStorage.getItem(O_KEY))||[];}catch(e){order=[];}
+function saveActive(){localStorage.setItem(A_KEY,JSON.stringify([...active]));}
+function saveOrder(){localStorage.setItem(O_KEY,JSON.stringify(order));}
+function orderedParams(){
+  return PARAMS.filter(p=>active.has(p.key)).slice().sort((x,y)=>{
+    const ix=order.indexOf(x.key),iy=order.indexOf(y.key);
+    return (ix<0?1e6+PARAMS.indexOf(x):ix)-(iy<0?1e6+PARAMS.indexOf(y):iy);});
+}
+
+/* ====== VERİ KAYNAĞI: sim (ID1) vs real (ID2) ====== */
+let activeSource='sim', realTimer=null;
+function generateTargets(){
+  if(activeSource!=='sim')return;       // gerçek-veri makinesindeyken rastgele üretme
+  PARAMS.forEach(p=>{const s=sim[p.key];
+    if(p.type==='gauge'){const r=p.max-p.min;
+      if(p.key==='batarya_soc'){let t=s.value-Math.random()*1.6;if(s.value<14)t=100;s.target=clamp(t,p.min,p.max);}
+      else s.target=clamp(s.value+(Math.random()-.5)*r*.3,p.min,p.max);}
+    else if(p.type==='bipolar'){const r=p.max-p.min;s.target=clamp(s.value+(Math.random()-.5)*r*.25,p.min,p.max);}
+    else if(p.type==='counter')s.target=s.value+1;
+    else if(p.type==='status'){const f=p.key==='koltuk'?.12:.2;if(Math.random()<f)s.value=s.value?0:1;}
+    else if(p.type==='mode'){if(Math.random()<.25)s.value=Math.floor(Math.random()*p.options.length);}
+  });
+}
+function startReal(deviceId){
+  stopReal();
+  const poll=async()=>{
+    try{const r=await fetch(VPS_ENDPOINT+'?device_id='+deviceId+'&limit=1',{cache:'no-store'});
+      const j=await r.json();const row=(j.data||[])[0];if(!row)return;
+      PARAMS.forEach(p=>{let v=row[p.key];if(v===undefined)v=row[p.key.toUpperCase()];
+        if(v!==undefined&&v!==null&&v!==''&&!isNaN(v))sim[p.key].target=Number(v);});
+      fillCanPanel(row);   // sağdaki CAN panelini de canlı satırla doldur
+    }catch(e){/* sunucu yoksa sessiz geç */}
+  };
+  poll();realTimer=setInterval(poll,2000);
+}
+function stopReal(){if(realTimer){clearInterval(realTimer);realTimer=null;}}
+function zoneColor(fr,p){if(p.type==='bipolar')return COLORS.accent;
+  if(p.warn==='low')return fr<.2?COLORS.red:fr<.4?COLORS.amber:COLORS.green;
+  if(p.warn==='high')return fr>.8?COLORS.red:fr>.6?COLORS.amber:COLORS.green;return COLORS.accent;}
+const widgets={};
+function animate(){for(const p of PARAMS){if(!active.has(p.key))continue;const w=widgets[p.key];if(!w)continue;const s=sim[p.key];
+  if(p.type==='gauge'||p.type==='bipolar'){s.value+=(s.target-s.value)*.08;w.update(s.value);}
+  else if(p.type==='counter'){s.value+=(s.target-s.value)*.1;w.update(s.value);}else w.update(s.value);}}
+
+/* ====================================================================
+   VIEWS
+   ==================================================================== */
+const content=document.getElementById('content');
+const HAFTA=['Çar','Per','Cum','Cmt','Paz','Pzt','Sal'],YAKIT=[27,35.5,8.5,20.5,0,21.5,4.5],SURE=[5.8,6.2,1.9,2.6,0,3.4,.6];
+function barChart(d,l,c){const mx=Math.max(...d,1);return `<div class="bars">${d.map((v,i)=>`<div class="bcol"><div class="v">${v||''}</div><div class="bar ${c}" style="height:${v/mx*120}px"></div><div class="lab">${l[i]}</div></div>`).join('')}</div>`;}
+function donut(p){const C=2*Math.PI*70,on=C*p/100;return `<svg width="150" height="150" viewBox="0 0 160 160"><circle cx="80" cy="80" r="70" fill="none" stroke="#eef1f4" stroke-width="18"/><circle cx="80" cy="80" r="70" fill="none" stroke="#a81f1f" stroke-width="18" stroke-linecap="round" stroke-dasharray="${on} ${C}" transform="rotate(-90 80 80)"/><text x="80" y="74" text-anchor="middle" font-size="30" font-weight="800" fill="#283543">${p}%</text><text x="80" y="96" text-anchor="middle" font-size="12" fill="#7a8696">Aktif</text></svg>`;}
+function badge(d){return `<span class="badge2 ${ {Aktif:'b-aktif',Kapalı:'b-kapali',Rölanti:'b-rolanti'}[d]||'b-kapali'}">${d}</span>`;}
+function srcBadge(s){return s==='real'?'<span class="badge2 b-real">Gerçek</span>':'<span class="badge2 b-sim">Simülasyon</span>';}
+function statCard(d,l,n){return `<div class="card pad stat"><div class="lab">${d} ${l}</div><div class="num">${n}</div></div>`;}
+
+function viewHome(){return `
+  <div class="row" style="margin-bottom:16px">
+    ${weatherCard('İstanbul','19°C','⛅','Parçalı Bulutlu')}
+    ${weatherCard('Gaziantep','28°C','☀️','Güneşli')}
+    ${weatherCard('Sakarya','17°C','🌧️','Yağmurlu')}
+  </div>
+  <div class="grid2"><div>
+    <div class="card pad" style="margin-bottom:16px"><h3 class="h">Tünaydın 👋</h3>
+      <div class="row" style="align-items:center">
+        <div class="donut">${donut(97)}<div class="legend">
+          <div><span class="dot" style="background:#a81f1f"></span>Aktif Çalışma <b>308.3 sa.</b></div>
+          <div><span class="dot" style="background:#cbd5e1"></span>Rölanti <b>9.4 sa.</b></div></div></div>
+        <div style="flex:1;min-width:220px"><div class="muted" style="font-size:13px">Enerji (kWh)</div>${barChart(YAKIT,HAFTA,'')}</div>
+        <div style="flex:1;min-width:220px"><div class="muted" style="font-size:13px">Çalışma (sa.)</div>${barChart(SURE,HAFTA,'y')}</div>
+      </div>
+      <div class="grid4" style="margin-top:18px">
+        ${statCard('🔴','Bakım Geçti','0')}${statCard('🟠','Bu Ay Bakım','1')}
+        ${statCard('🟢','Toplam',MACHINES.length)}${statCard('🟢','Aktif',MACHINES.filter(m=>m.durum==='Aktif').length)}</div>
+    </div>
+    <div class="card pad"><h3 class="h">Hızlı İşlemler</h3><div class="qa">${MACHINES.map(m=>`
+      <div class="qi" onclick="openDetail(${m.id})">${mimg(m,'lg')}<div class="nm">${m.seri}</div></div>`).join('')}</div></div>
+  </div><div>
+    <div class="card pad"><h3 class="h">Konum</h3><div class="mapbox" data-scope="all" style="height:540px"></div></div>
+  </div></div>`;}
+
+function viewMakineler(){return `
+  <div class="between" style="margin-bottom:14px"><h2 class="h" style="margin:0">Makineler (${MACHINES.length})</h2>
+    <button class="btn" onclick="openMachineModal(null)">＋ Araç Ekle</button></div>
+  <div class="card" style="overflow:hidden"><table>
+    <thead><tr><th>Araç</th><th>Kod / Şase</th><th>Kategori</th><th>Model</th><th>Veri</th><th>Çalışma</th><th>Durum</th><th>Konum</th><th></th></tr></thead>
+    <tbody>${MACHINES.map(m=>`<tr class="clk" onclick="openDetail(${m.id})">
+      <td>${mimg(m,'sm')}</td><td><b>${m.seri}</b></td>
+      <td>${m.kategori==='batarya'?'🔋 Batarya':'🚜 Forklift'}</td>
+      <td>${m.kategori==='batarya'?'—':m.model+(m.model==='EP02'?' · '+m.teker+' teker':'')}</td>
+      <td>${srcBadge(m.source)} <span class="muted">#${m.deviceId}</span></td>
+      <td>${(+m.saat).toFixed(0)} sa.</td><td>${badge(m.durum)}</td><td>📍 ${m.konum}</td>
+      <td onclick="event.stopPropagation()"><button class="btn ghost sm" onclick="openMachineModal(${m.id})">✎</button>
+        <button class="btn ghost sm" onclick="delMachine(${m.id})">🗑</button></td></tr>`).join('')}</tbody></table></div>`;}
+
+function viewUyarilar(){const rows=MACHINES.filter(m=>m.uyari>0);return `
+  <h3 class="h">Uyarı Durumu</h3><div class="card" style="overflow:hidden"><table>
+  <thead><tr><th>Araç</th><th>Kod</th><th>Model</th><th>Çalışma</th><th>Durum</th><th>Konum</th></tr></thead>
+  <tbody>${rows.length?rows.map(m=>`<tr class="clk" onclick="openDetail(${m.id})"><td>${mimg(m,'sm')}</td><td><b>${m.seri}</b></td>
+    <td>${m.model}</td><td>${(+m.saat).toFixed(0)} saat</td><td><span class="badge2 b-uyari">${m.uyari} Uyarı</span></td><td>📍 ${m.konum}</td></tr>`).join('')
+    :'<tr><td colspan="6" class="muted" style="padding:24px">Aktif uyarı yok 👍</td></tr>'}</tbody></table></div>`;}
+
+function viewDetail(){const m=currentMachine;setTimeout(initDetail,0);return `
+  <div class="detail-head"><span class="back" onclick="showView('makineler')">←</span>
+    <div class="mtitle"><b>${m.seri}</b><div>${m.kategori==='batarya'?'Batarya':'Forklift · '+m.model}</div></div>
+    <div style="margin-left:auto">${srcBadge(m.source)}</div></div>
+  <div class="grid2"><div>
+    <div class="card pad" style="margin-bottom:16px"><h3 class="h">Haftalık Özet</h3><div class="row">
+      <div style="flex:1;min-width:220px"><div class="muted" style="font-size:13px">Enerji (kWh)</div>${barChart(YAKIT,HAFTA,'')}</div>
+      <div style="flex:1;min-width:220px"><div class="muted" style="font-size:13px">Çalışma (sa.)</div>${barChart(SURE,HAFTA,'y')}</div></div></div>
+    <div class="card pad"><div class="between" style="margin-bottom:8px"><h3 class="h" style="margin:0">Makine Yönetimi</h3>
+      <div id="editBar"></div></div>
+      <div class="wgrid" id="wgrid"></div></div>
+  </div><div>
+    <div class="card pad" style="margin-bottom:16px"><h3 class="h">Genel</h3>${mimg(m,'lg')}
+      <div style="font-size:13.5px;line-height:2.1;margin-top:10px">
+        <div><span class="muted">Toplam Saat:</span> <b>${(+m.saat).toFixed(2)} sa.</b></div>
+        <div><span class="muted">Operatör:</span> <b>${m.operator||'—'}</b></div>
+        <div><span class="muted">Kod / Şase:</span> <b>${m.seri}</b></div>
+        <div><span class="muted">Veri Kaynağı:</span> ${srcBadge(m.source)} <span class="muted">cihaz #${m.deviceId}</span></div></div></div>
+    ${m.source==='real'?canPanelHtml():''}
+    <div class="card pad"><h3 class="h">Konum</h3><div class="mapbox" data-scope="current" style="height:240px"></div></div>
+  </div></div>`;}
+
+/* ----- DÜZENLE / SÜRÜKLE-BIRAK ----- */
+let editMode=false;
+function renderEditBar(){const b=document.getElementById('editBar');if(!b)return;
+  b.innerHTML=editMode
+    ? `<button class="btn ghost sm" onclick="autoArrange()">🧲 Otomatik Yerleştir</button> <button class="btn sm" onclick="toggleEdit()">✓ Bitir</button>`
+    : `<button class="btn ghost sm" onclick="toggleEdit()">✏️ Düzenle</button>`;}
+function toggleEdit(){editMode=!editMode;buildWidgets();}
+function autoArrange(){order=[];saveOrder();buildWidgets();}
+
+function dragAfter(grid,y){const els=[...grid.querySelectorAll('.wcard:not(.dragging)')];
+  return els.reduce((c,el)=>{const b=el.getBoundingClientRect();const off=y-b.top-b.height/2;
+    return (off<0&&off>c.off)?{off,el}:c;},{off:-Infinity,el:null}).el;}
+function enableDnd(grid){let drag=null;
+  grid.querySelectorAll('.wcard').forEach(card=>{card.draggable=true;
+    card.ondragstart=e=>{drag=card;card.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+    card.ondragend=()=>{drag&&drag.classList.remove('dragging');drag=null;
+      order=[...grid.querySelectorAll('.wcard[data-key]')].map(c=>c.dataset.key);saveOrder();};
+    card.ondragover=e=>{if(!drag)return;e.preventDefault();const after=dragAfter(grid,e.clientY);const addc=grid.querySelector('.addcard');
+      if(after==null)grid.insertBefore(drag,addc);else grid.insertBefore(drag,after);};});}
+
+function buildWidgets(){
+  const grid=document.getElementById('wgrid');if(!grid)return;
+  renderEditBar();
+  grid.className='wgrid'+(editMode?' editing':'');
+  grid.innerHTML='';for(const k in widgets)delete widgets[k];
+  const now=new Date().toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  orderedParams().forEach(p=>{
+    const card=document.createElement('div');card.className='wcard';card.dataset.key=p.key;card.style.setProperty('--accent',GROUP_COLORS[p.group]);
+    card.innerHTML=`<div class="acc"></div><button class="rm" title="Kaldır">✕</button>`;
+    let body='';
+    if(p.type==='gauge'||p.type==='bipolar')body=`<div class="gauge"><svg viewBox="0 0 200 112"><path class="track" d="${ARC}"/><path class="fill" d="${ARC}" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>${p.type==='bipolar'?'<line class="ctick" x1="100" y1="20" x2="100" y2="6"/>':''}<circle class="gdot" r="5.5" cx="20" cy="100"/></svg><div class="read"><span class="val">--</span><span class="unit">${p.unit||''}</span></div></div><div class="scale"><span>${fmt(p.min,p.dec)}</span><span>${fmt(p.max,p.dec)}</span></div>`;
+    else if(p.type==='counter')body=`<div class="counter"><span class="cval">--</span><span class="unit">${p.unit}</span></div><div class="cbar"><i></i></div>`;
+    else if(p.type==='status')body=`<div class="status"><span class="pill off">--</span></div>`;
+    else if(p.type==='mode')body=`<div class="modes">${p.options.map(o=>`<span class="mode">${o.l}</span>`).join('')}</div>`;
+    card.insertAdjacentHTML('beforeend',body+`<div class="wlabel">${p.label}</div><div class="wsub">son güncelleme ${now}</div>`);
+    card.querySelector('.rm').onclick=e=>{e.stopPropagation();active.delete(p.key);saveActive();buildWidgets();};
+    grid.appendChild(card);
+    if(p.type==='gauge'||p.type==='bipolar'){const fill=card.querySelector('.fill'),dot=card.querySelector('.gdot'),val=card.querySelector('.val');
+      widgets[p.key]={update(v){const fr=clamp((v-p.min)/(p.max-p.min),0,1),col=zoneColor(fr,p);fill.style.stroke=col;dot.style.fill=col;fill.style.strokeDashoffset=(100*(1-fr)).toFixed(2);const a=(180+180*fr)*Math.PI/180;dot.setAttribute('cx',(100+80*Math.cos(a)).toFixed(2));dot.setAttribute('cy',(100+80*Math.sin(a)).toFixed(2));val.textContent=fmt(v,p.dec);}};}
+    else if(p.type==='counter'){const cv=card.querySelector('.cval'),bar=card.querySelector('.cbar i');
+      widgets[p.key]={update(v){cv.textContent=Math.floor(v).toLocaleString('tr-TR');bar.style.width=clamp((v-p.min)/(p.max-p.min)*100,0,100).toFixed(1)+'%';}};}
+    else if(p.type==='status'){const pill=card.querySelector('.pill');widgets[p.key]={update(v){pill.textContent=p.labels[v];pill.className='pill '+(v===1?'on':'off');}};}
+    else if(p.type==='mode'){const it=card.querySelectorAll('.mode');widgets[p.key]={update(v){it.forEach((m,i)=>m.classList.toggle('active',i===v));}};}
+  });
+  const add=document.createElement('div');add.className='addcard';add.innerHTML='<div style="text-align:center"><div class="plus">＋</div>Ekle</div>';add.onclick=openWidgets;grid.appendChild(add);
+  if(editMode)enableDnd(grid);
+  animate();
+}
+function initDetail(){
+  const m=currentMachine;editMode=false;buildWidgets();stopReal();fillCanPanel(null);
+  document.getElementById('simChip').textContent=m.source==='real'?'● GERÇEK VERİ (cihaz #'+m.deviceId+')':'● SİMÜLASYON';
+  if(m.source==='real'){activeSource='real';startReal(m.deviceId);}else activeSource='sim';
+}
+function viewPH(t){return `<h2 class="h">${t}</h2><div class="placeholder">${t} — yakında 🚧</div>`;}
+
+/* ====================================================================
+   HARİTA (Leaflet + OpenStreetMap — API anahtarı GEREKMEZ, ücretsiz)
+   ==================================================================== */
+const CITY={istanbul:[41.0082,28.9784],kocaeli:[40.7654,29.9408],gaziantep:[37.0662,37.3833],
+  bursa:[40.1885,29.0610],giresun:[40.9128,38.3895],ankara:[39.9334,32.8597],izmir:[38.4237,27.1428]};
+function machineLatLng(m){
+  if(m.lat&&m.lng)return [m.lat,m.lng];
+  const k=(m.konum||'').toLocaleLowerCase('tr');
+  for(const c in CITY) if(k.includes(c)) return CITY[c];
+  return null;
+}
+let mapInstances=[],canliTimer=null,vpsTimer=null;
+function clearMaps(){mapInstances.forEach(m=>{try{m.remove();}catch(e){}});mapInstances=[];}
+function initMaps(){
+  if(typeof L==='undefined')return;          // Leaflet CDN yüklenmediyse (internet yok)
+  if(!window._iconFix){window._iconFix=1;     // marker ikonlarını CDN'den al
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'});}
+  clearMaps();
+  document.querySelectorAll('.mapbox').forEach(el=>{
+    const list=el.dataset.scope==='current'?[currentMachine]:MACHINES;
+    const map=L.map(el);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+    const pts=[];
+    list.forEach(m=>{const ll=machineLatLng(m);if(!ll)return;
+      L.marker(ll).addTo(map).bindPopup(`<b>${m.seri}</b><br>${m.konum||''}<br>
+        <a href="#" onclick="closeAllPopups();openDetail(${m.id});return false;">Detay →</a>`);
+      pts.push(ll);});
+    if(pts.length===1)map.setView(pts[0],12);
+    else if(pts.length>1)map.fitBounds(pts,{padding:[40,40]});
+    else map.setView([39.0,35.0],5);          // Türkiye geneli (konum yoksa)
+    mapInstances.push(map);
+    setTimeout(()=>map.invalidateSize(),60);
+  });
+}
+function closeAllPopups(){mapInstances.forEach(m=>m.closePopup());}
+
+function viewHarita(){return `
+  <div class="between" style="margin-bottom:14px"><h2 class="h" style="margin:0">Harita — Filo Konumları</h2>
+    <span class="muted">${MACHINES.length} araç</span></div>
+  <div class="card pad"><div class="mapbox" data-scope="all" style="height:72vh"></div></div>`;}
+
+/* ----- SERVİS ----- */
+function servisCard(ad,alt,adres,tel){return `<div class="card pad" style="flex:1;min-width:300px;max-width:480px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:11px;background:var(--red-l);display:grid;place-items:center;font-size:22px">🔧</div>
+    <div><div style="font-weight:700;font-size:15px">${ad}</div>${alt?`<div class="muted" style="font-size:12.5px">${alt}</div>`:''}</div></div>
+  <div style="font-size:13.5px;line-height:1.9"><div>📍 ${adres}</div>${tel?`<div>📞 <a href="tel:${tel.replace(/[^0-9]/g,'')}">${tel}</a></div>`:''}</div>
+  <div style="margin-top:12px"><a class="btn ghost sm" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adres)}">🗺️ Haritada Aç</a></div></div>`;}
+function viewServis(){return `<h2 class="h">Yetkili Servisler</h2><div class="row">
+  ${servisCard('Şimşek Kardeşler İş Makinaları','Doosan Yetkili Servis & Yedek Parça','Uzayçağı Caddesi, Ostim OSB, 1272. Sk. No:3, 06374 Yenimahalle/Ankara','(0312) 386 00 19')}
+  ${servisCard('Karakuşlar Forklift','Forklift Servis & Yedek Parça','Sam Mah. Celal Doğan Blv. Şehitkamil 2. OSB, Şehitkamil/Gaziantep','')}
+</div>`;}
+function weatherCard(city,temp,ico,desc){return `<div class="card pad" style="flex:1;min-width:200px;display:flex;align-items:center;gap:14px">
+  <div style="font-size:40px">${ico}</div><div><div class="muted" style="font-size:13px">📍 ${city}</div>
+  <div style="font-size:30px;font-weight:800">${temp}</div><div class="muted" style="font-size:12.5px">${desc}</div></div></div>`;}
+
+/* ----- CANLI (deneme): serbest sürükle + 0/1 fonksiyon listeleri ----- */
+const CANLI_GAUGES=['batarya_soc','dc_akim','motor_sic_sag','motor_rpm_sag','gercek_hiz','lift'];
+const FN_YUR=[['forward','Forward'],['reverse','Reverse'],['koltuk','Koltuk'],['servis_freni','Servis Freni']];
+const FN_POMPA=[['lift_sw','Lift (sw)'],['tilt','Tilt'],['side_shift','Side Shift'],['ops','OPS']];
+const liveFn={forward:0,reverse:0,koltuk:1,servis_freni:0,lift_sw:0,tilt:0,side_shift:0,ops:0};
+function fnRow(label,key){return `<div class="fnrow"><span>${label}</span><span class="fnval off" data-fn="${key}">0</span></div>`;}
+function viewCanli(){setTimeout(initCanli,40);return `
+  <div class="between" style="margin-bottom:14px"><h2 class="h" style="margin:0">Canlı (Deneme)</h2>
+    <span class="muted">Gauge'ları serbestçe sürükleyin · ızgara/otomatik yok · bu menü sonradan silinebilir</span></div>
+  <div class="grid2">
+    <div class="card pad"><h3 class="h">Makine Yönetimi — Serbest Yerleşim</h3>
+      <div id="canvas" style="position:relative;min-height:540px;border:1px dashed var(--line);border-radius:12px;
+        background:linear-gradient(#eef1f4 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,#eef1f4 1px,transparent 1px) 0 0/22px 22px,#fbfcfd"></div></div>
+    <div>
+      <div class="card pad" style="margin-bottom:16px"><h3 class="h">Yürüyüş Fonksiyonları</h3><div id="fnYur"></div></div>
+      <div class="card pad"><h3 class="h">Pompa Fonksiyonları</h3><div id="fnPompa"></div></div>
+    </div>
+  </div>`;}
+function makeFree(el,container){
+  const h=el.querySelector('.ghandle')||el;
+  h.addEventListener('pointerdown',e=>{e.preventDefault();
+    const r=el.getBoundingClientRect(),cr=container.getBoundingClientRect(),ox=e.clientX-r.left,oy=e.clientY-r.top;
+    const mv=ev=>{el.style.left=clamp(ev.clientX-cr.left-ox,0,cr.width-r.width)+'px';el.style.top=clamp(ev.clientY-cr.top-oy,0,cr.height-r.height)+'px';};
+    const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);};
+    document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);});}
+function initCanli(){
+  for(const k in widgets)delete widgets[k];activeSource='sim';
+  const canvas=document.getElementById('canvas');if(!canvas)return;canvas.innerHTML='';
+  CANLI_GAUGES.forEach((key,i)=>{const p=PARAMS.find(pp=>pp.key===key);if(!p)return;
+    const card=document.createElement('div');card.className='gcard';
+    card.style.left=(14+(i%3)*200)+'px';card.style.top=(14+Math.floor(i/3)*210)+'px';
+    card.innerHTML=`<div class="ghandle">⠿ ${p.label}</div>
+      <div class="gauge"><svg viewBox="0 0 200 112"><path class="track" d="${ARC}"/><path class="fill" d="${ARC}" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/><circle class="gdot" r="5.5" cx="20" cy="100"/></svg>
+      <div class="read"><span class="val">--</span><span class="unit">${p.unit||''}</span></div></div>`;
+    canvas.appendChild(card);makeFree(card,canvas);
+    const fill=card.querySelector('.fill'),dot=card.querySelector('.gdot'),val=card.querySelector('.val');
+    widgets[key]={update(v){const fr=clamp((v-p.min)/(p.max-p.min),0,1),col=zoneColor(fr,p);fill.style.stroke=col;dot.style.fill=col;fill.style.strokeDashoffset=(100*(1-fr)).toFixed(2);const a=(180+180*fr)*Math.PI/180;dot.setAttribute('cx',(100+80*Math.cos(a)).toFixed(2));dot.setAttribute('cy',(100+80*Math.sin(a)).toFixed(2));val.textContent=fmt(v,p.dec);}};});
+  document.getElementById('fnYur').innerHTML=FN_YUR.map(([k,l])=>fnRow(l,k)).join('');
+  document.getElementById('fnPompa').innerHTML=FN_POMPA.map(([k,l])=>fnRow(l,k)).join('');
+  if(canliTimer)clearInterval(canliTimer);
+  const tick=()=>{Object.keys(liveFn).forEach(k=>{if(Math.random()<.2)liveFn[k]=liveFn[k]?0:1;});
+    document.querySelectorAll('.fnval[data-fn]').forEach(el=>{const v=liveFn[el.dataset.fn]||0;el.textContent=v;el.className='fnval '+(v?'on':'off');});};
+  tick();canliTimer=setInterval(tick,1200);}
+
+/* ---- PARAMETRE sayfası: Transmit (SDO) — PCAN Viewer benzeri ----
+   Üretici dizisi (traction master node 8, COB-ID 0x608, param 0x50E2):
+   Enable: 22 10 10 01 'OPEN' | Oku: 40 E2 50 01/02 .. | Yaz: 22 E2 50 01 <deg>
+   Save:   22 10 10 01 'save' | Close: 22 10 10 01 'CLOS' (43 53 4C 4F) */
+function hb(n){return (n&0xFF).toString(16).toUpperCase().padStart(2,'0');}
+function txFrames(){
+  const node=parseInt(document.getElementById('txNode').value)||8;
+  const cob=0x600+node;
+  const idx=parseInt((document.getElementById('txIndex').value||'50E2').replace(/[^0-9a-fA-F]/g,''),16)||0x50E2;
+  const idxLo=idx&0xFF, idxHi=(idx>>8)&0xFF;
+  const raw=(document.getElementById('txValue').value||'').replace(/[^0-9a-fA-F]/g,'').padStart(8,'0').slice(-8);
+  const b0=parseInt(raw.slice(6,8),16),b1=parseInt(raw.slice(4,6),16),b2=parseInt(raw.slice(2,4),16),b3=parseInt(raw.slice(0,2),16);
+  return {cob, list:[
+    {t:'Enable (OPEN)',  d:[0x22,0x10,0x10,0x01,0x4F,0x50,0x45,0x4E], note:'Yazmayı aç — en başta gönder'},
+    {t:'Oku (ölçeksiz)', d:[0x40,idxLo,idxHi,0x01,0,0,0,0],          note:'Değeri oku (ham, sub01)'},
+    {t:'Oku (ölçekli)',  d:[0x40,idxLo,idxHi,0x02,0,0,0,0],          note:'Değeri oku (ölçekli, sub02)'},
+    {t:'Yaz',            d:[0x22,idxLo,idxHi,0x01,b0,b1,b2,b3],      note:'Değeri değiştir (sub01)'},
+    {t:'Save (EEPROM)',  d:[0x22,0x10,0x10,0x01,0x73,0x61,0x76,0x65],note:'EEPROM kaydet — onay bekle'},
+    {t:'Close (CLOS)',   d:[0x22,0x10,0x10,0x01,0x43,0x53,0x4C,0x4F],note:'Yazmayı kapat — en sonda gönder'},
+  ]};
+}
+function renderTx(){
+  const f=txFrames(), cob='0x'+f.cob.toString(16).toUpperCase();
+  document.getElementById('txCob').textContent=cob;
+  document.getElementById('txNodeLbl').textContent=(f.cob-0x600);
+  document.getElementById('txTable').innerHTML=f.list.map((m,i)=>`<tr>
+    <td class="hex">${cob}</td><td>8</td><td class="hex">${m.d.map(hb).join(' ')}</td>
+    <td>${m.t}</td><td class="muted">${m.note}</td>
+    <td><button class="btn ghost sm" onclick="txSend(${i})">Gönder</button></td></tr>`).join('');
+}
+let txCounter=0;
+function txSend(i){
+  const f=txFrames(), m=f.list[i], cob='0x'+f.cob.toString(16).toUpperCase();
+  const ts=new Date().toLocaleTimeString('tr-TR');
+  const line=`#${(++txCounter).toString().padStart(3,'0')}  ${ts}  TX  ${cob}  [8]  ${m.d.map(hb).join(' ')}   ; ${m.t}`;
+  const tr=document.getElementById('txTrace'); tr.textContent=line+'\n'+tr.textContent;
+}
+function initTx(){
+  ['txNode','txIndex','txValue'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=renderTx;});
+  renderTx();
+}
+function viewParametre(){setTimeout(initTx,40);return `
+  <div class="between" style="margin-bottom:14px"><h2 class="h" style="margin:0">Parametre — SDO Transmit</h2>
+    <span class="muted">PCAN Viewer tarzı · üreticinin SDO yazma dizisi</span></div>
+  <div class="card pad">
+    <div class="between"><h3 class="h" style="margin:0">Transmit (SDO)</h3>
+      <span class="muted">Traction master node <b id="txNodeLbl">8</b> · COB-ID <b id="txCob" class="hex">0x608</b></span></div>
+    <div class="row" style="align-items:flex-end;margin:10px 0 14px;gap:12px">
+      <div><label class="muted" style="font-size:12px;display:block;margin-bottom:4px">Node</label><input id="txNode" type="number" value="8" class="txin" style="width:80px"></div>
+      <div><label class="muted" style="font-size:12px;display:block;margin-bottom:4px">Parametre Index (hex)</label><input id="txIndex" type="text" value="50E2" class="txin" style="width:120px"></div>
+      <div><label class="muted" style="font-size:12px;display:block;margin-bottom:4px">Yazılacak Değer (hex, LE)</label><input id="txValue" type="text" value="00000000" class="txin" style="width:150px"></div>
+      <button class="btn" onclick="txSend(0)">🔓 Enable SDO</button>
+      <button class="btn" onclick="txSend(4)">💾 Save</button>
+      <button class="btn ghost" onclick="txSend(5)">🔒 Close</button>
+    </div>
+    <div style="overflow:hidden;border:1px solid var(--line);border-radius:10px">
+      <table><thead><tr><th>COB-ID</th><th>DLC</th><th>Data (hex)</th><th>İşlem</th><th>Açıklama</th><th></th></tr></thead>
+        <tbody id="txTable"></tbody></table>
+    </div>
+    <div class="between" style="margin:14px 0 6px"><h4 style="margin:0;font-size:14px">Trace (gönderilenler)</h4>
+      <button class="btn ghost sm" onclick="document.getElementById('txTrace').textContent=''">Temizle</button></div>
+    <pre id="txTrace" class="trace"></pre>
+    <div class="muted" style="font-size:12px;margin-top:8px">⚠️ Bu blok CAN çerçevelerini <b>oluşturur ve trace'e yazar</b> (üreticinin SDO dizisi: OPEN → oku/yaz → save → CLOS). Gerçek CAN'e göndermek için cihaz/ağ geçidi entegrasyonu gerekir (sıradaki aşama).</div>
+  </div>`;}
+
+/* ====================================================================
+   VPS SEKMESİ — MQTT verilerini gösterir
+   - Hostinger HTTPS → vm_proxy.php (mixed-content engeli nedeniyle)
+   - VM'nin kendi dashboard'u → veri_oku.php direkt
+   - Online: son veri < 10sn önce (MQTT köprüsü yazınca hemen gelir)
+   - Offline: son veri ≥ 10sn önce
+   ==================================================================== */
+const VPS_ENDPOINT = location.hostname === '34.175.200.205'
+    ? '/veri_oku.php' : 'vm_proxy.php';
+
+/* Frekans katmanları — STM32 buffer mimarisine birebir karşılık gelir */
+const VPS_TIERS = [
+  {label:'⚡ Hızlı',  sub:'2 Hz — 8sn ortalaması', color:'#2563eb',
+   keys:['motor_akim_sag','motor_akim_sol','dc_akim',
+         'motor_rpm_sag','motor_rpm_sol','gercek_hiz','pompa_rpm',
+         'gaz_talep','aci_sensor','aci_deger','lift']},
+  {label:'⏱ Orta',   sub:'1 Hz — son değer',        color:'#0d9488',
+   keys:['koltuk','hiz_modu']},
+  {label:'🌡 Yavaş',  sub:'1 / dk — son değer',      color:'#d97706',
+   keys:['batarya_soc','motor_sic_sag','motor_sic_sol',
+         'surucu_sic','pompa_motor_sic','pompa_surucu_sic']},
+  {label:'⌚ Çok Yavaş', sub:'1 / saat — son değer', color:'#7c3aed',
+   keys:['calisma_saati']},
+  {label:'🧪 Test',   sub:'saniye sayacı',            color:'#be185d',
+   keys:['timer']},
+];
+
+function vpsParamHtml(p, row) {
+  let v = row[p.key];
+  if (v === null || v === undefined || v === '') return null;
+  if (p.type === 'status')  v = (p.labels||['0','1'])[+v] ?? v;
+  else if (p.type === 'mode') v = (p.options||[])[+v]?.l ?? v;
+  else v = fmt(v, p.dec||0) + (p.unit ? ' '+p.unit : '');
+  return `<div class="between" style="padding:5px 10px;background:var(--bg);border-radius:7px">
+    <span class="muted" style="font-size:12px">${p.label}</span>
+    <span style="font-size:13px;font-weight:600;white-space:nowrap">${v}</span>
+  </div>`;
+}
+
+function viewVps(){setTimeout(initVps,60);return `
+  <div class="between" style="margin-bottom:14px">
+    <h2 class="h" style="margin:0">VPS — Google Cloud VM</h2>
+    <button class="btn ghost sm" onclick="fetchVps()">↺ Yenile</button>
+  </div>
+
+  <!-- Araç kartı: online/offline + son görülme -->
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div class="between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.4rem">🚜</span>
+        <div>
+          <div style="font-weight:700;font-size:1.05rem">204MB100134</div>
+          <div class="muted" style="font-size:11px">DEVICE_ID 1 · 34.175.200.205</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div id="vpsOnline" style="font-size:1rem;font-weight:700">● —</div>
+        <div id="vpsLastSeen" class="muted" style="font-size:11px;margin-top:2px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frekans katmanları -->
+  <div class="card pad" id="vpsTiers">
+    <div class="muted" style="font-size:12px;text-align:center;padding:20px">Bağlanıyor…</div>
+  </div>`;}
+
+function initVps(){
+  if(vpsTimer)clearInterval(vpsTimer);
+  vpsTimer=setInterval(fetchVps,2000);
+  fetchVps();}
+
+function fetchVps(){
+  fetch(VPS_ENDPOINT+'?device_id=1&limit=1')
+    .then(r=>r.json())
+    .then(json=>{
+      const onEl=document.getElementById('vpsOnline');
+      const lsEl=document.getElementById('vpsLastSeen');
+      const tiersEl=document.getElementById('vpsTiers');
+      if(!onEl){clearInterval(vpsTimer);vpsTimer=null;return;}
+
+      if(json.status==='success'&&json.data?.length){
+        const row=json.data[0];
+        const sAgo=parseInt(row.seconds_ago??9999);
+        const online=sAgo<10;
+
+        /* Online / Offline göstergesi */
+        onEl.textContent=online?'● ONLINE':'● OFFLİNE';
+        onEl.style.color=online?'#22c55e':'#ef4444';
+        if(online){
+          lsEl.textContent=`Son veri ${sAgo}sn önce`;
+        } else {
+          const t=row.TIME?row.TIME.replace('T',' ').split('.')[0]:'—';
+          lsEl.textContent=`Son görülme: ${t}`;
+        }
+
+        /* Canlı konum → MACHINES dizisini güncelle (harita sadece değişince yenilenir) */
+        const newLat=parseFloat(row.lat), newLng=parseFloat(row.lng);
+        if(row.lat&&row.lng&&newLat!==0&&newLng!==0){
+          const mc=MACHINES.find(x=>x.deviceId===parseInt(row.DEVICE_ID||1));
+          if(mc&&(mc.lat!==newLat||mc.lng!==newLng)){
+            mc.lat=newLat; mc.lng=newLng;
+            /* Sadece harita görünümündeyse güncelle */
+            if(document.querySelector('.mapbox'))initMaps();
+          }
+        }
+
+        /* Frekans katmanları */
+        if(tiersEl){
+          tiersEl.innerHTML=VPS_TIERS.map(tier=>{
+            const items=tier.keys.map(key=>{
+              const p=PARAMS.find(pp=>pp.key===key)||{key,label:key,unit:'',dec:0};
+              return vpsParamHtml(p,row);
+            }).filter(Boolean);
+            if(!items.length)return '';
+            return `<div style="margin-bottom:16px">
+              <div style="font-size:11px;font-weight:700;color:${tier.color};
+                  text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">
+                ${tier.label}
+                <span style="font-weight:400;color:var(--muted);text-transform:none;
+                    margin-left:6px">${tier.sub}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:5px">
+                ${items.join('')}
+              </div>
+            </div>`;
+          }).join('')||
+          '<div class="muted" style="font-size:12px;padding:8px">STM32 ilk MQTT verisini gönderince görünür.</div>';
+        }
+      } else {
+        onEl.textContent='● OFFLİNE'; onEl.style.color='#ef4444';
+        if(lsEl)lsEl.textContent=json.message||'VM yanıt vermedi';
+        if(tiersEl)tiersEl.innerHTML=`<div class="muted" style="font-size:12px;padding:8px">
+          ${json.message||'Veri yok'}</div>`;
+      }})
+    .catch(()=>{
+      const onEl=document.getElementById('vpsOnline');
+      if(onEl){onEl.textContent='● HATA';onEl.style.color='#ef4444';}});}
+
+const VIEWS={home:viewHome,makineler:viewMakineler,uyarilar:viewUyarilar,detail:viewDetail,
+  raporlar:()=>viewPH('Raporlar'),harita:viewHarita,servis:viewServis,canli:viewCanli,parametre:viewParametre,vps:viewVps};
+function showView(n){stopReal();if(canliTimer){clearInterval(canliTimer);canliTimer=null;}if(vpsTimer){clearInterval(vpsTimer);vpsTimer=null;}activeSource='sim';for(const k in widgets)delete widgets[k];
+  document.getElementById('simChip').textContent='● SİMÜLASYON';
+  content.innerHTML=(VIEWS[n]||viewHome)();
+  document.querySelectorAll('#navi a').forEach(a=>a.classList.toggle('active',a.dataset.view===n));
+  setTimeout(initMaps,40);window.scrollTo(0,0);}
+function openDetail(id){currentMachine=MACHINES.find(m=>m.id===id)||MACHINES[0];showView('detail');}
+document.querySelectorAll('#navi a').forEach(a=>a.onclick=()=>showView(a.dataset.view));
+
+/* ====================================================================
+   GÖSTERGE EKLE/KALDIR MODAL
+   ==================================================================== */
+const ovW=document.getElementById('ovWidgets');let workSet;
+function openWidgets(){workSet=new Set(active);renderTransfer();ovW.classList.add('open');}
+function closeWidgets(){ovW.classList.remove('open');}
+function renderTransfer(){const q=(document.getElementById('wSearch').value||'').toLocaleLowerCase('tr');
+  const av=PARAMS.filter(p=>!workSet.has(p.key)&&p.label.toLocaleLowerCase('tr').includes(q));
+  const ac=PARAMS.filter(p=>workSet.has(p.key)&&p.label.toLocaleLowerCase('tr').includes(q));
+  const it=(p,d)=>`<div class="titem" data-k="${p.key}"><span class="gd" style="background:${GROUP_COLORS[p.group]}"></span>${p.label}<span class="arr">${d}</span></div>`;
+  document.getElementById('availList').innerHTML=av.map(p=>it(p,'→')).join('')||'<div class="titem muted">—</div>';
+  document.getElementById('activeList').innerHTML=ac.map(p=>it(p,'✕')).join('')||'<div class="titem muted">—</div>';
+  document.querySelectorAll('#availList .titem[data-k]').forEach(e=>e.onclick=()=>{workSet.add(e.dataset.k);renderTransfer();});
+  document.querySelectorAll('#activeList .titem[data-k]').forEach(e=>e.onclick=()=>{workSet.delete(e.dataset.k);renderTransfer();});}
+document.getElementById('wSearch').oninput=renderTransfer;
+document.getElementById('wClose').onclick=closeWidgets;document.getElementById('wCancel').onclick=closeWidgets;
+document.getElementById('wSave').onclick=()=>{active=new Set(workSet);saveActive();closeWidgets();buildWidgets();};
+ovW.onclick=e=>{if(e.target===ovW)closeWidgets();};
+
+/* ====================================================================
+   ARAÇ EKLE/DÜZENLE MODAL  (EP01/EP02/teker -> görsel, canlı önizleme)
+   ==================================================================== */
+const ovM=document.getElementById('ovMachine');let mForm,mEditId;
+function openMachineModal(id){mEditId=id;
+  const base={seri:'',kategori:'forklift',model:'EP01',teker:4,source:'sim',deviceId:nextId(),operator:'',konum:'',lat:null,lng:null,durum:'Aktif',saat:0,uyari:0};
+  mForm=id?Object.assign({},MACHINES.find(m=>m.id===id)):base;
+  document.getElementById('mTitle').textContent=id?'Araç Düzenle':'Araç Ekle';
+  renderMachineForm();ovM.classList.add('open');}
+function closeMachine(){ovM.classList.remove('open');}
+function opt(name,val,cur,label){const sel=String(cur)===String(val);
+  return `<label class="opt ${sel?'sel':''}"><input type="radio" name="${name}" value="${val}" ${sel?'checked':''}>${label}</label>`;}
+function renderMachineForm(){
+  const f=mForm;let html=`
+    <div class="frow"><label>Kod / Şase No</label><input type="text" id="fSeri" value="${f.seri}" placeholder="304MB100127"></div>
+    <div class="frow"><label>Kategori</label><div class="opts">
+      ${opt('kat','forklift',f.kategori,'🚜 Forklift')}${opt('kat','batarya',f.kategori,'🔋 Batarya')}</div></div>`;
+  if(f.kategori==='forklift'){
+    html+=`<div class="frow"><label>Model</label><div class="opts">
+      ${opt('mdl','EP01',f.model,'EP01')}${opt('mdl','EP02',f.model,'EP02')}</div></div>`;
+    if(f.model==='EP02')html+=`<div class="frow"><label>Teker</label><div class="opts">
+      ${opt('tk','3',f.teker,'3 Teker')}${opt('tk','4',f.teker,'4 Teker')}</div></div>`;
+  }
+  html+=`<div class="frow"><label>Veri Kaynağı</label><div class="opts">
+      ${opt('src','sim',f.source,'Simülasyon (rastgele)')}${opt('src','real',f.source,'Gerçek (cihazdan)')}</div></div>
+    <div class="row"><div class="frow" style="flex:1"><label>Cihaz ID (device_id)</label><input type="number" id="fDev" value="${f.deviceId}"></div>
+      <div class="frow" style="flex:1"><label>Operatör</label><input type="text" id="fOp" value="${f.operator||''}"></div></div>
+    <div class="frow"><label>Konum (şehir)</label><input type="text" id="fKonum" value="${f.konum||''}" placeholder="İstanbul, Türkiye"></div>
+    <div class="row"><div class="frow" style="flex:1"><label>Enlem (lat) — opsiyonel</label><input type="number" step="any" id="fLat" value="${f.lat||''}" placeholder="41.0082"></div>
+      <div class="frow" style="flex:1"><label>Boylam (lng) — opsiyonel</label><input type="number" step="any" id="fLng" value="${f.lng||''}" placeholder="28.9784"></div></div>
+    <div class="frow muted" style="font-size:12px;margin-top:-6px">Boş bırakırsanız şehir adına göre konumlanır. Haritadan tam nokta için enlem/boylam girin.</div>
+    <div class="frow"><label>Önizleme — Görsel</label>${mimg(f,'lg')}</div>`;
+  document.getElementById('mBody').innerHTML=html;
+  // handlers
+  document.getElementById('fSeri').oninput=e=>f.seri=e.target.value;
+  const dev=document.getElementById('fDev');if(dev)dev.oninput=e=>f.deviceId=+e.target.value;
+  const op=document.getElementById('fOp');if(op)op.oninput=e=>f.operator=e.target.value;
+  const kn=document.getElementById('fKonum');if(kn)kn.oninput=e=>f.konum=e.target.value;
+  const la=document.getElementById('fLat');if(la)la.oninput=e=>f.lat=e.target.value===''?null:+e.target.value;
+  const lo=document.getElementById('fLng');if(lo)lo.oninput=e=>f.lng=e.target.value===''?null:+e.target.value;
+  document.querySelectorAll('input[name=kat]').forEach(r=>r.onchange=()=>{f.kategori=r.value;renderMachineForm();});
+  document.querySelectorAll('input[name=mdl]').forEach(r=>r.onchange=()=>{f.model=r.value;renderMachineForm();});
+  document.querySelectorAll('input[name=tk]').forEach(r=>r.onchange=()=>{f.teker=+r.value;renderMachineForm();});
+  document.querySelectorAll('input[name=src]').forEach(r=>r.onchange=()=>{f.source=r.value;renderMachineForm();});
+}
+document.getElementById('aClose').onclick=closeMachine;document.getElementById('aCancel').onclick=closeMachine;
+document.getElementById('aSave').onclick=()=>{
+  if(!mForm.seri.trim()){alert('Kod / Şase No giriniz');return;}
+  if(mEditId){Object.assign(MACHINES.find(m=>m.id===mEditId),mForm);}
+  else{mForm.id=nextId();MACHINES.push(mForm);}
+  saveMachines();closeMachine();showView('makineler');};
+ovM.onclick=e=>{if(e.target===ovM)closeMachine();};
+function delMachine(id){if(!confirm('Araç silinsin mi?'))return;MACHINES=MACHINES.filter(m=>m.id!==id);saveMachines();showView('makineler');}
+
+/* ====================================================================
+   LOGIN + START
+   ==================================================================== */
+const landingEl=document.getElementById('landing'),loginEl=document.getElementById('login'),appEl=document.getElementById('app');
+function showLanding(){landingEl.style.display='block';loginEl.style.display='none';appEl.hidden=true;}
+function showLogin(){landingEl.style.display='none';loginEl.style.display='flex';appEl.hidden=true;}
+function showApp(){landingEl.style.display='none';loginEl.style.display='none';appEl.hidden=false;showView('home');}
+document.getElementById('telemetriBtn').onclick=showLogin;          // Ana sayfadaki "Telemetri" -> giriş
+document.getElementById('loginBrand').onclick=showLanding;          // Giriş ekranı logosu -> ana sayfa
+document.getElementById('goRegister').onclick=()=>alert('Kayıt yakında. Şimdilik herhangi bir kullanıcı adı + parola ile girebilirsiniz.');
+document.getElementById('loginForm').onsubmit=e=>{e.preventDefault();sessionStorage.setItem('omni_auth','1');showApp();};
+document.getElementById('userBtn').onclick=()=>{if(confirm('Çıkış yapılsın mı?')){sessionStorage.removeItem('omni_auth');location.reload();}};
+if(sessionStorage.getItem('omni_auth'))showApp();
+else if(new URLSearchParams(location.search).get('login'))showLogin();
+else showLanding();
+setInterval(generateTargets,1600);
+setInterval(animate,40);
+</script>
+</body>
+</html>

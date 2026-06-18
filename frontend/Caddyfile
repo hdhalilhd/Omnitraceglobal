@@ -1,0 +1,17 @@
+# Caddy: {$DOMAIN} için otomatik HTTPS + frontend statik + API/WebSocket reverse-proxy
+{$DOMAIN} {
+	encode gzip
+
+	# API ve WebSocket isteklerini backend'e yönlendir
+	@backend path /api/* /socket.io/*
+	handle @backend {
+		reverse_proxy backend:4000
+	}
+
+	# Diğer her şey: React SPA (statik dosyalar + client-side routing)
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

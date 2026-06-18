@@ -1,0 +1,157 @@
+// Forklift Telemetri — Prisma şeması
+// İLİŞKİSEL tablolar burada yönetilir.
+// Yüksek hacimli zaman-serisi tablosu `telemetry` Prisma DIŞINDA, TimescaleDB
+// hypertable olarak prisma/applyTimescale.ts ile oluşturulur (ham SQL).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+// CAN kaynağı: yürüyüş mü pompa mı
+enum SourceType {
+  TRACTION // Yürüyüş
+  PUMP     // Pompa
+}
+
+enum VehicleStatus {
+  ACTIVE
+  IDLE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum Severity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(VIEWER)
+  createdAt    DateTime @default(now())
+
+  layouts DashboardLayout[]
+}
+
+model Device {
+  id           Int       @id @default(autoincrement())
+  serial       String    @unique // ESP32 donanım/seri kimliği (MQTT client id)
+  mqttClientId String?   @unique
+  fwVersion    String?
+  online       Boolean   @default(false)
+  lastSeen     DateTime?
+  createdAt    DateTime  @default(now())
+
+  vehicle Vehicle?
+}
+
+model Vehicle {
+  id             Int           @id @default(autoincrement())
+  chassisNo      String        @unique // örn. 304MB100104
+  model          String? // örn. M642S
+  type           String        @default("Electric Forklift")
+  name           String?
+  photoUrl       String?
+  tractionNodeId Int           @default(14) // yürüyüş sürücü Node ID
+  pumpNodeId     Int           @default(22) // pompa sürücü Node ID
+  status         VehicleStatus @default(OFFLINE)
+  totalHours     Float         @default(0)
+  // Konum (forkliftler kapalı alandaysa opsiyonel)
+  lat            Float?
+  lng            Float?
+  locationLabel  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  deviceId Int?    @unique
+  device   Device? @relation(fields: [deviceId], references: [id])
+
+  layouts   DashboardLayout[]
+  errorLogs ErrorLog[]
+}
+
+// CAN map'in DB yansıması — UI listeleri ve dashboard seçimleri için.
+// Decode mantığı kodda (src/canmap). Bu tablo seed ile doldurulur.
+model SignalDef {
+  key      String     @id // örn. "traction.motor_rpm"
+  label    String // örn. "Motor Devri"
+  source   SourceType
+  cobId    Int // örn. 0x18E
+  unit     String     @default("")
+  dataType String // "int16" | "uint16" | ...
+  decimals Int        @default(0)
+  min      Float?
+  max      Float?
+  enabled  Boolean    @default(true)
+  sortKey  Int        @default(0)
+}
+
+// Ana ekran (Makine Detay) gösterge düzeni — "Gösterge Ekle/Kaldır" bunu yazar.
+// widgets: JSON dizisi -> [{ signalKey, type: "gauge"|"number"|"chart", x, y, w, h }]
+model DashboardLayout {
+  id        Int      @id @default(autoincrement())
+  vehicleId Int
+  userId    Int? // null => aracın varsayılan düzeni; dolu => kullanıcıya özel
+  name      String   @default("default")
+  widgets   Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([vehicleId, userId, name])
+}
+
+// Hata kodu sözlüğü (EMCY kodu -> anlam)
+model FaultCode {
+  id                Int         @id @default(autoincrement())
+  code              Int // EMCY error code (decimal). Hex gösterim UI'da.
+  source            SourceType? // null => her iki sürücü için geçerli
+  descriptionTr     String
+  severity          Severity    @default(WARNING)
+  recommendedAction String?
+
+  errorLogs ErrorLog[]
+
+  @@unique([code, source])
+}
+
+// Hata logu — kullanıcı için kritik. Düşük hacim olduğundan normal tablo.
+model ErrorLog {
+  id            Int        @id @default(autoincrement())
+  time          DateTime   @default(now())
+  vehicleId     Int
+  source        SourceType
+  nodeId        Int
+  emcyCode      Int
+  emcyCodeHex   String
+  errorRegister Int        @default(0)
+  vendorBytes   String     @default("") // ham bayt hex
+  description   String
+  severity      Severity   @default(WARNING)
+  active        Boolean    @default(true)
+  clearedAt     DateTime?
+  faultCodeId   Int?
+
+  vehicle   Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  faultCode FaultCode? @relation(fields: [faultCodeId], references: [id])
+
+  @@index([vehicleId, time])
+  @@index([active])
+}

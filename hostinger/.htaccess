@@ -1,0 +1,12 @@
+# Forklift telemetri — HTTPS yönlendirme kuralı
+# Cihaz (SIM800L) düz HTTP POST yapar; veri_al.php'yi HTTPS'e ZORLAMA.
+# Diğer her şey (panel, yönetim, veri_oku...) HTTPS'e yönlendirilsin.
+
+DirectoryIndex index.html index.php
+
+RewriteEngine On
+
+# 1) veri_al.php hariç, HTTP gelen her isteği HTTPS'e taşı
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !^/veri_al\.php [NC]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]

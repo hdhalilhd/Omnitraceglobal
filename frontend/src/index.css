@@ -1,0 +1,25 @@
+/* react-grid-layout temel stilleri (@import en üstte olmalı) */
+@import "react-grid-layout/css/styles.css";
+@import "react-resizable/css/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #eef1f4;
+  color: #1f2937;
+}
+
+.react-grid-item.react-grid-placeholder {
+  background: #f5a62355;
+  border-radius: 0.75rem;
+}

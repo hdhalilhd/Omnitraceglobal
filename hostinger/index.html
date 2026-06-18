@@ -1,0 +1,1859 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>OmniTrace Global â Fleet Intelligence for ZASS Electric Forklifts</title>
+<meta name="description" content="OmniTrace Global transforms your ZASS forklift fleet into a fully intelligent, connected ecosystem â real-time battery telemetry, CAN bus diagnostics, driver parameter control and predictive maintenance from a single command center." />
+<meta property="og:title" content="OmniTrace Global â See Every Volt. Every Move. Every Fault." />
+<meta property="og:description" content="The world's most advanced telemetry and intelligence platform for ZASS electric forklift fleets." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%231A94F7'/%3E%3Cellipse cx='16' cy='16' rx='13' ry='5' fill='none' stroke='%231A94F7' stroke-width='1.6' transform='rotate(-24 16 16)' opacity='0.8'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="img/gorsel1.png" />
+<style>
+/* âââââââââââââââ DESIGN TOKENS âââââââââââââââ */
+:root{
+  --void:#030508; --abyss:#070C14; --surface-1:#0D1520; --surface-2:#111E2E;
+  --border-subtle:#1A2D42; --border:#1F3A52;
+  --omni-50:#E8F4FF; --omni-100:#C0DFFE; --omni-200:#87C5FD; --omni-300:#4DADFB;
+  --omni-400:#1A94F7; --omni-500:#0078E8; --omni-600:#005CBF; --omni-700:#00428F;
+  --omni-glow:rgba(26,148,247,0.35);
+  --signal-400:#FFB800; --signal-glow:rgba(255,184,0,0.4);
+  --online-400:#00E5A0; --online-glow:rgba(0,229,160,0.35);
+  --alert-400:#FF3B4E; --alert-glow:rgba(255,59,78,0.35);
+  --text-1:#F0F6FF; --text-2:#94A8BE; --text-3:#4A6478; --text-4:#2A3E52;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --text-hero:clamp(2.8rem,5.2vw,5.4rem);
+  --text-h2:clamp(2rem,3.5vw,3.5rem);
+  --text-h3:clamp(1.4rem,2.2vw,1.9rem);
+  --r-sm:6px; --r-md:12px; --r-lg:20px; --r-xl:32px; --r-pill:9999px;
+  --gutter:clamp(1.5rem,5vw,6rem);
+  --sec-pad:clamp(6rem,10vw,12rem);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:auto}
+body{background:var(--void);color:var(--text-1);font-family:var(--font-body);overflow-x:hidden;line-height:1.6}
+a{color:inherit;text-decoration:none}
+ul,ol{list-style:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img,svg,canvas{display:block;max-width:100%}
+::selection{background:rgba(26,148,247,.3);color:var(--text-1)}
+.container{max-width:1440px;margin-inline:auto;padding-inline:var(--gutter)}
+.mono{font-family:var(--font-mono)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--void)}
+::-webkit-scrollbar-thumb{background:var(--border-subtle);border-radius:5px;border:2px solid var(--void)}
+::-webkit-scrollbar-thumb:hover{background:var(--border)}
+
+/* âââââââââââââââ SHARED PRIMITIVES âââââââââââââââ */
+.glass{
+  background:linear-gradient(135deg,rgba(13,21,32,.85),rgba(17,30,46,.6));
+  backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(31,58,82,.6);
+  box-shadow:0 0 0 1px rgba(26,148,247,.05),0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font:600 .8rem var(--font-body);letter-spacing:.15em;text-transform:uppercase;color:var(--omni-400);
+}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--online-400);box-shadow:0 0 12px var(--online-glow);animation:pdot 2.2s ease-in-out infinite;flex:none}
+.pulse-dot.blue{background:var(--omni-400);box-shadow:0 0 12px var(--omni-glow)}
+@keyframes pdot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.55}}
+.sec-head{max-width:760px;margin-bottom:clamp(3rem,5vw,4.5rem)}
+.sec-head h2{font:700 var(--text-h2)/1.08 var(--font-display);letter-spacing:-.02em;margin:18px 0 20px}
+.sec-head h2 em{font-style:normal;background:linear-gradient(100deg,var(--omni-300),var(--omni-400) 55%,var(--omni-200));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sec-head p{color:var(--text-2);font-size:1.1rem;max-width:620px}
+.sec-head.center{margin-inline:auto;text-align:center}
+.sec-head.center p{margin-inline:auto}
+
+/* reveal system */
+.rv{opacity:0;transform:translateY(30px);will-change:transform,opacity}
+html.no-js .rv,html.reduced .rv{opacity:1;transform:none}
+
+/* âââââââââââââââ BUTTONS âââââââââââââââ */
+.btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 28px;border-radius:var(--r-md);font:600 .95rem var(--font-body);letter-spacing:.01em;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,border-color .25s ease,color .25s ease,background-color .25s ease;
+  will-change:transform;white-space:nowrap;overflow:hidden;
+}
+.btn:active{transform:scale(.96)}
+.btn svg{width:17px;height:17px;flex:none}
+.btn-primary{
+  color:#fff;background:linear-gradient(135deg,#1A94F7,#005CBF);
+  border:1px solid rgba(26,148,247,.5);
+  box-shadow:0 0 24px -8px rgba(26,148,247,.6),0 4px 16px rgba(0,0,0,.4);
+}
+.btn-primary:hover{transform:scale(1.04);box-shadow:0 0 40px -4px rgba(26,148,247,.8),0 8px 24px rgba(0,0,0,.5)}
+.btn-primary::after{
+  content:"";position:absolute;top:-40%;bottom:-40%;left:-30%;width:36%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.32),transparent);
+  transform:translateX(-120%) skewX(-18deg);animation:shimmer 3s ease-in-out infinite;pointer-events:none;
+}
+@keyframes shimmer{0%,55%{transform:translateX(-160%) skewX(-18deg)}85%,100%{transform:translateX(520%) skewX(-18deg)}}
+.btn-ghost{color:var(--text-1);border:1px solid var(--border);background:rgba(13,21,32,.3)}
+.btn-ghost:hover{border-color:var(--omni-400);color:var(--omni-300);box-shadow:0 0 28px -10px var(--omni-glow);transform:scale(1.02)}
+
+/* âââââââââââââââ NAVIGATION âââââââââââââââ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:background-color .6s cubic-bezier(.22,1,.36,1),border-color .6s,backdrop-filter .6s}
+.nav::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--border-subtle);opacity:0;transition:opacity .6s}
+.nav.scrolled{background:linear-gradient(135deg,rgba(13,21,32,.82),rgba(17,30,46,.66));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+.nav.scrolled::after{opacity:1}
+.nav-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:11px;flex:none}
+.brand-mark{width:34px;height:34px;position:relative}
+.brand-mark .core{position:absolute;inset:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4DADFB,#005CBF 60%,#00428F);box-shadow:0 0 16px -2px var(--omni-glow);animation:corePulse 3s ease-in-out infinite;will-change:transform}
+@keyframes corePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.brand-mark .orbit{position:absolute;inset:0;border-radius:50%;will-change:transform;transition:filter .4s}
+.brand-mark .orbit::before{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:13px;margin-top:-6.5px;border:1.5px solid var(--omni-400);border-radius:50%;transform:rotate(-24deg);opacity:.85}
+.brand:hover .orbit{animation:orbitSpin .8s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 0 6px var(--omni-glow))}
+@keyframes orbitSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.brand-name{font:700 1.18rem var(--font-display);letter-spacing:-.01em}
+.brand-name b{font-weight:700}.brand-name span{font-weight:400;color:var(--text-2)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-item{position:relative}
+.nav-link{display:inline-block;position:relative;padding:10px 14px;font:500 .9rem var(--font-body);color:var(--text-2);transition:color .2s}
+.nav-link::after{content:"";position:absolute;left:14px;right:14px;bottom:5px;height:1.5px;background:var(--omni-400);transform:scaleX(0);transform-origin:left;transition:transform .2s ease}
+.nav-item:hover .nav-link,.nav-link:focus-visible{color:var(--text-1)}
+.nav-item:hover .nav-link::after,.nav-link.active::after{transform:scaleX(1)}
+.nav-ctas{display:flex;align-items:center;gap:12px;flex:none}
+.btn-nav-ghost{padding:10px 20px;border-radius:var(--r-md);border:1px solid var(--border);font:500 .88rem var(--font-body);color:var(--text-1);transition:border-color .25s,color .25s,box-shadow .25s}
+.btn-nav-ghost:hover{border-color:var(--omni-400);color:var(--omni-300);box-shadow:0 0 24px -10px var(--omni-glow)}
+.btn-telemetry{
+  position:relative;display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--r-md);
+  font:600 .9rem var(--font-body);color:#fff;overflow:hidden;
+  background:linear-gradient(135deg,#1A94F7,#005CBF);border:1px solid rgba(26,148,247,.5);
+  box-shadow:0 0 24px -8px rgba(26,148,247,.6),0 4px 16px rgba(0,0,0,.4);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;will-change:transform;
+}
+.btn-telemetry:hover{transform:scale(1.04);box-shadow:0 0 40px -4px rgba(26,148,247,.8),0 8px 24px rgba(0,0,0,.5)}
+.btn-telemetry:active{transform:scale(.96)}
+.btn-telemetry::after{content:"";position:absolute;top:-40%;bottom:-40%;left:-30%;width:36%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-160%) skewX(-18deg);animation:shimmer 3s ease-in-out infinite;pointer-events:none}
+.btn-telemetry svg{width:14px;height:14px}
+
+/* mega dropdown */
+.mega{
+  position:absolute;top:calc(100% + 10px);left:50%;transform:translate(-50%,8px);
+  width:min(680px,92vw);padding:18px;border-radius:var(--r-lg);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease,visibility .2s;
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;z-index:1001;
+}
+.mega.cols-1{width:min(420px,92vw);grid-template-columns:1fr}
+.nav-item:hover .mega,.nav-item:focus-within .mega{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
+.mega a{display:flex;gap:14px;align-items:flex-start;padding:13px 14px;border-radius:var(--r-md);transition:background-color .2s}
+.mega a:hover{background:rgba(26,148,247,.07)}
+.mega-ic{width:38px;height:38px;flex:none;border-radius:10px;display:grid;place-items:center;background:rgba(26,148,247,.1);border:1px solid rgba(26,148,247,.22)}
+.mega-ic svg{width:18px;height:18px;stroke:var(--omni-300)}
+.mega b{display:block;font:600 .9rem var(--font-body);color:var(--text-1)}
+.mega span{display:block;font-size:.78rem;color:var(--text-3);line-height:1.45;margin-top:2px}
+
+/* burger + mobile menu */
+.burger{display:none;width:44px;height:44px;position:relative;z-index:1003;flex:none}
+.burger i{position:absolute;left:11px;right:11px;height:2px;background:var(--text-1);border-radius:2px;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .25s;will-change:transform}
+.burger i:nth-child(1){top:15px}.burger i:nth-child(2){top:21px}.burger i:nth-child(3){top:27px}
+.burger.open i:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.burger.open i:nth-child(2){opacity:0;transform:scaleX(.4)}
+.burger.open i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.mmenu{position:fixed;inset:0;z-index:1002;background:rgba(3,5,8,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;justify-content:center;padding:80px var(--gutter) 48px;opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+.mmenu.open{opacity:1;visibility:visible}
+.mmenu a.mlink{display:block;font:700 2rem var(--font-display);padding:12px 0;color:var(--text-1);opacity:0;transform:translateX(40px);transition:opacity .45s ease,transform .45s cubic-bezier(.22,1,.36,1),color .2s}
+.mmenu a.mlink:hover{color:var(--omni-300)}
+.mmenu.open a.mlink{opacity:1;transform:translateX(0)}
+.mmenu .btn-telemetry{margin-top:34px;align-self:flex-start;font-size:1rem;padding:15px 30px;opacity:0;transform:translateX(40px);transition:opacity .45s ease .42s,transform .45s cubic-bezier(.22,1,.36,1) .42s}
+.mmenu.open .btn-telemetry{opacity:1;transform:translateX(0)}
+
+/* âââââââââââââââ CINEMATIC FORKLIFT LAYER (the one continuous animation) âââââââââââââââ */
+.cine{position:fixed;inset:0;z-index:1;display:grid;place-items:center;pointer-events:none;overflow:hidden;will-change:opacity}
+.cine-ctx{position:absolute;inset:0}
+.ctx-img{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;will-change:opacity;transform:scale(1.06)}
+.cine-grid{position:absolute;inset:-20%;background-image:linear-gradient(rgba(26,148,247,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(26,148,247,.5) 1px,transparent 1px);background-size:54px 54px;opacity:.05;mask-image:radial-gradient(ellipse 60% 60% at 50% 50%,#000,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 60% 60% at 50% 50%,#000,transparent 75%)}
+.cine-glow{position:absolute;width:60vw;height:60vw;max-width:760px;max-height:760px;border-radius:50%;background:radial-gradient(circle,rgba(26,148,247,.22),transparent 62%);filter:blur(10px);will-change:transform,opacity}
+.cine-float{position:relative;width:min(60vw,900px);aspect-ratio:1040/740;will-change:transform}
+.cine-idle{position:absolute;inset:0;will-change:transform}
+.fork-shot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100%;height:auto;opacity:0;filter:drop-shadow(0 40px 60px rgba(0,0,0,.6)) drop-shadow(0 0 50px rgba(26,148,247,.18));will-change:opacity}
+.fork-shot.is-on{opacity:1}
+/* scan sweep */
+.scan{position:absolute;inset:0;overflow:hidden;mix-blend-mode:screen;opacity:0;transition:opacity .4s}
+.scan::before{content:"";position:absolute;left:0;right:0;height:34%;top:-34%;background:linear-gradient(180deg,transparent,rgba(26,148,247,.10) 60%,rgba(77,173,251,.22));animation:scanmove 4.6s cubic-bezier(.6,0,.4,1) infinite}
+@keyframes scanmove{0%{top:-40%}100%{top:110%}}
+/* hud chips that ride the cinematic */
+.hud{position:absolute;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;font:500 .72rem var(--font-mono);color:var(--text-1);background:rgba(7,12,20,.78);border:1px solid rgba(31,58,82,.85);box-shadow:0 6px 22px rgba(0,0,0,.5),0 0 16px -6px var(--omni-glow);opacity:0;transform:translateY(8px) scale(.92);backdrop-filter:blur(8px)}
+.hud b{color:var(--omni-200);font-weight:600}
+
+/* âââââââââââââââ SCENES (vertical scroll, varied entrances) âââââââââââââââ */
+.cinema{position:relative;z-index:2}
+.scene{position:relative;min-height:100vh;display:flex;align-items:center;padding:120px 0 80px}
+.scene-inner{position:relative;width:100%;display:flex}
+.scene.align-left .scene-inner{justify-content:flex-start}
+.scene.align-right .scene-inner{justify-content:flex-end}
+.scene.align-center .scene-inner{justify-content:center;text-align:center}
+.scene.align-bottom{align-items:flex-end}
+.scene.align-bottom .scene-inner{justify-content:center}
+.scene-panel{width:min(540px,100%)}
+.scene.align-center .scene-panel{width:min(760px,100%)}
+.scene-card{padding:clamp(1.4rem,2.4vw,2.4rem);border-radius:var(--r-lg)}
+.panel-no{font:600 .76rem var(--font-mono);color:var(--omni-400);letter-spacing:.22em}
+.scene-panel h2{font:700 var(--text-h2)/1.06 var(--font-display);letter-spacing:-.02em;margin:14px 0 16px}
+.scene-panel h2 em{font-style:normal;color:var(--omni-300);text-shadow:0 0 40px rgba(26,148,247,.4)}
+.scene-panel h3{font:700 var(--text-h3)/1.14 var(--font-display);letter-spacing:-.015em;margin:12px 0 14px}
+.scene-panel .lede{color:var(--text-2);font-size:1.06rem;max-width:520px}
+.scene-panel .desc{color:var(--text-2);font-size:1rem;max-width:480px}
+.bullets{margin-top:22px;display:grid;gap:12px}
+.bullets li{display:flex;gap:11px;align-items:flex-start;color:var(--text-2);font-size:.94rem}
+.bullets .chk{width:19px;height:19px;flex:none;border-radius:50%;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.35);display:grid;place-items:center;margin-top:2px}
+.bullets .chk svg{width:10px;height:10px;stroke:var(--online-400);stroke-width:3;fill:none}
+.hero-ctas{display:flex;gap:14px;margin:30px 0 26px;flex-wrap:wrap}
+.trust{display:flex;gap:22px;flex-wrap:wrap;color:var(--text-3);font:500 .82rem var(--font-body)}
+.trust li{display:flex;align-items:center;gap:8px}
+.trust .tdot{width:6px;height:6px;border-radius:50%;background:var(--omni-400);box-shadow:0 0 10px var(--omni-glow);flex:none}
+.scroll-hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:9px;color:var(--text-3);font:500 .68rem var(--font-body);letter-spacing:.2em;text-transform:uppercase;transition:opacity .45s;pointer-events:none}
+.scroll-hint .wheel{width:1.5px;height:34px;background:linear-gradient(var(--omni-400),transparent);position:relative;overflow:hidden}
+.scroll-hint .wheel::after{content:"";position:absolute;top:-8px;left:0;width:100%;height:9px;background:var(--omni-200);animation:wheelDrop 1.8s ease-in-out infinite}
+@keyframes wheelDrop{to{transform:translateY(48px)}}
+
+/* reveal transitions (the varied directions) */
+.reveal{opacity:0;will-change:transform,opacity,filter;transition:opacity .9s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1),filter .9s ease}
+.reveal.t-right{transform:translateX(80px)}
+.reveal.t-left{transform:translateX(-80px)}
+.reveal.t-up{transform:translateY(70px)}
+.reveal.t-down{transform:translateY(-70px)}
+.reveal.t-zoom{transform:scale(1.18)}
+.reveal.t-dissolve{transform:scale(1.06);filter:blur(18px)}
+.reveal.in{opacity:1;transform:none;filter:none}
+html.no-js .reveal,html.reduced .reveal{opacity:1;transform:none;filter:none}
+
+/* âââââââââââââââ module vizzes (inside scene cards) âââââââââââââââ */
+.viz-card{position:relative;border-radius:var(--r-lg);padding:clamp(1.1rem,2vw,1.7rem);overflow:hidden}
+.viz-title{display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .7rem var(--font-mono);letter-spacing:.14em;color:var(--text-3);text-transform:uppercase;margin-bottom:16px}
+.live-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:var(--r-pill);background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.25);color:var(--online-400);font:600 .64rem var(--font-mono);letter-spacing:.1em}
+.viz-map svg{width:100%;height:auto}
+.geo{fill:rgba(26,148,247,.05);stroke:var(--omni-400);stroke-width:1.2;stroke-dasharray:6 5;animation:ants 1.4s linear infinite}
+.geo.amber{stroke:var(--signal-400);fill:rgba(255,184,0,.04)}
+@keyframes ants{to{stroke-dashoffset:-22}}
+.fkm{filter:drop-shadow(0 0 6px var(--omni-glow))}
+.ping{transform-origin:center;transform-box:fill-box;animation:ping 2s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{transform:scale(.3);opacity:.9}80%,100%{transform:scale(2.6);opacity:0}}
+.cells{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;margin-bottom:18px}
+.cell{position:relative;height:52px;background:#0A1322;border:1px solid var(--border-subtle);border-radius:4px;overflow:hidden}
+.cell i{position:absolute;inset:0;transform:scaleY(0);transform-origin:bottom;background:linear-gradient(180deg,rgba(0,229,160,.85),rgba(0,229,160,.45));will-change:transform}
+.cell.warn i{background:linear-gradient(180deg,rgba(255,184,0,.9),rgba(255,184,0,.45))}
+.cell.low i{background:linear-gradient(180deg,rgba(255,59,78,.9),rgba(255,59,78,.45))}
+.cell span{position:absolute;left:0;right:0;bottom:4px;text-align:center;font:500 .56rem var(--font-mono);color:rgba(240,246,255,.9);z-index:1}
+.bat-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.bstat{padding:12px 8px;border-radius:10px;background:rgba(13,21,32,.6);border:1px solid var(--border-subtle);text-align:center}
+.bstat b{display:block;font:600 1.12rem var(--font-mono);color:var(--text-1);font-variant-numeric:tabular-nums}
+.bstat span{font:500 .6rem var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.can-stage{position:relative;height:230px;margin-bottom:14px}
+.cnode{position:absolute;padding:9px 13px;border-radius:9px;background:var(--surface-1);border:1px solid var(--border);font:600 .68rem var(--font-mono);color:var(--text-2);white-space:nowrap;z-index:1}
+.cnode small{display:block;font:400 .58rem var(--font-mono);color:var(--text-3);letter-spacing:.04em}
+.cnode.hub{background:linear-gradient(135deg,rgba(26,148,247,.18),rgba(0,92,191,.1));border-color:var(--omni-400);color:var(--omni-200);box-shadow:0 0 30px -6px var(--omni-glow);animation:hubGlow 2.6s ease-in-out infinite}
+@keyframes hubGlow{0%,100%{box-shadow:0 0 22px -8px var(--omni-glow)}50%{box-shadow:0 0 44px -4px var(--omni-glow)}}
+.can-lines{position:absolute;inset:0;width:100%;height:100%}
+.can-lines path{fill:none;stroke:rgba(26,148,247,.45);stroke-width:1.4;stroke-dasharray:3 9;animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+.term{height:128px;overflow:hidden;background:#04070D;border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;font:400 .66rem/1.7 var(--font-mono);color:#3E5E7E;mask-image:linear-gradient(180deg,transparent,#000 22%);-webkit-mask-image:linear-gradient(180deg,transparent,#000 22%)}
+.term b{color:var(--omni-300);font-weight:500}.term .ok{color:var(--online-400)}.term .wn{color:var(--signal-400)}
+.fault-card{display:block;padding:15px;border-radius:12px;background:var(--surface-1);border:1px solid var(--border-subtle);border-left:3px solid var(--alert-400);margin-bottom:12px;will-change:transform,opacity}
+.fault-card.warn{border-left-color:var(--signal-400)}
+.fault-card.info{border-left-color:var(--omni-400)}
+.sev{display:inline-flex;padding:3px 9px;border-radius:var(--r-pill);font:700 .58rem var(--font-mono);letter-spacing:.12em}
+.sev.crit{background:rgba(255,59,78,.12);color:var(--alert-400);border:1px solid rgba(255,59,78,.3)}
+.sev.warn{background:rgba(255,184,0,.1);color:var(--signal-400);border:1px solid rgba(255,184,0,.3)}
+.sev.info{background:rgba(26,148,247,.1);color:var(--omni-300);border:1px solid rgba(26,148,247,.3)}
+.fault-code{font:600 .85rem var(--font-mono);color:var(--text-1);margin-left:10px}
+.fault-desc{margin-top:9px;font:600 .92rem var(--font-body);color:var(--text-1)}
+.fault-meta{font-size:.72rem;color:var(--text-3);margin-top:3px}
+.fault-act{margin-top:8px;font-size:.8rem;color:var(--text-2)}
+.fault-act b{color:var(--omni-300);font-weight:600}
+.driver-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.avatar{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#2D5D8F,#11253C);border:1px solid var(--border);flex:none}
+.driver-head b{display:block;font:600 .98rem}
+.driver-head span{font:400 .72rem var(--font-mono);color:var(--text-3)}
+.param{margin-bottom:16px}
+.param-top{display:flex;justify-content:space-between;font:500 .8rem;color:var(--text-2);margin-bottom:9px}
+.param-top output{font:600 .8rem var(--font-mono);color:var(--omni-200)}
+.track{position:relative;height:5px;border-radius:3px;background:var(--surface-2)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:3px;background:linear-gradient(90deg,var(--omni-600),var(--omni-400));transform:scaleX(0);transform-origin:left;will-change:transform}
+.track .thumb{position:absolute;top:50%;left:0;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:#fff;border:3px solid var(--omni-400);box-shadow:0 0 14px -2px var(--omni-glow);will-change:transform}
+.seg{display:flex;gap:6px}
+.seg b{flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1px solid var(--border-subtle);font:500 .72rem var(--font-body);color:var(--text-3);transition:background-color .2s,border-color .2s,color .2s}
+.seg b.on{background:rgba(26,148,247,.12);border-color:var(--omni-400);color:var(--omni-200)}
+.an-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+.an-card{background:rgba(13,21,32,.6);border:1px solid var(--border-subtle);border-radius:12px;padding:14px}
+.an-card h5{font:600 .62rem var(--font-mono);letter-spacing:.14em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.an-card.span2{grid-column:1/-1}
+.bars{display:flex;align-items:flex-end;gap:8px;height:104px}
+.bars i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--omni-400),var(--omni-600));transform:scaleY(0);transform-origin:bottom;will-change:transform}
+.bars i.hi{background:linear-gradient(180deg,var(--online-400),#00A874)}
+.heat{display:grid;grid-template-columns:repeat(24,1fr);gap:3px}
+.heat i{height:9px;border-radius:2px;background:var(--omni-400);opacity:0}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.kpi{padding:7px 13px;border-radius:var(--r-pill);font:600 .72rem var(--font-mono);background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.25);color:var(--online-400)}
+.kpi.blue{background:rgba(26,148,247,.08);border-color:rgba(26,148,247,.3);color:var(--omni-300)}
+
+/* âââââââââââââââ STATS âââââââââââââââ */
+.stats{position:relative;z-index:2;padding:clamp(4rem,7vw,7rem) 0;background:var(--abyss);border-block:1px solid var(--border-subtle)}
+.stats-line{height:1px;background:linear-gradient(90deg,transparent,var(--omni-400),transparent);transform:scaleX(0);margin-bottom:clamp(3rem,5vw,4.5rem);will-change:transform}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5rem;text-align:center}
+.stat-num{font:700 clamp(2.4rem,4.2vw,3.8rem)/1 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat-num .sfx{color:var(--omni-400)}
+.stat-label{margin-top:10px;color:var(--text-3);font:500 .82rem var(--font-body);letter-spacing:.06em;text-transform:uppercase}
+
+/* âââââââââââââââ FIELD GALLERY (photo band) âââââââââââââââ */
+.field{position:relative;z-index:2;padding-block:var(--sec-pad);background:var(--void);overflow:hidden}
+.field-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:clamp(2rem,4vw,3rem)}
+.shot{position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border-subtle);min-height:240px}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.1s cubic-bezier(.2,.6,.2,1);will-change:transform}
+.shot:hover img{transform:scale(1.07)}
+.shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,5,8,.05),rgba(3,5,8,.7) 88%)}
+.shot .cap{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:20px 22px}
+.shot .cap b{display:block;font:700 1.05rem var(--font-display)}
+.shot .cap span{font:500 .76rem var(--font-mono);color:var(--omni-300);letter-spacing:.08em}
+.shot.s-wide{grid-column:span 8}
+.shot.s-tall{grid-column:span 4;grid-row:span 2;min-height:0}
+.shot.s-half{grid-column:span 4}
+
+/* âââââââââââââââ HOW IT WORKS âââââââââââââââ */
+.how{position:relative;z-index:2;padding-block:var(--sec-pad);background:var(--abyss);border-block:1px solid var(--border-subtle)}
+.how-wrap{display:grid;grid-template-columns:56px 1fr;gap:clamp(1rem,3vw,3rem);margin-top:clamp(2rem,4vw,3rem)}
+.rail{position:relative}
+.rail::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:var(--border-subtle)}
+.rail-fill{position:absolute;top:0;left:50%;width:2px;height:100%;margin-left:-1px;background:linear-gradient(180deg,var(--omni-400),var(--omni-200));transform:scaleY(0);transform-origin:top;will-change:transform;box-shadow:0 0 12px var(--omni-glow)}
+.step{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,4vw,4.5rem);align-items:center;padding:clamp(3.5rem,6vw,5.5rem) 0}
+.step-wm{position:absolute;top:2%;left:-14px;font:700 clamp(6rem,13vw,12rem)/1 var(--font-display);color:rgba(26,148,247,.05);letter-spacing:-.05em;pointer-events:none;user-select:none}
+.step-tag{font:600 .72rem var(--font-mono);letter-spacing:.2em;color:var(--omni-400)}
+.step h3{font:700 var(--text-h3) var(--font-display);margin:12px 0 14px;position:relative;letter-spacing:-.015em}
+.step p{color:var(--text-2);position:relative;max-width:460px}
+.step-viz{border-radius:var(--r-lg);padding:clamp(1.4rem,2vw,2rem);min-height:230px;display:grid;place-items:center;overflow:hidden}
+.step-viz svg{width:100%;max-width:400px;height:auto}
+.step-viz.photo{padding:0;background:#060B12}
+.step-viz.photo img{width:100%;height:100%;object-fit:contain;padding:18px}
+
+/* âââââââââââââââ THE DEVICE âââââââââââââââ */
+.device-sec{position:relative;z-index:2;padding-block:var(--sec-pad);text-align:center;overflow:hidden;background:var(--void)}
+.device-sec::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 45% at 50% 60%,rgba(26,148,247,.08),transparent 70%);pointer-events:none}
+.device-kicker{font:600 .78rem var(--font-mono);letter-spacing:.34em;color:var(--text-3)}
+.device-rule{width:min(420px,60%);height:1px;margin:18px auto;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.device-name{font:700 var(--text-h2) var(--font-display);letter-spacing:-.02em;margin-bottom:14px}
+.device-sub{color:var(--text-2);max-width:520px;margin:0 auto;font-size:1.05rem}
+.device-stage{position:relative;height:min(560px,66vh);min-height:380px;max-width:1100px;margin:clamp(2rem,4vw,3rem) auto 0}
+#device3d{position:absolute;inset:0;width:100%;height:100%}
+.callout{position:absolute;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(10px);will-change:transform,opacity;text-align:right;z-index:2}
+.callout .ln{width:clamp(24px,5vw,60px);height:1px;flex:none}
+.callout .dot{width:6px;height:6px;border-radius:50%;background:var(--omni-400);box-shadow:0 0 12px var(--omni-glow);flex:none}
+.callout .txt b{display:block;font:600 .84rem var(--font-body);color:var(--text-1);white-space:nowrap}
+.callout .txt span{font:400 .68rem var(--font-mono);color:var(--text-3);white-space:nowrap}
+.callout.L .ln{background:linear-gradient(90deg,transparent,var(--omni-400));order:3}
+.callout.L .dot{order:2}.callout.L .txt{order:1}
+.callout.R{text-align:left}
+.callout.R .ln{background:linear-gradient(90deg,var(--omni-400),transparent)}
+
+/* âââââââââââââââ INDUSTRIES âââââââââââââââ */
+.industries{position:relative;z-index:2;padding-block:var(--sec-pad);background:var(--abyss);border-block:1px solid var(--border-subtle)}
+.ind-row{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 20px;cursor:grab;scrollbar-width:none;-ms-overflow-style:none}
+.ind-row::-webkit-scrollbar{display:none}
+.ind-row.dragging{cursor:grabbing;scroll-snap-type:none}
+.ind-card{flex:0 0 min(380px,82vw);height:520px;border-radius:var(--r-lg);overflow:hidden;position:relative;scroll-snap-align:start;border:1px solid var(--border-subtle);background:var(--surface-1)}
+.ind-art{position:absolute;inset:0;transition:transform .8s cubic-bezier(.2,.6,.2,1);will-change:transform}
+.ind-art img{width:100%;height:100%;object-fit:cover}
+.ind-card:hover .ind-art{transform:scale(1.08)}
+.ind-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,5,8,.12),rgba(3,5,8,.55) 55%,rgba(3,5,8,.94) 85%);transition:background-color .4s}
+.ind-body{position:absolute;left:0;right:0;bottom:0;padding:26px}
+.ind-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(26,148,247,.12);border:1px solid rgba(26,148,247,.35);box-shadow:0 0 24px -6px var(--omni-glow);margin-bottom:16px}
+.ind-ic svg{width:21px;height:21px;stroke:var(--omni-300)}
+.ind-body h3{font:700 1.25rem var(--font-display);letter-spacing:-.01em;margin-bottom:8px}
+.ind-body p{color:var(--text-2);font-size:.88rem;line-height:1.55}
+.ind-cta{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font:600 .84rem var(--font-body);color:var(--omni-300);opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s cubic-bezier(.22,1,.36,1)}
+.ind-card:hover .ind-cta{opacity:1;transform:translateY(0)}
+.ind-progress{height:2px;background:var(--border-subtle);border-radius:1px;margin-top:18px;overflow:hidden}
+.ind-progress b{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--omni-500),var(--omni-300));transform:scaleX(.2);transform-origin:left;will-change:transform;transition:transform .15s linear}
+
+/* âââââââââââââââ TESTIMONIALS âââââââââââââââ */
+.social{position:relative;z-index:2;padding-block:var(--sec-pad);background:var(--void);overflow:hidden}
+.marq{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);margin-top:26px}
+.marq-track{display:flex;gap:24px;width:max-content;animation:mq 56s linear infinite;will-change:transform}
+.marq.rev .marq-track{animation-direction:reverse}
+.marq:hover .marq-track{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.tcard{width:min(430px,84vw);flex:none;border-radius:var(--r-lg);padding:26px 28px}
+.tcard q{display:block;quotes:none;color:var(--text-2);font-size:.95rem;line-height:1.7;min-height:120px}
+.tcard q::before{content:"\201C";display:block;font:700 2.4rem/0.6 var(--font-display);color:var(--omni-400);margin-bottom:12px}
+.tauthor{display:flex;align-items:center;gap:12px;margin-top:18px}
+.tauthor .avatar{width:38px;height:38px}
+.tauthor b{display:block;font:600 .85rem}
+.tauthor span{font-size:.74rem;color:var(--text-3)}
+
+/* âââââââââââââââ FINAL CTA âââââââââââââââ */
+.cta{position:relative;z-index:2;min-height:92vh;display:grid;place-items:center;overflow:hidden;padding:var(--sec-pad) 0;background:var(--abyss)}
+#ctaNet{position:absolute;inset:0;width:100%;height:100%}
+.cta-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(26,148,247,.15),transparent);pointer-events:none}
+.cta-box{position:relative;text-align:center;max-width:780px;padding-inline:var(--gutter)}
+.cta-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--r-pill);border:1px solid rgba(26,148,247,.35);background:rgba(26,148,247,.07);color:var(--omni-200);font:600 .8rem var(--font-body);letter-spacing:.04em}
+.cta h2{font:700 clamp(2.4rem,4.6vw,4.4rem)/1.08 var(--font-display);letter-spacing:-.025em;margin:26px 0 10px}
+.cta h2 small{display:block;font-size:.52em;font-weight:500;color:var(--text-2);letter-spacing:-.01em;margin-top:10px}
+.cta p{color:var(--text-2);max-width:560px;margin:18px auto 36px;font-size:1.05rem}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+/* âââââââââââââââ FOOTER âââââââââââââââ */
+.footer{position:relative;z-index:2;background:var(--abyss);border-top:1px solid var(--border-subtle);padding-top:72px}
+.foot-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr 1.3fr;gap:clamp(2rem,3vw,3rem);padding-bottom:60px}
+.foot-brand p{color:var(--text-3);font-size:.88rem;margin:16px 0 20px;max-width:260px}
+.soc{display:flex;gap:10px}
+.soc a{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--border-subtle);transition:border-color .25s,box-shadow .25s}
+.soc a:hover{border-color:var(--omni-400);box-shadow:0 0 20px -8px var(--omni-glow)}
+.soc svg{width:16px;height:16px;fill:var(--text-2)}
+.foot-col h4{font:600 .76rem var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--text-2);margin-bottom:18px}
+.foot-col a{display:block;padding:6px 0;font-size:.88rem;color:var(--text-3);transition:color .2s}
+.foot-col a:hover{color:var(--text-2)}
+.foot-bottom{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:24px 0;border-top:1px solid var(--border-subtle);color:var(--text-3);font-size:.8rem}
+.foot-bottom nav{display:flex;gap:22px}
+.foot-bottom a:hover{color:var(--text-2)}
+.zass-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:var(--r-pill);border:1px solid var(--border);font:600 .72rem var(--font-mono);letter-spacing:.1em;color:var(--text-2)}
+.zass-badge i{width:7px;height:7px;border-radius:50%;background:var(--signal-400);box-shadow:0 0 10px var(--signal-glow)}
+
+/* âââââââââââââââ RESPONSIVE âââââââââââââââ */
+@media (max-width:1180px){
+  .nav-links{display:none}
+  .burger{display:block}
+  .nav-ctas .btn-nav-ghost{display:none}
+}
+@media (max-width:1024px){
+  .cine-float{width:86vw}
+  .scene{padding:104px 0 64px}
+  .scene.align-left .scene-inner,.scene.align-right .scene-inner{justify-content:center}
+  .scene-card{background:linear-gradient(135deg,rgba(7,12,20,.92),rgba(13,21,32,.86));backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
+  /* hero text has no card â give it a scrim so it stays readable over the forklift */
+  #top .scene-panel{position:relative;z-index:1}
+  #top .scene-panel::before{content:"";position:absolute;inset:-26px -18px;z-index:-1;border-radius:26px;background:radial-gradient(ellipse 130% 84% at 32% 42%,rgba(3,5,8,.86),rgba(3,5,8,.5) 64%,transparent)}
+  .step{grid-template-columns:1fr;gap:2rem}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .device-stage{height:440px}
+  .field-grid{grid-template-columns:repeat(6,1fr)}
+  .shot.s-wide{grid-column:span 6}
+  .shot.s-half{grid-column:span 3}
+  .shot.s-tall{grid-column:span 6;grid-row:span 1;min-height:240px}
+}
+@media (max-width:680px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}
+  .nav-ctas .btn-telemetry span{display:none}
+  .nav-ctas .btn-telemetry{padding:11px 14px}
+  .cells{grid-template-columns:repeat(8,1fr)}
+  .cell{height:38px}.cell span{display:none}
+  .bat-stats,.an-grid{grid-template-columns:repeat(2,1fr)}
+  .can-stage{height:240px}
+  .callout .txt span{display:none}
+  .foot-grid{grid-template-columns:1fr}
+  .foot-bottom{justify-content:center;text-align:center}
+  .field-grid{grid-template-columns:1fr}
+  .shot{grid-column:1/-1!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .btn-primary::after,.btn-telemetry::after,.marq-track,.pulse-dot,.scroll-hint .wheel::after,.geo,.ping,.can-lines path,.scan::before{animation:none!important}
+  .rv,.reveal{opacity:1;transform:none;filter:none}
+}
+
+/* ─── LANGUAGE SWITCHER ─── */
+.lang-sw{display:flex;align-items:center;gap:2px;background:rgba(13,21,32,.55);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:3px;flex:none}
+.lang-sw button{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;font:600 .78rem var(--font-body);color:var(--text-3);transition:background-color .2s,color .2s;white-space:nowrap;cursor:pointer;background:none;border:none}
+.lang-sw button:hover{color:var(--text-1)}
+.lang-sw button.lactive{background:rgba(26,148,247,.18);color:var(--text-1);box-shadow:inset 0 0 0 1px rgba(26,148,247,.3)}
+.lang-sw .flag{font-size:13px;line-height:1}</style>
+</head>
+<body>
+<!-- âââââââ NAV âââââââ -->
+<nav class="nav" id="nav" aria-label="Main">
+  <div class="container nav-inner">
+    <a href="#top" class="brand" aria-label="OmniTrace Global â home">
+      <span class="brand-mark"><span class="core"></span><span class="orbit"></span></span>
+      <span class="brand-name"><b>OmniTrace</b> <span>Global</span></span>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item">
+        <a class="nav-link" href="#platform" data-i18n="nav_products">Products</a>
+        <div class="mega glass" role="menu" aria-label="Products">
+          <a href="#platform"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><i><b>GPS &amp; Indoor Positioning</b><span>Sub-meter live tracking, geofencing and zone alerts.</span></i></a>
+          <a href="#platform"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2M6 11v2M10 11v2"/></svg></span><i><b>Battery Telemetry</b><span>Cell-level SoC, SoH and AI degradation forecasting.</span></i></a>
+          <a href="#platform"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg></span><i><b>CAN Bus Acquisition</b><span>Every vehicle parameter, captured and decoded live.</span></i></a>
+          <a href="#platform"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></svg></span><i><b>Fault Intelligence</b><span>Real-time DTC decoding with corrective actions.</span></i></a>
+          <a href="#platform"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span><i><b>Driver Parameter OTA</b><span>Remote ZASS-exclusive driver configuration push.</span></i></a>
+          <a href="#platform"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M8 17v-6M13 17V7M18 17v-3"/></svg></span><i><b>Fleet Analytics</b><span>Heatmaps, shift reports, ML-driven maintenance.</span></i></a>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#industries" data-i18n="nav_solutions">Solutions</a>
+        <div class="mega cols-1 glass" role="menu" aria-label="Solutions">
+          <a href="#industries"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg></span><i><b>Warehousing &amp; 3PL</b><span>Multi-facility fleets from one command center.</span></i></a>
+          <a href="#industries"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4H2Z"/></svg></span><i><b>Manufacturing</b><span>Zero-downtime predictive maintenance on the floor.</span></i></a>
+          <a href="#industries"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span><i><b>Ports &amp; Terminals</b><span>Quay-side positioning for heavy handlers.</span></i></a>
+          <a href="#industries"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4 7l16 10M20 7L4 17"/></svg></span><i><b>Cold Chain</b><span>Battery performance in -30Â°C storage zones.</span></i></a>
+          <a href="#industries"><span class="mega-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14l1-5-3-5H7l-3 5Z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg></span><i><b>Automotive</b><span>Lean flow optimization for production logistics.</span></i></a>
+        </div>
+      </li>
+      <li class="nav-item"><a class="nav-link" href="#technology" data-i18n="nav_technology">Technology</a></li>
+      <li class="nav-item"><a class="nav-link" href="#cases" data-i18n="nav_cases">Case Studies</a></li>
+      <li class="nav-item"><a class="nav-link" href="#about" data-i18n="nav_about">About</a></li>
+      <li class="nav-item"><a class="nav-link" href="#contact" data-i18n="nav_contact">Contact</a></li>
+    </ul>
+    <div class="nav-ctas">
+      <div class="lang-sw" id="langSw"><button onclick="setLang('tr')" id="btnTr" class="lactive"><span class="flag">🇹🇷</span>TR</button><button onclick="setLang('en')" id="btnEn"><span class="flag">🇬🇧</span>EN</button></div>
+      
+      <a href="#contact" class="btn-nav-ghost" data-i18n="nav_contact_sales">Contact Sales</a>
+      <a href="dashboard.html?login=1" class="btn-telemetry" aria-label="Open Telemetry Dashboard"><span data-i18n="nav_telemetry">Telemetry</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+    </div>
+  </div>
+</nav>
+<div class="mmenu" id="mmenu">
+  <a class="mlink" href="#platform" style="transition-delay:.06s" data-i18n="nav_products">Products</a>
+  <a class="mlink" href="#industries" style="transition-delay:.12s" data-i18n="nav_solutions">Solutions</a>
+  <a class="mlink" href="#technology" style="transition-delay:.18s" data-i18n="nav_technology">Technology</a>
+  <a class="mlink" href="#cases" style="transition-delay:.24s" data-i18n="nav_cases">Case Studies</a>
+  <a class="mlink" href="#about" style="transition-delay:.30s" data-i18n="nav_about">About</a>
+  <a class="mlink" href="#contact" style="transition-delay:.36s" data-i18n="nav_contact">Contact</a>
+  <a href="dashboard.html?login=1" class="btn-telemetry"><span>Telemetry</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
+</div>
+
+<!-- âââââââ CINEMATIC FORKLIFT LAYER â the single continuous animation âââââââ -->
+<div class="cine" id="cine" aria-hidden="true">
+  <div class="cine-ctx">
+    <div class="ctx-img" id="ctxHangar" style="background-image:url(img/gorsel1.png)"></div>
+    <div class="ctx-img" id="ctxPallet" style="background-image:url(img/gorsel2.png)"></div>
+    <div class="ctx-img" id="ctxOperator" style="background-image:url(img/gorsel3.png)"></div>
+  </div>
+  <div class="cine-grid"></div>
+  <div class="cine-glow" id="cineGlow"></div>
+  <div class="cine-float" id="cineFloat">
+    <div class="cine-idle" id="cineIdle">
+      <img class="fork-shot is-on" id="shotSide" src="img/gorsel1.png" alt="ZASS EFL 224 electric forklift" fetchpriority="high" width="1259" height="781" />
+      <img class="fork-shot" id="shotHero" src="img/gorsel2.png" alt="ZASS EFL 304 electric forklift" loading="lazy" width="1004" height="740" />
+      <img class="fork-shot" id="shotRear" src="img/gorsel3.png" alt="ZASS EFL 304 rear three-quarter" loading="lazy" width="823" height="517" />
+    </div>
+  </div>
+  <div class="scan" id="cineScan"></div>
+  <div class="hud" id="hud1" style="left:13%;top:30%"><i class="pulse-dot blue"></i><span>UPLINK <b>ACTIVE</b></span></div>
+  <div class="hud" id="hud2" style="right:14%;top:36%"><i class="pulse-dot"></i><span><b>48V</b> Â· 94.2%</span></div>
+  <div class="hud" id="hud3" style="left:18%;bottom:24%"><i class="pulse-dot blue"></i><span>ZONE <b>B-12</b></span></div>
+  <div class="hud" id="hud4" style="right:17%;bottom:27%"><i class="pulse-dot" style="background:var(--signal-400);box-shadow:0 0 12px var(--signal-glow)"></i><span><b>32Â°C</b> ctrl temp</span></div>
+</div>
+
+<!-- âââââââ CINEMA â 7 scroll scenes, one moving forklift, varied entrances âââââââ -->
+<div class="cinema" id="cinema">
+
+  <!-- SCENE 0 â HERO (panel left, forklift right) -->
+  <section class="scene align-left" id="top">
+    <div class="container scene-inner">
+      <div class="scene-panel">
+        <p class="eyebrow ld"><span class="pulse-dot"></span><span data-i18n="hero_eyebrow">Next-Generation Fleet Intelligence</span></p>
+        <h2 class="ld"><span data-i18n-h="hero_h2">See Every Volt.<br />Every Move.<br />Every <em>Fault.</em></span></h2>
+        <p class="lede ld"><span data-i18n="hero_lede">OmniTrace Global turns your ZASS electric forklift fleet into a connected, self-reporting ecosystem â battery health, vehicle diagnostics, driver behaviour and predictive maintenance, from one command center.</span></p>
+        <div class="hero-ctas ld">
+          <a href="#contact" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg><span data-i18n="hero_demo_btn">Request a Demo</span></a>
+          <a href="#platform" class="btn btn-ghost"><span data-i18n="hero_explore_btn">Explore the Platform</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <ul class="trust ld">
+          <li><i class="tdot"></i><span data-i18n="hero_trust_1">120fps Live Data</span></li>
+          <li><i class="tdot"></i><span data-i18n="hero_trust_2">ZASS-Native Integration</span></li>
+          <li><i class="tdot"></i><span data-i18n="hero_trust_3">ISO 27001 Secured</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 1 â POSITIONING (forklift slides left, panel enters from RIGHT) -->
+  <section class="scene align-right" id="platform">
+    <div class="container scene-inner">
+      <div class="scene-panel reveal t-right">
+        <div class="scene-card glass">
+          <p class="panel-no"><span data-i18n="s1_module">MODULE 01 â POSITIONING</p>
+          <h3><span data-i18n="s1_h3">Live GPS &amp; Zone Intelligence</span></h3>
+          <p class="desc">Every vehicle, every second, on one live map. Sub-meter indoor positioning, drag-and-drop geofences and instant zone-breach alerts.</p>
+          <div class="viz-card viz-map" style="margin-top:18px;background:rgba(6,11,18,.5);border:1px solid var(--border-subtle)">
+            <div class="viz-title"><span>WAREHOUSE 03 â LIVE VIEW</span><span class="live-chip"><i class="pulse-dot" style="width:5px;height:5px"></i>LIVE</span></div>
+            <svg viewBox="0 0 560 300" aria-hidden="true">
+              <rect width="560" height="300" rx="10" fill="#060B12"/>
+              <g fill="#0D1520" stroke="#1A2D42">
+                <rect x="60" y="50" width="180" height="20"/><rect x="60" y="86" width="180" height="20"/><rect x="60" y="122" width="180" height="20"/>
+                <rect x="320" y="50" width="180" height="20"/><rect x="320" y="86" width="180" height="20"/><rect x="320" y="122" width="180" height="20"/>
+                <rect x="60" y="196" width="180" height="20"/><rect x="60" y="232" width="180" height="20"/>
+                <rect x="320" y="196" width="180" height="20"/><rect x="320" y="232" width="180" height="20"/>
+              </g>
+              <rect class="geo" x="42" y="36" width="216" height="124" rx="6"/>
+              <text x="52" y="30" font-family="JetBrains Mono" font-size="10" fill="#4A6478">ZONE A â RECEIVING</text>
+              <rect class="geo amber" x="302" y="182" width="216" height="86" rx="6"/>
+              <text x="312" y="282" font-family="JetBrains Mono" font-size="10" fill="#4A6478">ZONE C â RESTRICTED</text>
+              <g id="fk1" class="fkm"><circle class="ping" r="10" fill="none" stroke="#1A94F7" stroke-width="1.5"/><circle r="5" fill="#1A94F7"/></g>
+              <g id="fk2" class="fkm"><circle class="ping" r="10" fill="none" stroke="#00E5A0" stroke-width="1.5" style="animation-delay:.7s"/><circle r="5" fill="#00E5A0"/></g>
+              <g id="fk3" class="fkm"><circle class="ping" r="10" fill="none" stroke="#FFB800" stroke-width="1.5" style="animation-delay:1.3s"/><circle r="5" fill="#FFB800"/></g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 2 â BATTERY (zoom INTO forklift, panel rises from BELOW) -->
+  <section class="scene align-bottom">
+    <div class="container scene-inner">
+      <div class="scene-panel reveal t-up" style="width:min(620px,100%)">
+        <div class="scene-card glass">
+          <p class="panel-no"><span data-i18n="s2_module">MODULE 02 â ENERGY</p>
+          <h3><span data-i18n="s2_h3">Battery DNA</span></h3>
+          <p class="desc">Cell-level voltage, thermal profiling and AI-powered degradation forecasting. Know the true health of every pack â before it costs you a shift.</p>
+          <div class="viz-card" style="margin-top:18px;background:rgba(6,11,18,.5);border:1px solid var(--border-subtle)">
+            <div class="viz-title"><span>PACK TOPOLOGY â 32 CELLS</span><span class="live-chip"><i class="pulse-dot" style="width:5px;height:5px"></i>LIVE</span></div>
+            <div class="cells" id="cellGrid"></div>
+            <div class="bat-stats">
+              <div class="bstat"><b><span class="cnt" data-to="94.2" data-dec="1">0</span>%</b><span>SoC</span></div>
+              <div class="bstat"><b><span class="cnt" data-to="91.2" data-dec="1">0</span>%</b><span>SoH</span></div>
+              <div class="bstat"><b><span class="cnt" data-to="1247" data-grp="1">0</span></b><span>Cycles</span></div>
+              <div class="bstat"><b><span class="cnt" data-to="4.2" data-dec="1">0</span>h</b><span>Range</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 3 â CAN BUS (cross-fade to 3/4 view, forklift right, panel from LEFT) -->
+  <section class="scene align-left">
+    <div class="container scene-inner">
+      <div class="scene-panel reveal t-left" style="width:min(600px,100%)">
+        <div class="scene-card glass">
+          <p class="panel-no"><span data-i18n="s3_module">MODULE 03 â DATA</p>
+          <h3><span data-i18n="s3_h3">Full CAN Bus Intelligence</span></h3>
+          <p class="desc">The OT-1 hub listens to every controller on the vehicle network â motor current, hydraulic pressure, lift height, steering angle â decoded and streamed live.</p>
+          <div class="viz-card" style="margin-top:18px;background:rgba(6,11,18,.5);border:1px solid var(--border-subtle)">
+            <div class="viz-title"><span>VEHICLE NETWORK â OT-1 HUB</span><span class="live-chip"><i class="pulse-dot" style="width:5px;height:5px"></i>STREAMING</span></div>
+            <div class="can-stage">
+              <svg class="can-lines" viewBox="0 0 560 230" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M95 30 C 220 30 260 100 380 102"/>
+                <path d="M95 108 C 200 108 250 104 380 106"/>
+                <path d="M95 188 C 220 188 260 118 380 112"/>
+                <path d="M255 30 C 320 30 330 92 382 100"/>
+                <path d="M255 188 C 320 188 330 126 382 116"/>
+              </svg>
+              <div class="cnode" style="left:3%;top:5%">BMS<small>battery mgmt</small></div>
+              <div class="cnode" style="left:3%;top:42%">MCU<small>motor control</small></div>
+              <div class="cnode" style="left:3%;top:80%">BCU<small>brake control</small></div>
+              <div class="cnode" style="left:32%;top:5%">HMI<small>dashboard</small></div>
+              <div class="cnode" style="left:32%;top:80%">HYD<small>hydraulics</small></div>
+              <div class="cnode hub" style="left:66%;top:38%">OMNITRACE OT-1<small>intelligence hub</small></div>
+            </div>
+            <div class="term" id="canTerm" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 4 â FAULTS (warehouse backdrop dissolves in, rear view, cards drop from TOP) -->
+  <section class="scene align-right">
+    <div class="container scene-inner">
+      <div class="scene-panel reveal t-down" style="width:min(560px,100%)">
+        <div class="scene-card glass">
+          <p class="panel-no"><span data-i18n="s4_module">MODULE 04 â DIAGNOSTICS</p>
+          <h3><span data-i18n="s4_h3">Fault Intelligence &amp; DTC Decoder</span></h3>
+          <p class="desc">Every diagnostic trouble code, decoded into plain language with severity, timestamp and a recommended action â pushed to your team the second it happens.</p>
+          <div style="margin-top:18px">
+            <div class="fault-card fc-anim">
+              <span class="sev crit">CRITICAL</span><span class="fault-code">ERR_0x2A14</span>
+              <div class="fault-desc"><span data-i18n="fault1_title">Motor Controller Overtemperature</span></div>
+              <div class="fault-meta">FLT-0042 Â· Detected 5 min ago Â· Zone C-07</div>
+              <div class="fault-act"><b>Action:</b> Reduce load, inspect cooling fan circuit.</div>
+            </div>
+            <div class="fault-card warn fc-anim">
+              <span class="sev warn">WARNING</span><span class="fault-code">ERR_0x1B03</span>
+              <div class="fault-desc"><span data-i18n="fault2_title">Battery Cell Voltage Imbalance</span></div>
+              <div class="fault-meta">FLT-0017 Â· Detected 32 min ago Â· Charging Bay 2</div>
+              <div class="fault-act"><b>Action:</b> Schedule equalization charge tonight.</div>
+            </div>
+            <div class="fault-card info fc-anim" style="margin-bottom:0">
+              <span class="sev info">INFO</span><span class="fault-code">SRV_0x0090</span>
+              <div class="fault-desc"><span data-i18n="fault3_title">Planned Service In 18 Operating Hours</span></div>
+              <div class="fault-meta">FLT-0008 Â· Forecast by ML maintenance model</div>
+              <div class="fault-act"><b>Action:</b> Auto-scheduled â parts reserved.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 5 â DRIVER PARAMS (forklift back to side, panel enters from RIGHT) -->
+  <section class="scene align-right">
+    <div class="container scene-inner">
+      <div class="scene-panel reveal t-right">
+        <div class="scene-card glass">
+          <p class="panel-no"><span data-i18n="s5_module">MODULE 05 â CONTROL Â· ZASS EXCLUSIVE</p>
+          <h3><span data-i18n="s5_h3">Driver Parameter Control</span></h3>
+          <p class="desc">Push driver-specific vehicle behaviour over the air â speed limits, lift profiles, regen intensity â bound to RFID identity. Exclusive to ZASS vehicles.</p>
+          <div class="viz-card" style="margin-top:18px;background:rgba(6,11,18,.5);border:1px solid var(--border-subtle)">
+            <div class="viz-title"><span>DRIVER PROFILE â OTA CONFIG</span><span class="live-chip">SYNCED</span></div>
+            <div class="driver-head"><span class="avatar"></span><div><b>Mehmet YÄ±lmaz</b><span>RFID ****2841 Â· Shift A</span></div></div>
+            <div class="param"><div class="param-top"><span>Max Speed</span><output>8 km/h</output></div><div class="track"><i class="fill" data-v=".667"></i><i class="thumb" data-v=".667"></i></div></div>
+            <div class="param"><div class="param-top"><span>Lift Speed</span><output>75%</output></div><div class="track"><i class="fill" data-v=".75"></i><i class="thumb" data-v=".75"></i></div></div>
+            <div class="param"><div class="param-top"><span>Regen Braking</span><output>Medium</output></div><div class="track"><i class="fill" data-v=".55"></i><i class="thumb" data-v=".55"></i></div></div>
+            <div class="param" style="margin-bottom:0"><div class="param-top"><span>Acceleration Profile</span></div><div class="seg"><b>Smooth</b><b class="on">Standard</b><b>Sport</b></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 6 â ANALYTICS (pull back wide, panel DISSOLVES into focus) -->
+  <section class="scene align-center">
+    <div class="container scene-inner">
+      <div class="scene-panel reveal t-dissolve" style="width:min(820px,100%);text-align:left">
+        <div class="scene-card glass">
+          <p class="panel-no"><span data-i18n="s6_module">MODULE 06 â ANALYTICS</p>
+          <h3><span data-i18n="s6_h3">Fleet Analytics &amp; Reporting</span></h3>
+          <p class="desc" style="max-width:640px">Shift reports, utilization heatmaps and energy intelligence â benchmarked across your entire fleet and delivered before your morning coffee.</p>
+          <div class="viz-card" style="margin-top:18px;background:rgba(6,11,18,.5);border:1px solid var(--border-subtle)">
+            <div class="viz-title"><span>FLEET REPORT â LAST 7 DAYS</span><span class="live-chip">AUTO</span></div>
+            <div class="an-grid">
+              <div class="an-card span2">
+                <h5>Energy Consumption â kWh / day</h5>
+                <svg viewBox="0 0 520 130" aria-hidden="true">
+                  <defs><linearGradient id="agrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A94F7" stop-opacity=".34"/><stop offset="1" stop-color="#1A94F7" stop-opacity="0"/></linearGradient></defs>
+                  <path id="areaFill" d="M0,104 C40,96 70,86 105,90 C140,94 170,68 210,62 C250,56 280,74 320,64 C360,54 390,38 430,34 C470,30 495,40 520,36 L520,130 L0,130 Z" fill="url(#agrad)" opacity="0"/>
+                  <path id="areaLine" d="M0,104 C40,96 70,86 105,90 C140,94 170,68 210,62 C250,56 280,74 320,64 C360,54 390,38 430,34 C470,30 495,40 520,36" fill="none" stroke="#1A94F7" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="an-card">
+                <h5>Utilization / Shift</h5>
+                <div class="bars">
+                  <i data-h=".58"></i><i data-h=".74"></i><i class="hi" data-h=".92"></i><i data-h=".66"></i><i data-h=".81"></i><i class="hi" data-h=".88"></i><i data-h=".45"></i>
+                </div>
+              </div>
+              <div class="an-card">
+                <h5>Weekly Intensity</h5>
+                <div class="heat" id="heatGrid"></div>
+              </div>
+            </div>
+            <div class="kpis">
+              <span class="kpi">â² 22% Energy Saved</span>
+              <span class="kpi">3 Faults Prevented</span>
+              <span class="kpi blue">98.1% Uptime</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<main>
+<!-- âââââââ STATS âââââââ -->
+<section class="stats" id="stats">
+  <div class="container">
+    <div class="stats-line" id="statsLine"></div>
+    <div class="stats-grid">
+      <div class="stat rv"><div class="stat-num"><span class="sfx">+</span><span class="cnt" data-to="3200" data-grp="1">0</span></div><div class="stat-label"><span data-i18n="stat_vehicles">Vehicles Online</span></div></div>
+      <div class="stat rv"><div class="stat-num"><span class="cnt" data-to="99.97" data-dec="2">0</span><span class="sfx">%</span></div><div class="stat-label"><span data-i18n="stat_uptime">Uptime SLA</span></div></div>
+      <div class="stat rv"><div class="stat-num"><span class="sfx">&lt;</span><span class="cnt" data-to="200">0</span><span class="sfx">ms</span></div><div class="stat-label"><span data-i18n="stat_latency">Data Latency</span></div></div>
+      <div class="stat rv"><div class="stat-num"><span class="cnt" data-to="7">0</span></div><div class="stat-label"><span data-i18n="stat_industries">Supported Industries</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- âââââââ IN THE FIELD â photo band âââââââ -->
+<section class="field" id="fleet">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow rv"><span class="pulse-dot blue"></span><span data-i18n="field_eyebrow">In the Field</span></p>
+      <h2 class="rv"><span data-i18n-h="field_h2">Built for the <em>real</em> warehouse floor.</span></h2>
+      <p class="rv">From empty hangars to packed high-bay aisles â every ZASS truck on OmniTrace, reporting in real time.</p>
+    </div>
+    <div class="field-grid">
+      <div class="shot s-wide rv"><img src="img/gorsel1.png" alt="ZASS forklift in a large distribution hangar" loading="lazy" /><div class="cap"><span>DISTRIBUTION Â· 24/7</span><b>One fleet, total visibility</b></div></div>
+      <div class="shot s-tall rv"><img src="img/gorsel3.png" alt="ZASS forklift lifting a load high on warehouse racking" loading="lazy" /><div class="cap"><span>HIGH-BAY Â· LIFT</span><b>Every metre tracked</b></div></div>
+      <div class="shot s-half rv"><img src="img/gorsel3.png" alt="ZASS forklift operator working in a warehouse" loading="lazy" /><div class="cap"><span>OPERATOR Â· RFID</span><b>Driver-aware control</b></div></div>
+      <div class="shot s-half rv"><img src="img/gorsel2.png" alt="ZASS forklift moving a wrapped pallet" loading="lazy" /><div class="cap"><span>PALLET FLOW</span><b>Throughput, measured</b></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- âââââââ HOW IT WORKS âââââââ -->
+<section class="how" id="technology">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow rv"><span class="pulse-dot blue"></span><span data-i18n="how_eyebrow">How It Works</span></p>
+      <h2 class="rv"><span data-i18n-h="how_h2">From forklift to <em>foresight</em><br />in four steps.</span></h2>
+      <p class="rv">A 15-minute installation stands between your fleet and complete operational intelligence.</p>
+    </div>
+    <div class="how-wrap">
+      <div class="rail"><i class="rail-fill" id="railFill"></i></div>
+      <div class="steps">
+        <div class="step">
+          <span class="step-wm">01</span>
+          <div class="rv">
+            <p class="step-tag">STEP 01 â HARDWARE</p>
+            <h3><span data-i18n="step1_h3">Plug-and-Play Installation</span></h3>
+            <p>The OT-1 clips onto the ZASS vehicle's CAN port under the overhead guard. No wiring harness surgery, no downtime â 15 minutes per vehicle, tools included.</p>
+          </div>
+          <div class="step-viz photo glass rv"><img src="img/gorsel3.png" alt="ZASS forklift rear three-quarter view" loading="lazy" /></div>
+        </div>
+        <div class="step">
+          <span class="step-wm">02</span>
+          <div class="rv">
+            <p class="step-tag">STEP 02 â ACQUISITION</p>
+            <h3><span data-i18n="step2_h3">Real-Time Data Acquisition</span></h3>
+            <p>The unit reads every frame on the vehicle network â battery, motors, hydraulics, steering â sampling 200+ parameters continuously without touching vehicle behaviour.</p>
+          </div>
+          <div class="step-viz glass rv">
+            <svg viewBox="0 0 400 200" aria-hidden="true">
+              <g font-family="JetBrains Mono" font-size="9" fill="#4A6478">
+                <rect x="24" y="28" width="64" height="28" rx="5" fill="#0D1520" stroke="#1F3A52"/><text x="56" y="46" text-anchor="middle" fill="#94A8BE">BMS</text>
+                <rect x="24" y="86" width="64" height="28" rx="5" fill="#0D1520" stroke="#1F3A52"/><text x="56" y="104" text-anchor="middle" fill="#94A8BE">MCU</text>
+                <rect x="24" y="144" width="64" height="28" rx="5" fill="#0D1520" stroke="#1F3A52"/><text x="56" y="162" text-anchor="middle" fill="#94A8BE">HYD</text>
+              </g>
+              <g stroke="#1A94F7" stroke-width="1.6" fill="none" stroke-dasharray="3 8" style="animation:flow 1.1s linear infinite">
+                <path d="M88 42 C 180 42 220 96 296 99"/>
+                <path d="M88 100 H 296"/>
+                <path d="M88 158 C 180 158 220 104 296 101"/>
+              </g>
+              <rect x="296" y="78" width="84" height="44" rx="9" fill="rgba(26,148,247,.14)" stroke="#1A94F7"/>
+              <text x="338" y="104" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="11" fill="#C0DFFE">OT-1 HUB</text>
+            </svg>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-wm">03</span>
+          <div class="rv">
+            <p class="step-tag">STEP 03 â TRANSMISSION</p>
+            <h3><span data-i18n="step3_h3">Secure Cloud Transmission</span></h3>
+            <p>4G/LTE uplink wrapped in TLS 1.3, payloads encrypted with AES-256. Telemetry lands in the OmniTrace cloud in under 200 milliseconds â anywhere on earth.</p>
+          </div>
+          <div class="step-viz glass rv">
+            <svg viewBox="0 0 400 200" aria-hidden="true">
+              <rect x="30" y="138" width="70" height="40" rx="6" fill="#0D1520" stroke="#1F3A52"/>
+              <text x="65" y="192" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#4A6478">FLEET</text>
+              <path d="M188 168 V 110 M178 122 L188 110 L198 122" stroke="#1F3A52" stroke-width="2" fill="none"/>
+              <text x="188" y="192" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#4A6478">LTE</text>
+              <path d="M310 132 a22 22 0 0 1 0-30 a26 26 0 0 1 50 8 a18 18 0 0 1-6 35 h-40 a16 16 0 0 1-4-13Z" fill="#0D1520" stroke="#1F3A52" stroke-width="1.5" transform="translate(-28,-18)"/>
+              <text x="318" y="192" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#4A6478">CLOUD</text>
+              <path d="M100 150 C 150 60 240 60 300 96" stroke="#1A94F7" stroke-width="2" fill="none" stroke-dasharray="4 7" style="animation:flow 1.1s linear infinite"/>
+              <text x="200" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#1A94F7">TLS 1.3 Â· &lt;200ms</text>
+            </svg>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-wm">04</span>
+          <div class="rv">
+            <p class="step-tag">STEP 04 â INTELLIGENCE</p>
+            <h3><span data-i18n="step4_h3">Your Command Center</span></h3>
+            <p>Live maps, battery DNA, fault feeds and OTA control â rendered at 120fps in the Telemetry dashboard, with alerts that find you before problems find your fleet.</p>
+          </div>
+          <div class="step-viz glass rv">
+            <svg viewBox="0 0 400 200" aria-hidden="true">
+              <rect x="50" y="24" width="300" height="152" rx="10" fill="#060B12" stroke="#1F3A52" stroke-width="1.5"/>
+              <rect x="50" y="24" width="300" height="24" rx="10" fill="#0D1520"/>
+              <circle cx="66" cy="36" r="3.4" fill="#FF3B4E"/><circle cx="78" cy="36" r="3.4" fill="#FFB800"/><circle cx="90" cy="36" r="3.4" fill="#00E5A0"/>
+              <rect x="66" y="62" width="120" height="100" rx="6" fill="#0D1520" stroke="#1A2D42"/>
+              <circle cx="100" cy="100" r="4" fill="#1A94F7"><animate attributeName="cx" values="100;150;120;100" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="100;120;140;100" dur="6s" repeatCount="indefinite"/></circle>
+              <circle cx="150" cy="130" r="4" fill="#00E5A0"><animate attributeName="cx" values="150;90;140;150" dur="7s" repeatCount="indefinite"/></circle>
+              <path d="M204 140 L 224 118 L 248 128 L 272 96 L 296 104 L 320 78" stroke="#1A94F7" stroke-width="2" fill="none"/>
+              <rect x="204" y="62" width="56" height="18" rx="4" fill="rgba(0,229,160,.12)" stroke="rgba(0,229,160,.4)"/>
+              <rect x="268" y="62" width="56" height="18" rx="4" fill="rgba(255,184,0,.1)" stroke="rgba(255,184,0,.35)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- âââââââ THE DEVICE âââââââ -->
+<section class="device-sec" id="device">
+  <div class="container">
+    <p class="device-kicker rv"><span data-i18n="device_kicker">THE DEVICE</span></p>
+    <div class="device-rule"></div>
+    <h2 class="device-name rv"><span data-i18n="device_name">OmniTrace OT-1 Intelligence Unit</span></h2>
+    <p class="device-sub rv"><span data-i18n-h="device_sub">Built for the harshest industrial environments.<br />Engineered for the most demanding data requirements.</span></p>
+    <div class="device-stage" id="deviceStage">
+      <canvas id="device3d" aria-label="Rotating OmniTrace OT-1 device" role="img"></canvas>
+      <div class="callout L" style="left:4%;top:16%"><span class="txt"><b>4G LTE + GPS</b><span>dual-band antenna</span></span><span class="dot"></span><span class="ln"></span></div>
+      <div class="callout L" style="left:1%;top:46%"><span class="txt"><b>CAN Bus Interface</b><span>ZASS-native protocol</span></span><span class="dot"></span><span class="ln"></span></div>
+      <div class="callout L" style="left:5%;top:76%"><span class="txt"><b>IP67 Rated</b><span>dust &amp; water sealed</span></span><span class="dot"></span><span class="ln"></span></div>
+      <div class="callout R" style="right:4%;top:18%"><span class="ln"></span><span class="dot"></span><span class="txt"><b>-40Â°C to +85Â°C</b><span>operating range</span></span></div>
+      <div class="callout R" style="right:1%;top:48%"><span class="ln"></span><span class="dot"></span><span class="txt"><b>AES-256 Encrypted</b><span>secure element on-chip</span></span></div>
+      <div class="callout R" style="right:5%;top:78%"><span class="ln"></span><span class="dot"></span><span class="txt"><b>96h Battery Backup</b><span>uninterrupted telemetry</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- âââââââ INDUSTRIES âââââââ -->
+<section class="industries" id="industries">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow rv"><span class="pulse-dot blue"></span><span data-i18n="ind_eyebrow">Solutions</span></p>
+      <h2 class="rv"><span data-i18n-h="ind_h2">Proven where uptime<br />is <em>non-negotiable.</em></span></h2>
+      <p class="rv"><span data-i18n="ind_desc">Five industries. One intelligence layer. Drag to explore.</span></p>
+    </div>
+    <div class="ind-row" id="indRow">
+      <article class="ind-card">
+        <div class="ind-art"><img src="img/gorsel1.png" alt="Large distribution warehouse" loading="lazy" /></div>
+        <div class="ind-grad"></div>
+        <div class="ind-body">
+          <span class="ind-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg></span>
+          <h3><span data-i18n="ind1_h3">Large-Scale Distribution</span></h3>
+          <p>Monitor 500+ forklifts across multiple facilities from one dashboard â with per-site benchmarking.</p>
+          <span class="ind-cta">Explore <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </article>
+      <article class="ind-card">
+        <div class="ind-art"><img src="img/gorsel3.png" alt="High-bay cold storage racking" loading="lazy" /></div>
+        <div class="ind-grad"></div>
+        <div class="ind-body">
+          <span class="ind-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4 7l16 10M20 7L4 17"/></svg></span>
+          <h3><span data-i18n="ind2_h3">Cold Chain Logistics</span></h3>
+          <p>Battery chemistry tracking in -30Â°C storage with thermal alerts before capacity collapses.</p>
+          <span class="ind-cta">Explore <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </article>
+      <article class="ind-card">
+        <div class="ind-art"><img src="img/gorsel2.png" alt="Forklift moving pallet at terminal" loading="lazy" /></div>
+        <div class="ind-grad"></div>
+        <div class="ind-body">
+          <span class="ind-ic" style="background:rgba(255,184,0,.1);border-color:rgba(255,184,0,.35);box-shadow:0 0 24px -6px var(--signal-glow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--signal-400)"><circle cx="12" cy="5" r="3"/><path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
+          <h3><span data-i18n="ind3_h3">Ports &amp; Terminals</span></h3>
+          <p>Real-time quay positioning for reach stackers and empty handlers â in salt, heat and dust.</p>
+          <span class="ind-cta">Explore <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </article>
+      <article class="ind-card">
+        <div class="ind-art"><img src="img/gorsel3.png" alt="Operator on forklift in plant" loading="lazy" /></div>
+        <div class="ind-grad"></div>
+        <div class="ind-body">
+          <span class="ind-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14l1-5-3-5H7l-3 5Z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg></span>
+          <h3><span data-i18n="ind4_h3">Automotive Manufacturing</span></h3>
+          <p>Lean floor optimization with zero-downtime predictive maintenance on line-feeding fleets.</p>
+          <span class="ind-cta">Explore <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </article>
+      <article class="ind-card">
+        <div class="ind-art"><img src="img/gorsel1.png" alt="Food and beverage warehouse" loading="lazy" style="filter:hue-rotate(70deg) saturate(.8)" /></div>
+        <div class="ind-grad"></div>
+        <div class="ind-body">
+          <span class="ind-ic" style="background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.35);box-shadow:0 0 24px -6px var(--online-glow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--online-400)"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/></svg></span>
+          <h3><span data-i18n="ind5_h3">Food &amp; Beverage</span></h3>
+          <p>HACCP-compliant zone management with hygiene-grade operational logging, audit-ready.</p>
+          <span class="ind-cta">Explore <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </article>
+    </div>
+    <div class="ind-progress"><b id="indBar"></b></div>
+  </div>
+</section>
+
+<!-- âââââââ TESTIMONIALS âââââââ -->
+<section class="social" id="cases">
+  <div class="container">
+    <div class="sec-head center">
+      <p class="eyebrow rv"><span class="pulse-dot blue"></span><span data-i18n="soc_eyebrow">Case Studies</span></p>
+      <h2 class="rv"><span data-i18n-h="soc_h2">Operators who stopped<br />guessing. <em>Forever.</em></span></h2>
+    </div>
+  </div>
+  <div class="marq" id="marq1"></div>
+  <div class="marq rev" id="marq2" style="margin-top:24px"></div>
+</section>
+
+<!-- âââââââ FINAL CTA âââââââ -->
+<section class="cta" id="contact">
+  <canvas id="ctaNet"></canvas>
+  <div class="cta-glow"></div>
+  <div class="cta-box">
+    <span class="cta-badge rv"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span data-i18n="cta_badge">Ready to Activate Your Fleet?</span></span>
+    <h2 class="rv"><span data-i18n-h="cta_h2">Connect. Monitor. Optimize.<small>Your entire fleet, intelligently wired.</small></span></h2>
+    <p class="rv"><span data-i18n="cta_p">Join the companies that have already unlocked complete visibility into their ZASS forklift fleets. Get started in minutes.</span></p>
+    <div class="cta-btns rv">
+      <a href="mailto:sales@omnitraceglobal.com?subject=Demo%20Request" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>Request a Demo â Free</a>
+      <a href="dashboard.html?login=1" class="btn-telemetry" style="padding:15px 28px;font-size:.95rem"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span><span data-i18n="cta_btn2">Open Telemetry Dashboard</span></span></a>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- âââââââ FOOTER âââââââ -->
+<footer class="footer" id="about">
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#top" class="brand"><span class="brand-mark"><span class="core"></span><span class="orbit"></span></span><span class="brand-name"><b>OmniTrace</b> <span>Global</span></span></a>
+        <p><span data-i18n="foot_desc">The Intelligence Layer for Your Fleet. Purpose-built telemetry for ZASS electric forklifts and material handling equipment.</span></p>
+        <div class="soc">
+          <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13Zm1.78 13.02H3.55V9h3.57v11.45Z"/></svg></a>
+          <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.9 2.1h3.4l-7.4 8.5 8.7 11.3h-6.8l-5.3-7-6.1 7H2l7.9-9.1L1.5 2.1h7l4.8 6.3 5.6-6.3Zm-1.2 17.8h1.9L7.4 4H5.4l12.3 15.9Z"/></svg></a>
+          <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.2C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.2c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.2A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg></a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Products</h4>
+        <a href="#platform">GPS &amp; Positioning</a><a href="#platform">Battery Telemetry</a><a href="#platform">CAN Bus Intelligence</a><a href="#platform">Fault Decoder</a><a href="#platform">Driver Parameters</a><a href="#platform">Fleet Analytics</a>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <a href="#about">About</a><a href="#about">Team</a><a href="#about">Careers</a><a href="#about">Press</a>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <a href="#technology">Docs</a><a href="#technology">API Reference</a><a href="#cases">Case Studies</a><a href="#cases">Blog</a>
+      </div>
+      <div class="foot-col">
+        <h4>Contact</h4>
+        <a href="mailto:sales@omnitraceglobal.com">sales@omnitraceglobal.com</a>
+        <a href="mailto:support@omnitraceglobal.com">support@omnitraceglobal.com</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Global HQ â Ä°stanbul Â· Rotterdam</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Â© <span id="yr">2026</span> <span data-i18n="foot_copyright">OmniTrace Global. All rights reserved.</span></span>
+      <nav><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></nav>
+      <span class="zass-badge"><i></i>ZASS OFFICIAL PARTNER</span>
+    </div>
+  </div>
+</footer>
+
+<div class="scroll-hint" id="scrollHint"><span data-i18n="scroll_hint">Scroll to explore</span><span class="wheel"></span></div>
+
+<!-- CDN'ler ÃNCE, tek inline script SONRA -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (REDUCED) document.documentElement.classList.add('reduced');
+var hasGSAP = typeof gsap !== 'undefined';
+var hasTHREE = typeof THREE !== 'undefined';
+if (hasGSAP) gsap.registerPlugin(ScrollTrigger);
+function $(s,c){ return (c||document).querySelector(s); }
+function $$(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); }
+document.documentElement.style.scrollPaddingTop = '84px';
+
+/* ââ NAV ââ */
+var nav = $('#nav'), scrollHint = $('#scrollHint');
+function onScroll(){
+  nav.classList.toggle('scrolled', window.scrollY > 80);
+  if (scrollHint) scrollHint.style.opacity = window.scrollY > 60 ? '0' : '1';
+}
+window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+var burger = $('#burger'), mmenu = $('#mmenu');
+burger.addEventListener('click', function(){
+  var open = mmenu.classList.toggle('open');
+  burger.classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+$$('a', mmenu).forEach(function(a){
+  a.addEventListener('click', function(){
+    mmenu.classList.remove('open'); burger.classList.remove('open');
+    burger.setAttribute('aria-expanded','false'); document.body.style.overflow = '';
+  });
+});
+$('#yr').textContent = new Date().getFullYear();
+
+/* ââ LOAD INTRO ââ */
+if (hasGSAP && !REDUCED){
+  gsap.set('.ld', {opacity:0, y:26});
+  gsap.to('.ld', {opacity:1, y:0, duration:.85, ease:'power4.out', stagger:.14, delay:.3});
+} else { $$('.ld').forEach(function(e){ e.style.opacity = '1'; }); }
+
+/* ââ SCROLL REVEALS (.rv) ââ */
+if (hasGSAP && !REDUCED){
+  ScrollTrigger.batch('.rv', {start:'top 88%', once:true, onEnter:function(els){
+    gsap.to(els, {opacity:1, y:0, duration:.95, ease:'power4.out', stagger:.12});
+  }});
+} else { $$('.rv').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }
+
+/* ââ SCENE PANEL REVEALS (.reveal â varied directional entrances) ââ */
+if (hasGSAP && !REDUCED){
+  $$('.reveal').forEach(function(el){
+    ScrollTrigger.create({
+      trigger: el, start:'top 78%', once:true,
+      onEnter:function(){ el.classList.add('in'); }
+    });
+  });
+} else { $$('.reveal').forEach(function(e){ e.classList.add('in'); }); }
+
+/* ââ ONE-SHOT VIZ OBSERVER ââ */
+var ioEls = [];
+function reg(el, fn){ if (el){ el.__anim = fn; ioEls.push(el); } }
+var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if (!en.isIntersecting) return;
+    io.unobserve(en.target);
+    en.target.__anim();
+  });
+}, {threshold:.2}) : null;
+
+/* counters */
+function fmt(v, dec, grp){
+  var s = v.toFixed(dec);
+  if (grp){ var p = s.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); s = p.join('.'); }
+  return s;
+}
+$$('.cnt').forEach(function(el){
+  var to = parseFloat(el.getAttribute('data-to'));
+  var dec = parseInt(el.getAttribute('data-dec') || '0', 10);
+  var grp = el.hasAttribute('data-grp');
+  reg(el, function(){
+    if (!hasGSAP || REDUCED){ el.textContent = fmt(to, dec, grp); return; }
+    var o = {v:0};
+    gsap.to(o, {v:to, duration:2, ease:'power2.out', onUpdate:function(){ el.textContent = fmt(o.v, dec, grp); }});
+  });
+});
+
+/* stats line */
+reg($('#statsLine'), function(){
+  if (hasGSAP && !REDUCED) gsap.to('#statsLine', {scaleX:1, duration:1.4, ease:'power3.inOut'});
+  else if ($('#statsLine')) $('#statsLine').style.transform = 'scaleX(1)';
+});
+
+/* battery cells */
+var cellGrid = $('#cellGrid');
+if (cellGrid){
+  var socs = [];
+  for (var i=0;i<32;i++){
+    var v = 86 + Math.random()*11, cls = '';
+    if (i===9 || i===17 || i===26){ v = 60 + Math.random()*14; cls = 'warn'; }
+    if (i===21){ v = 36 + Math.random()*6; cls = 'low'; }
+    socs.push(v);
+    var c = document.createElement('div');
+    c.className = 'cell' + (cls ? ' ' + cls : '');
+    c.innerHTML = '<i></i><span>' + v.toFixed(0) + '%</span>';
+    cellGrid.appendChild(c);
+  }
+  reg(cellGrid, function(){
+    var fills = $$('.cell i', cellGrid);
+    if (!hasGSAP || REDUCED){ fills.forEach(function(f,j){ f.style.transform = 'scaleY(' + (socs[j]/100) + ')'; }); return; }
+    fills.forEach(function(f,j){ gsap.to(f, {scaleY:socs[j]/100, duration:.8, ease:'power3.out', delay:j*.03}); });
+  });
+}
+
+/* heatmap */
+var heatGrid = $('#heatGrid');
+if (heatGrid){
+  var heats = [];
+  for (var d=0; d<7; d++) for (var h=0; h<24; h++){
+    var base = (h>=6 && h<=20) ? .28 + .6*Math.sin((h-6)/14*Math.PI) : .05;
+    if (d>4) base *= .35;
+    var op = Math.min(1, Math.max(.05, base + (Math.random()-.5)*.22));
+    heats.push(op);
+    var s = document.createElement('i'); heatGrid.appendChild(s);
+  }
+  reg(heatGrid, function(){
+    var cells = $$('i', heatGrid);
+    if (!hasGSAP || REDUCED){ cells.forEach(function(c,j){ c.style.opacity = heats[j]; }); return; }
+    cells.forEach(function(c,j){ gsap.to(c, {opacity:heats[j], duration:.5, delay:j*.005}); });
+  });
+}
+
+/* bars */
+$$('.bars').forEach(function(b){
+  reg(b, function(){
+    $$('i', b).forEach(function(bar,j){
+      var h = parseFloat(bar.getAttribute('data-h'));
+      if (!hasGSAP || REDUCED){ bar.style.transform = 'scaleY(' + h + ')'; return; }
+      gsap.to(bar, {scaleY:h, duration:.9, ease:'power4.out', delay:j*.08});
+    });
+  });
+});
+
+/* area chart */
+var areaLine = $('#areaLine');
+if (areaLine){
+  var len = areaLine.getTotalLength();
+  areaLine.style.strokeDasharray = len;
+  areaLine.style.strokeDashoffset = len;
+  reg(areaLine, function(){
+    if (!hasGSAP || REDUCED){ areaLine.style.strokeDashoffset = 0; $('#areaFill').style.opacity = 1; return; }
+    gsap.to(areaLine, {strokeDashoffset:0, duration:1.8, ease:'power3.inOut'});
+    gsap.to('#areaFill', {opacity:1, duration:1, delay:1.1});
+  });
+}
+
+/* param sliders */
+$$('.track').forEach(function(t){
+  reg(t, function(){
+    var fill = $('.fill', t), thumb = $('.thumb', t);
+    var v = parseFloat(fill.getAttribute('data-v'));
+    var w = t.clientWidth * v;
+    if (!hasGSAP || REDUCED){ fill.style.transform = 'scaleX(' + v + ')'; thumb.style.transform = 'translateX(' + w + 'px)'; return; }
+    gsap.to(fill, {scaleX:v, duration:1.1, ease:'power3.inOut'});
+    gsap.to(thumb, {x:w, duration:1.1, ease:'power3.inOut'});
+  });
+});
+
+/* fault cards */
+$$('.fc-anim').forEach(function(fc, j){
+  if (hasGSAP && !REDUCED) gsap.set(fc, {y:-30, opacity:0});
+  reg(fc, function(){
+    if (!hasGSAP || REDUCED) return;
+    gsap.to(fc, {y:0, opacity:1, duration:.8, ease:'power4.out', delay:(j%3)*.14});
+  });
+});
+
+/* device callouts */
+var devStage = $('#deviceStage');
+if (devStage) reg(devStage, function(){
+  $$('.callout', devStage).forEach(function(c, j){
+    if (!hasGSAP || REDUCED){ c.style.opacity='1'; c.style.transform='none'; return; }
+    gsap.to(c, {opacity:1, y:0, duration:.8, ease:'power4.out', delay:.2 + j*.13});
+  });
+});
+
+/* CAN terminal feed */
+var term = $('#canTerm');
+if (term){
+  var params = ['motor_current','pack_voltage','hyd_pressure','lift_height','steer_angle','ctrl_temp','drive_speed','soc','regen_state','hours_total'];
+  var units = ['A','V','bar','m','Â°','Â°C','km/h','%','','h'];
+  var started = false;
+  function termLine(){
+    var id = '0x18FF' + (Math.random()*65535|0).toString(16).toUpperCase().padStart(4,'0');
+    var bytes = [];
+    for (var b=0;b<8;b++) bytes.push((Math.random()*255|0).toString(16).toUpperCase().padStart(2,'0'));
+    var pi = Math.random()*params.length|0;
+    var val = (Math.random()*180).toFixed(1);
+    var cls = Math.random() > .9 ? (Math.random() > .5 ? 'ok' : 'wn') : '';
+    var row = document.createElement('div');
+    row.innerHTML = '<b>' + id + '</b>  8  [' + bytes.join(' ') + ']  <span class="' + cls + '">' + params[pi] + '=' + val + units[pi] + '</span>';
+    term.appendChild(row);
+    while (term.children.length > 9) term.removeChild(term.firstChild);
+  }
+  reg(term, function(){
+    if (started) return; started = true;
+    for (var k=0;k<9;k++) termLine();
+    setInterval(termLine, REDUCED ? 2000 : 650);
+  });
+}
+
+ioEls.forEach(function(el){ if (io) io.observe(el); else el.__anim(); });
+
+/* ââ MAP FORKLIFT MOTION ââ */
+function walk(sel, pts, speed){
+  var el = $(sel); if (!el || !hasGSAP || REDUCED){ if (el && hasGSAP) gsap.set(el,{x:pts[0][0],y:pts[0][1]}); return; }
+  gsap.set(el, {x:pts[0][0], y:pts[0][1]});
+  var tl = gsap.timeline({repeat:-1});
+  var all = pts.concat([pts[0]]);
+  for (var i=1;i<all.length;i++){
+    var dx = all[i][0]-all[i-1][0], dy = all[i][1]-all[i-1][1];
+    tl.to(el, {x:all[i][0], y:all[i][1], duration:Math.sqrt(dx*dx+dy*dy)/speed, ease:'none'});
+  }
+}
+walk('#fk1', [[120,176],[284,176],[284,72],[150,72]], 46);
+walk('#fk2', [[352,36],[352,164],[486,164],[486,36]], 52);
+walk('#fk3', [[332,224],[470,224],[470,256],[332,256]], 38);
+
+/* âââââââ THE ONE CONTINUOUS CINEMATIC â forklift travels the whole scroll âââââââ */
+(function(){
+  var cine = $('#cine'), cinema = $('#cinema'), floatEl = $('#cineFloat'), idleEl = $('#cineIdle');
+  if (!cine || !cinema) return;
+  if (!hasGSAP || REDUCED){ return; } /* static fallback: hero shot stays centered */
+  var shotSide = $('#shotSide'), shotHero = $('#shotHero'), shotRear = $('#shotRear');
+  var ctxPallet = $('#ctxPallet'), ctxOperator = $('#ctxOperator');
+  var glow = $('#cineGlow'), scan = $('#cineScan');
+  var huds = [$('#hud1'),$('#hud2'),$('#hud3'),$('#hud4')];
+
+  /* idle life â gentle float + breathing, independent of scroll */
+  gsap.to(idleEl, {yPercent:-2.2, duration:4.5, ease:'sine.inOut', yoyo:true, repeat:-1});
+  gsap.to(glow, {scale:1.12, opacity:.85, duration:3.4, ease:'sine.inOut', yoyo:true, repeat:-1});
+
+  function hud(on){ huds.forEach(function(h,i){ if(!h) return; gsap.to(h,{autoAlpha:on?1:0, y:on?0:8, scale:on?1:.92, duration:.5, delay:on?i*.08:0, overwrite:true}); }); }
+
+  /* MASTER scrubbed timeline across the whole cinema block.
+     Varied moves: shrink-left â zoom IN â pan RIGHT â dissolve backdrop â return â pull back. */
+  var master = gsap.timeline({
+    defaults:{ease:'none'},
+    scrollTrigger:{
+      trigger: cinema, start:'top top', end:'bottom bottom', scrub:1,
+      onUpdate:function(self){ scan.style.opacity = (self.progress>0.02 && self.progress<0.95) ? '1' : '0'; }
+    }
+  });
+  /* SCENE 0 hero (panel LEFT)  ->  SCENE 1 positioning (panel RIGHT, fork LEFT).
+     xPercent values keep the truck on the side OPPOSITE the text so it never overlaps. */
+  master.fromTo(floatEl, {scale:.9, xPercent:42, yPercent:-2, rotation:0},
+                         {scale:.66, xPercent:-36, yPercent:-2}, 0);
+  master.to(glow, {xPercent:-34}, 0);
+  /* SCENE 2 battery (panel BOTTOM) : ZOOM IN + lift UP so it clears the lower card */
+  master.to(floatEl, {scale:1.4, xPercent:4, yPercent:-16});
+  /* SCENE 3 CAN (panel LEFT, fork RIGHT) : cross-fade to 3/4 view, glide RIGHT */
+  master.to(shotSide, {autoAlpha:0, duration:.4}, '<0.15');
+  master.to(shotHero, {autoAlpha:1, duration:.5}, '<');
+  master.to(floatEl, {scale:.82, xPercent:36, yPercent:0, rotation:0});
+  /* SCENE 4 faults (panel RIGHT, fork LEFT) : warehouse backdrop dissolves, rear view */
+  master.to(ctxPallet, {autoAlpha:.5, duration:.6}, '<0.1');
+  master.to(shotHero, {autoAlpha:0, duration:.4});
+  master.to(shotRear, {autoAlpha:1, duration:.5}, '<');
+  master.to(floatEl, {scale:.9, xPercent:-34, yPercent:2});
+  /* SCENE 5 driver (panel RIGHT, fork LEFT) : backdrop out, clean side view */
+  master.to(ctxPallet, {autoAlpha:0, duration:.5}, '<');
+  master.to(shotRear, {autoAlpha:0, duration:.4});
+  master.to(shotSide, {autoAlpha:1, duration:.5}, '<');
+  master.to(floatEl, {scale:.78, xPercent:-32, yPercent:0});
+  /* SCENE 6 analytics (panel CENTER) : pull back small + lift UP behind the wide card */
+  master.to(ctxOperator, {autoAlpha:.3, duration:.6}, '<0.2');
+  master.to(floatEl, {scale:.58, xPercent:0, yPercent:-22});
+  master.to(ctxOperator, {autoAlpha:0, duration:.5});
+  /* exit : fade the whole cinematic away before the solid sections */
+  master.to(cine, {autoAlpha:0, duration:.5});
+
+  /* show/hide HUD chips by scroll zone + disable layer once past cinema */
+  ScrollTrigger.create({
+    trigger: cinema, start:'top top', end:'bottom bottom',
+    onEnter:function(){ hud(true); },
+    onLeave:function(){ hud(false); cine.style.visibility='hidden'; },
+    onEnterBack:function(){ cine.style.visibility='visible'; hud(true); },
+    onLeaveBack:function(){ hud(false); }
+  });
+  hud(true);
+
+  /* light pointer parallax on the idle group */
+  window.addEventListener('pointermove', function(e){
+    var nx = (e.clientX/window.innerWidth - .5);
+    gsap.to(idleEl, {xPercent: nx*2.4, duration:.8, ease:'power2.out', overwrite:'auto'});
+  }, {passive:true});
+})();
+
+/* ââ how-it-works rail fill ââ */
+if (hasGSAP && !REDUCED){
+  gsap.to('#railFill', {
+    scaleY: 1, ease: 'none',
+    scrollTrigger: {trigger:'.how-wrap', start:'top 62%', end:'bottom 62%', scrub:.6}
+  });
+} else {
+  var rf = $('#railFill'); if (rf) rf.style.transform = 'scaleY(1)';
+}
+
+/* ââ INDUSTRIES: drag-scroll + progress ââ */
+var indRow = $('#indRow'), indBar = $('#indBar');
+if (indRow){
+  var isDown = false, startX = 0, startL = 0, moved = false;
+  indRow.addEventListener('pointerdown', function(e){
+    isDown = true; moved = false; startX = e.clientX; startL = indRow.scrollLeft;
+    indRow.classList.add('dragging');
+  });
+  window.addEventListener('pointermove', function(e){
+    if (!isDown) return;
+    var d = e.clientX - startX;
+    if (Math.abs(d) > 4) moved = true;
+    indRow.scrollLeft = startL - d;
+  }, {passive:true});
+  window.addEventListener('pointerup', function(){ isDown = false; indRow.classList.remove('dragging'); });
+  indRow.addEventListener('click', function(e){ if (moved) e.preventDefault(); }, true);
+  function indProg(){
+    var max = indRow.scrollWidth - indRow.clientWidth;
+    var p = max > 0 ? indRow.scrollLeft / max : 0;
+    indBar.style.transform = 'scaleX(' + (.18 + .82*p) + ')';
+  }
+  indRow.addEventListener('scroll', indProg, {passive:true}); indProg();
+}
+
+/* ââ TESTIMONIAL MARQUEES ââ */
+var QUOTES = [
+  {q:'OmniTrace transformed our maintenance operation. We went from reactive break-fix to zero unplanned downtime in 90 days. The DTC decoder alone paid for the system.', a:'Head of Fleet Operations', c:'3PL Logistics Group Â· Germany'},
+  {q:'Battery DNA caught two packs degrading months before failure. We re-planned charging shifts and extended pack life by a full season.', a:'Reliability Engineering Lead', c:'Cold Storage Network Â· Netherlands'},
+  {q:'Driver parameter control is the killer feature. New operators are speed-limited automatically by their RFID badge. Incidents fell 64% in one quarter.', a:'HSE Director', c:'Automotive Tier-1 Plant Â· TÃ¼rkiye'},
+  {q:'We run 540 ZASS trucks across 11 sites. OmniTrace is the only platform that gave us one pane of glass â and the uptime SLA is real.', a:'VP of Operations', c:'Distribution Network Â· USA'},
+  {q:'The geofence alerts ended unauthorized cold-zone entries overnight. Audit prep went from two weeks to two hours.', a:'Compliance Manager', c:'Food & Beverage Producer Â· Poland'},
+  {q:'Sub-200ms telemetry over LTE at the quay, in salt fog, all year. Our reach stackers have never been this visible.', a:'Terminal Systems Manager', c:'Container Port Authority Â· UAE'}
+];
+function tcard(t){
+  return '<div class="tcard glass"><q>' + t.q + '</q><div class="tauthor"><span class="avatar"></span><div><b>' + t.a + '</b><span>' + t.c + '</span></div></div></div>';
+}
+function buildMarq(id, items){
+  var host = $(id); if (!host) return;
+  var s = items.map(tcard).join('');
+  var tr = document.createElement('div');
+  tr.className = 'marq-track';
+  tr.innerHTML = s + s;
+  host.appendChild(tr);
+}
+buildMarq('#marq1', [QUOTES[0], QUOTES[1], QUOTES[2]]);
+buildMarq('#marq2', [QUOTES[3], QUOTES[4], QUOTES[5]]);
+
+/* ââ RUN/PAUSE OBSERVER for canvases ââ */
+var runIO = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries){
+  entries.forEach(function(en){ if (en.target.__run) en.target.__run(en.isIntersecting); });
+}, {threshold:.05}) : null;
+function watchRun(el, fn){ if (!el) return; el.__run = fn; if (runIO) runIO.observe(el); else fn(true); }
+
+/* ââ CTA CONSTELLATION ââ */
+(function(){
+  var cv = $('#ctaNet'); if (!cv || REDUCED) return;
+  var ctx = cv.getContext('2d'), W, H, running = false, raf, t = 0;
+  var N = 110, nodes = [], links = [];
+  for (var i=0;i<N;i++){
+    var th = Math.random()*6.283, ph = Math.acos(2*Math.random()-1), r = .55+Math.random()*.45;
+    nodes.push({x:r*Math.sin(ph)*Math.cos(th), y:r*Math.cos(ph)*.6, z:r*Math.sin(ph)*Math.sin(th)});
+  }
+  for (var a=0;a<N;a++) for (var b=a+1;b<N;b++){
+    var dx=nodes[a].x-nodes[b].x, dy=nodes[a].y-nodes[b].y, dz=nodes[a].z-nodes[b].z;
+    if (dx*dx+dy*dy+dz*dz < .065) links.push([a,b]);
+  }
+  function size(){
+    W = cv.clientWidth; H = cv.clientHeight;
+    var dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  size(); window.addEventListener('resize', size);
+  function frame(){
+    if (!running) return;
+    t += .0022;
+    ctx.clearRect(0,0,W,H);
+    var R = Math.min(W,H)*.46, cx = W/2, cy = H/2;
+    var cos = Math.cos(t), sin = Math.sin(t), proj = [];
+    for (var i=0;i<N;i++){
+      var n = nodes[i];
+      var x = n.x*cos - n.z*sin, z = n.x*sin + n.z*cos;
+      var sc = 1/(1.6+z);
+      proj.push([cx + x*R*1.4*sc, cy + n.y*R*1.4*sc, sc]);
+    }
+    ctx.lineWidth = 1;
+    for (var l=0;l<links.length;l++){
+      var p1 = proj[links[l][0]], p2 = proj[links[l][1]];
+      ctx.strokeStyle = 'rgba(26,148,247,' + (.05 + .12*(p1[2]+p2[2]-1)) + ')';
+      ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+    }
+    for (var j=0;j<N;j++){
+      var p = proj[j];
+      ctx.fillStyle = 'rgba(77,173,251,' + (.25 + .5*(p[2]-.3)) + ')';
+      ctx.beginPath(); ctx.arc(p[0], p[1], 1.3 + p[2]*1.6, 0, 6.283); ctx.fill();
+    }
+    raf = requestAnimationFrame(frame);
+  }
+  watchRun(cv, function(on){
+    if (on && !running){ running = true; frame(); }
+    else if (!on){ running = false; cancelAnimationFrame(raf); }
+  });
+})();
+
+/* âââââââ DEVICE 3D â OT-1 STUDIO âââââââ */
+(function(){
+  var cv = $('#device3d'), stage = $('#deviceStage');
+  if (!cv || !hasTHREE || REDUCED){ if (cv) cv.style.display = 'none'; return; }
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true, powerPreference:'high-performance'}); }
+  catch(e){ cv.style.display = 'none'; return; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+  var scene = new THREE.Scene();
+  var cam = new THREE.PerspectiveCamera(30, 1, .1, 50);
+  cam.position.set(0, 1.7, 5.4); cam.lookAt(0, 0, 0);
+
+  scene.add(new THREE.HemisphereLight(0x2E4257, 0x05070A, .4));
+  var keyL = new THREE.SpotLight(0xFFF1DD, 1.05); keyL.position.set(-3.5, 5, 2.5); scene.add(keyL);
+  var fillL = new THREE.DirectionalLight(0x9CC4FF, .4); fillL.position.set(4, 2, 1); scene.add(fillL);
+  var rimL = new THREE.PointLight(0x1A94F7, 1.4, 14); rimL.position.set(0, -1.6, -2.6); scene.add(rimL);
+
+  var dev = new THREE.Group(); scene.add(dev);
+  var bodyMat = new THREE.MeshStandardMaterial({color:0x0B0D11, metalness:.55, roughness:.42});
+  var inlayMat = new THREE.MeshStandardMaterial({color:0x0E1116, metalness:.4, roughness:.6});
+  function add(geo, mat, x, y, z){
+    var m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); dev.add(m); return m;
+  }
+  add(new THREE.BoxGeometry(2.5, .5, 1.6), bodyMat, 0, 0, 0);
+  add(new THREE.BoxGeometry(2.3, .03, 1.4), inlayMat, 0, .26, 0);
+  var logoRing = add(new THREE.TorusGeometry(.4, .014, 10, 64),
+    new THREE.MeshStandardMaterial({color:0x0B0D11, emissive:0x1A94F7, emissiveIntensity:.7}), 0, .29, 0);
+  logoRing.rotation.x = Math.PI/2; logoRing.scale.set(1, .45, 1);
+  add(new THREE.SphereGeometry(.11, 18, 18),
+    new THREE.MeshStandardMaterial({color:0x00428F, emissive:0x1A94F7, emissiveIntensity:.9}), 0, .31, 0);
+  var ledMat = new THREE.MeshStandardMaterial({color:0x06121E, emissive:0x1A94F7, emissiveIntensity:1.2});
+  add(new THREE.BoxGeometry(2.2, .05, .03), ledMat, 0, .06, .815);
+  add(new THREE.BoxGeometry(.06, .2, .4), new THREE.MeshStandardMaterial({color:0x1A1F26, roughness:.8}), -1.28, 0, .32);
+  add(new THREE.BoxGeometry(.06, .2, .4), new THREE.MeshStandardMaterial({color:0x1A1F26, roughness:.8}), -1.28, 0, -.32);
+  add(new THREE.CylinderGeometry(.035, .045, .34, 12), bodyMat, 1.0, .4, -.5);
+  add(new THREE.SphereGeometry(.05, 10, 10), inlayMat, 1.0, .58, -.5);
+  [[1.1,.65],[1.1,-.65],[-1.1,.65],[-1.1,-.65]].forEach(function(p){
+    add(new THREE.CylinderGeometry(.07, .07, .07, 10), inlayMat, p[0], -.28, p[1]);
+  });
+
+  var vel = 0, lastSY = window.scrollY;
+  window.addEventListener('scroll', function(){
+    vel += (window.scrollY - lastSY)*.0006; lastSY = window.scrollY;
+  }, {passive:true});
+
+  function fit(){
+    var w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    cam.aspect = w/h; cam.updateProjectionMatrix();
+  }
+  fit(); window.addEventListener('resize', fit);
+
+  var clock = new THREE.Clock(), running = false, raf;
+  function frame(){
+    if (!running) return;
+    var dt = Math.min(clock.getDelta(), .05), t = clock.getElapsedTime();
+    vel *= .92;
+    dev.rotation.y += dt*(.21 + Math.min(Math.abs(vel), 1.6)*(vel > 0 ? 1 : -1));
+    dev.position.y = Math.sin(t*.7)*.07;
+    dev.rotation.z = Math.sin(t*.5)*.02;
+    ledMat.emissiveIntensity = 1.0 + .5*Math.sin(t*2.2);
+    renderer.render(scene, cam);
+    raf = requestAnimationFrame(frame);
+  }
+  watchRun(cv, function(on){
+    if (on && !running){ running = true; clock.getDelta(); frame(); }
+    else if (!on){ running = false; cancelAnimationFrame(raf); }
+  });
+})();
+
+
+/* ─────────── i18n TRANSLATION SYSTEM ─────────── */
+var LANGS = {
+  tr: {
+    nav_products:'Ürünler', nav_solutions:'Çözümler', nav_technology:'Teknoloji',
+    nav_cases:'Vaka Çalışmaları', nav_about:'Hakkımızda', nav_contact:'İletişim',
+    nav_contact_sales:'Satış İletişimi', nav_telemetry:'Telemetri',
+    scroll_hint:'Keşfetmek için kaydır',
+    hero_eyebrow:'Yeni Nesil Filo Zekası',
+    hero_h2:'Her Volt.<br />Her Hareket.<br />Her <em>Arıza.</em>',
+    hero_lede:'OmniTrace Global, ZASS elektrikli forklift filonuzu bağlı, kendini raporlayan bir ekosisteme dönüştürür — batarya sağlığı, araç diagnostiği, sürücü davranışı ve kestirimci bakım, tek komuta merkezinden.',
+    hero_demo_btn:'Demo İste', hero_explore_btn:'Platformu Keşfet',
+    hero_trust_1:'120fps Canlı Veri', hero_trust_2:'ZASS Yerel Entegrasyon', hero_trust_3:'ISO 27001 Güvenli',
+    s1_module:'MODÜL 01 — KONUMLAMA', s1_h3:'Canlı GPS & Bölge Zekası',
+    s1_desc:'Her araç, her saniye, tek canlı haritada. Metre altı iç mekan konumlandırma, sürükle-bırak coğrafi çitler ve anlık bölge ihlal uyarıları.',
+    s2_module:'MODÜL 02 — ENERJİ', s2_h3:'Batarya DNA',
+    s2_desc:'Hücre düzeyinde gerilim, termal profilleme ve yapay zeka destekli degradasyon tahmini. Bir vardiyaya mal olmadan önce her paketin gerçek sağlığını öğrenin.',
+    s3_module:'MODÜL 03 — VERİ', s3_h3:'Tam CAN Bus Zekası',
+    s3_desc:'OT-1 merkezi, araç ağındaki her kontrolörü dinler — motor akımı, hidrolik basınç, kaldırma yüksekliği, direksiyon açısı — çözümlenerek canlı yayınlanır.',
+    s4_module:'MODÜL 04 — DİAGNOSTİK', s4_h3:'Arıza Zekası & DTC Çözümleyici',
+    s4_desc:'Her diagnostik arıza kodu; ciddiyet, zaman damgası ve önerilen aksiyon ile düz dile çevrilir — yaşandığı anda ekibinize iletilir.',
+    fault1_title:'Motor Kontrolcüsü Aşırı Sıcaklık',
+    fault1_meta:'FLT-0042 · 5 dak. önce tespit edildi · C-07 Bölgesi',
+    fault1_act:'Yükü azalt, soğutma fanı devresini kontrol et.',
+    fault2_title:'Batarya Hücre Gerilim Dengesizliği',
+    fault2_meta:'FLT-0017 · 32 dak. önce tespit edildi · Şarj İstasyonu 2',
+    fault2_act:'Bu gece eşitleme şarjı planla.',
+    fault3_title:'18 Çalışma Saatinde Planlı Bakım',
+    fault3_meta:'FLT-0008 · ML bakım modeli tahmini',
+    fault3_act:'Otomatik zamanlandı — parçalar rezerve edildi.',
+    s5_module:'MODÜL 05 — KONTROL · ZASS ÖZEL', s5_h3:'Sürücü Parametre Kontrolü',
+    s5_desc:'Sürücüye özel araç davranışını kablosuz olarak iletin — hız limitleri, kaldırma profilleri, rejenerasyon yoğunluğu — RFID kimliğine bağlı. Yalnızca ZASS araçlarına özel.',
+    s6_module:'MODÜL 06 — ANALİTİK', s6_h3:'Filo Analitik & Raporlama',
+    s6_desc:'Vardiya raporları, kullanım ısı haritaları ve enerji zekası — tüm filonuz genelinde karşılaştırmalı, sabah kahvenizden önce teslim edilir.',
+    stat_vehicles:'Araç Online', stat_uptime:'Çalışma Süresi SLA',
+    stat_latency:'Veri Gecikmesi', stat_industries:'Desteklenen Sektörler',
+    field_eyebrow:'Sahada',
+    field_h2:'Gerçek depo zemini için <em>inşa edildi.</em>',
+    field_desc:'Boş hangarlardan dolu yüksek raflı koridorlara — OmniTrace\'deki her ZASS kamyon, gerçek zamanlı olarak raporlama yapar.',
+    shot1_span:'DAĞITIM · 7/24', shot1_b:'Tek filo, tam görünürlük',
+    shot2_span:'YÜKSEK RAF · KALDIRMA', shot2_b:'Her metre takip edilir',
+    shot3_span:'OPERATÖR · RFID', shot3_b:'Sürücü farkındalıklı kontrol',
+    shot4_span:'PALET AKIŞI', shot4_b:'Verim, ölçüldü',
+    how_eyebrow:'Nasıl Çalışır',
+    how_h2:'Forkliftden <em>öngörüye</em><br />dört adımda.',
+    how_desc:'Filonuz ile eksiksiz operasyonel zeka arasında yalnızca 15 dakikalık kurulum var.',
+    step1_tag:'ADIM 01 — DONANIM', step1_h3:'Tak ve Çalıştır Kurulum',
+    step1_p:'OT-1, ZASS aracının kaporta altındaki CAN portuna takılır. Kablo demeti ameliyatı yok, duruş yok — araç başına 15 dakika, aletler dahil.',
+    step2_tag:'ADIM 02 — TOPLAMA', step2_h3:'Gerçek Zamanlı Veri Toplama',
+    step2_p:'Ünite, araç ağındaki her kareyi okur — batarya, motorlar, hidrolik, direksiyon — araç davranışına dokunmadan 200+ parametreyi sürekli örnekler.',
+    step3_tag:'ADIM 03 — İLETİM', step3_h3:'Güvenli Bulut İletimi',
+    step3_p:'TLS 1.3 ile sarmalanmış 4G/LTE bağlantısı, AES-256 ile şifrelenmiş yükler. Telemetri, dünyanın herhangi bir yerinde 200 milisaniyenin altında OmniTrace bulutuna ulaşır.',
+    step4_tag:'ADIM 04 — ZEKA', step4_h3:'Komuta Merkeziniz',
+    step4_p:'Canlı haritalar, batarya DNA\'sı, arıza beslemeleri ve OTA kontrol — Telemetri panosunda 120fps\'de işlenir; uyarılar sorunlar filonuzu bulmadan sizi bulur.',
+    device_kicker:'CİHAZ', device_name:'OmniTrace OT-1 Zeka Ünitesi',
+    device_sub:'En zorlu endüstriyel ortamlar için inşa edildi.<br />En zorlu veri gereksinimleri için tasarlandı.',
+    cl_4g:'4G LTE + GPS', cl_4g_sub:'çift bant anten',
+    cl_can:'CAN Bus Arabirimi', cl_can_sub:'ZASS yerel protokol',
+    cl_ip:'IP67 Sertifikalı', cl_ip_sub:'toz & su geçirmez',
+    cl_temp:'-40°C ile +85°C', cl_temp_sub:'çalışma aralığı',
+    cl_aes:'AES-256 Şifreli', cl_aes_sub:'çip üstü güvenli element',
+    cl_bat:'96 Saat Batarya Yedek', cl_bat_sub:'kesintisiz telemetri',
+    ind_eyebrow:'Çözümler',
+    ind_h2:'Kesintisizliğin<br /><em>müzakere konusu olmadığı</em> yerlerde kanıtlandı.',
+    ind_desc:'Beş sektör. Tek zeka katmanı. Keşfetmek için sürükleyin.',
+    ind1_h3:'Büyük Ölçekli Dağıtım',
+    ind1_p:'Tek panodan birden fazla tesisteki 500+ forklifi takip edin — tesis başına karşılaştırmalı değerlendirme ile.',
+    ind2_h3:'Soğuk Zincir Lojistiği',
+    ind2_p:'-30°C depolama bölgelerinde kapasite çökmeden önce termal uyarılarla batarya kimyası takibi.',
+    ind3_h3:'Liman & Terminaller',
+    ind3_p:'İstifleyici ve boş konteyner taşıyıcılar için gerçek zamanlı rıhtım konumlandırması — tuz, sıcak ve toz içinde.',
+    ind4_h3:'Otomotiv Üretimi',
+    ind4_p:'Hat besleme filolarında sıfır duruşlu kestirimci bakım ile yalın hat optimizasyonu.',
+    ind5_h3:'Gıda & İçecek',
+    ind5_p:'HACCP uyumlu bölge yönetimi, hijyen sınıfı operasyonel kayıt, denetime hazır.',
+    soc_eyebrow:'Vaka Çalışmaları',
+    soc_h2:'Tahmin etmeyi bırakan<br />operatörler. <em>Sonsuza dek.</em>',
+    cta_badge:'Filonuzu Aktive Etmeye Hazır Mısınız?',
+    cta_h2:'Bağlan. İzle. Optimize Et.<small>Tüm filonuz, akıllıca bağlı.</small>',
+    cta_p:'ZASS forklift filolarına eksiksiz görünürlük sağlayan şirketlere katılın. Dakikalar içinde başlayın.',
+    cta_btn1:'Demo İste — Ücretsiz', cta_btn2:'Telemetri Panosunu Aç',
+    foot_desc:'Filonuzun Zeka Katmanı. ZASS elektrikli forklifler ve malzeme taşıma ekipmanları için özel tasarım telemetri.',
+    foot_copyright:'OmniTrace Global. Tüm hakları saklıdır.',
+    foot_privacy:'Gizlilik Politikası', foot_terms:'Kullanım Koşulları',
+    q1:'OmniTrace bakım operasyonumuzu dönüştürdü. 90 günde reaktif arızadan sıfır plansız duruşa geçtik. DTC çözümleyicinin kendisi bile sistemi karşıladı.',
+    q1a:'Filo Operasyonları Müdürü', q1c:'3PL Lojistik Grubu · Almanya',
+    q2:'Batarya DNA, arızadan aylarca önce bozulan iki paketi yakaladı. Şarj vardiyalarını yeniden planladık ve paket ömrünü tam bir sezon uzattık.',
+    q2a:'Güvenilirlik Mühendisliği Lideri', q2c:'Soğuk Depolama Ağı · Hollanda',
+    q3:'Sürücü parametre kontrolü, katil özellik. Yeni operatörler RFID kartlarıyla otomatik olarak hız sınırlandırılıyor. Olaylar bir çeyrekte %64 azaldı.',
+    q3a:'HSE Direktörü', q3c:'Otomotiv Tier-1 Fabrikası · Türkiye',
+    q4:'11 sitede 540 ZASS kamyon çalıştırıyoruz. OmniTrace bize tek cam panel veren tek platform — ve çalışma süresi SLA gerçek.',
+    q4a:'Operasyon VP\'si', q4c:'Dağıtım Ağı · ABD',
+    q5:'Coğrafi çit uyarıları, yetkisiz soğuk bölge girişlerini bir gecede sona erdirdi. Denetim hazırlığı iki haftadan iki saate indi.',
+    q5a:'Uyum Müdürü', q5c:'Gıda & İçecek Üreticisi · Polonya',
+    q6:'LTE üzerinden 200ms altı telemetri, tüm yıl boyunca tuz sisi içinde rıhtımda. Konteyner istifleme araçlarımız hiç bu kadar görünür olmamıştı.',
+    q6a:'Terminal Sistemleri Yöneticisi', q6c:'Konteyner Liman Otoritesi · BAE'
+  },
+  en: {
+    nav_products:'Products', nav_solutions:'Solutions', nav_technology:'Technology',
+    nav_cases:'Case Studies', nav_about:'About', nav_contact:'Contact',
+    nav_contact_sales:'Contact Sales', nav_telemetry:'Telemetry',
+    scroll_hint:'Scroll to explore',
+    hero_eyebrow:'Next-Generation Fleet Intelligence',
+    hero_h2:'See Every Volt.<br />Every Move.<br />Every <em>Fault.</em>',
+    hero_lede:'OmniTrace Global turns your ZASS electric forklift fleet into a connected, self-reporting ecosystem — battery health, vehicle diagnostics, driver behaviour and predictive maintenance, from one command center.',
+    hero_demo_btn:'Request a Demo', hero_explore_btn:'Explore the Platform',
+    hero_trust_1:'120fps Live Data', hero_trust_2:'ZASS-Native Integration', hero_trust_3:'ISO 27001 Secured',
+    s1_module:'MODULE 01 — POSITIONING', s1_h3:'Live GPS & Zone Intelligence',
+    s1_desc:'Every vehicle, every second, on one live map. Sub-meter indoor positioning, drag-and-drop geofences and instant zone-breach alerts.',
+    s2_module:'MODULE 02 — ENERGY', s2_h3:'Battery DNA',
+    s2_desc:'Cell-level voltage, thermal profiling and AI-powered degradation forecasting. Know the true health of every pack — before it costs you a shift.',
+    s3_module:'MODULE 03 — DATA', s3_h3:'Full CAN Bus Intelligence',
+    s3_desc:'The OT-1 hub listens to every controller on the vehicle network — motor current, hydraulic pressure, lift height, steering angle — decoded and streamed live.',
+    s4_module:'MODULE 04 — DIAGNOSTICS', s4_h3:'Fault Intelligence & DTC Decoder',
+    s4_desc:'Every diagnostic trouble code, decoded into plain language with severity, timestamp and a recommended action — pushed to your team the second it happens.',
+    fault1_title:'Motor Controller Overtemperature',
+    fault1_meta:'FLT-0042 · Detected 5 min ago · Zone C-07',
+    fault1_act:'Reduce load, inspect cooling fan circuit.',
+    fault2_title:'Battery Cell Voltage Imbalance',
+    fault2_meta:'FLT-0017 · Detected 32 min ago · Charging Bay 2',
+    fault2_act:'Schedule equalization charge tonight.',
+    fault3_title:'Planned Service In 18 Operating Hours',
+    fault3_meta:'FLT-0008 · Forecast by ML maintenance model',
+    fault3_act:'Auto-scheduled — parts reserved.',
+    s5_module:'MODULE 05 — CONTROL · ZASS EXCLUSIVE', s5_h3:'Driver Parameter Control',
+    s5_desc:'Push driver-specific vehicle behaviour over the air — speed limits, lift profiles, regen intensity — bound to RFID identity. Exclusive to ZASS vehicles.',
+    s6_module:'MODULE 06 — ANALYTICS', s6_h3:'Fleet Analytics & Reporting',
+    s6_desc:'Shift reports, utilization heatmaps and energy intelligence — benchmarked across your entire fleet and delivered before your morning coffee.',
+    stat_vehicles:'Vehicles Online', stat_uptime:'Uptime SLA',
+    stat_latency:'Data Latency', stat_industries:'Supported Industries',
+    field_eyebrow:'In the Field',
+    field_h2:'Built for the <em>real</em> warehouse floor.',
+    field_desc:'From empty hangars to packed high-bay aisles — every ZASS truck on OmniTrace, reporting in real time.',
+    shot1_span:'DISTRIBUTION · 24/7', shot1_b:'One fleet, total visibility',
+    shot2_span:'HIGH-BAY · LIFT', shot2_b:'Every metre tracked',
+    shot3_span:'OPERATOR · RFID', shot3_b:'Driver-aware control',
+    shot4_span:'PALLET FLOW', shot4_b:'Throughput, measured',
+    how_eyebrow:'How It Works',
+    how_h2:'From forklift to <em>foresight</em><br />in four steps.',
+    how_desc:'A 15-minute installation stands between your fleet and complete operational intelligence.',
+    step1_tag:'STEP 01 — HARDWARE', step1_h3:'Plug-and-Play Installation',
+    step1_p:'The OT-1 clips onto the ZASS vehicle\'s CAN port under the overhead guard. No wiring harness surgery, no downtime — 15 minutes per vehicle, tools included.',
+    step2_tag:'STEP 02 — ACQUISITION', step2_h3:'Real-Time Data Acquisition',
+    step2_p:'The unit reads every frame on the vehicle network — battery, motors, hydraulics, steering — sampling 200+ parameters continuously without touching vehicle behaviour.',
+    step3_tag:'STEP 03 — TRANSMISSION', step3_h3:'Secure Cloud Transmission',
+    step3_p:'4G/LTE uplink wrapped in TLS 1.3, payloads encrypted with AES-256. Telemetry lands in the OmniTrace cloud in under 200 milliseconds — anywhere on earth.',
+    step4_tag:'STEP 04 — INTELLIGENCE', step4_h3:'Your Command Center',
+    step4_p:'Live maps, battery DNA, fault feeds and OTA control — rendered at 120fps in the Telemetry dashboard, with alerts that find you before problems find your fleet.',
+    device_kicker:'THE DEVICE', device_name:'OmniTrace OT-1 Intelligence Unit',
+    device_sub:'Built for the harshest industrial environments.<br />Engineered for the most demanding data requirements.',
+    cl_4g:'4G LTE + GPS', cl_4g_sub:'dual-band antenna',
+    cl_can:'CAN Bus Interface', cl_can_sub:'ZASS-native protocol',
+    cl_ip:'IP67 Rated', cl_ip_sub:'dust & water sealed',
+    cl_temp:'-40°C to +85°C', cl_temp_sub:'operating range',
+    cl_aes:'AES-256 Encrypted', cl_aes_sub:'secure element on-chip',
+    cl_bat:'96h Battery Backup', cl_bat_sub:'uninterrupted telemetry',
+    ind_eyebrow:'Solutions',
+    ind_h2:'Proven where uptime<br />is <em>non-negotiable.</em>',
+    ind_desc:'Five industries. One intelligence layer. Drag to explore.',
+    ind1_h3:'Large-Scale Distribution',
+    ind1_p:'Monitor 500+ forklifts across multiple facilities from one dashboard — with per-site benchmarking.',
+    ind2_h3:'Cold Chain Logistics',
+    ind2_p:'Battery chemistry tracking in -30°C storage with thermal alerts before capacity collapses.',
+    ind3_h3:'Ports & Terminals',
+    ind3_p:'Real-time quay positioning for reach stackers and empty handlers — in salt, heat and dust.',
+    ind4_h3:'Automotive Manufacturing',
+    ind4_p:'Lean floor optimization with zero-downtime predictive maintenance on line-feeding fleets.',
+    ind5_h3:'Food & Beverage',
+    ind5_p:'HACCP-compliant zone management with hygiene-grade operational logging, audit-ready.',
+    soc_eyebrow:'Case Studies',
+    soc_h2:'Operators who stopped<br />guessing. <em>Forever.</em>',
+    cta_badge:'Ready to Activate Your Fleet?',
+    cta_h2:'Connect. Monitor. Optimize.<small>Your entire fleet, intelligently wired.</small>',
+    cta_p:'Join the companies that have already unlocked complete visibility into their ZASS forklift fleets. Get started in minutes.',
+    cta_btn1:'Request a Demo — Free', cta_btn2:'Open Telemetry Dashboard',
+    foot_desc:'The Intelligence Layer for Your Fleet. Purpose-built telemetry for ZASS electric forklifts and material handling equipment.',
+    foot_copyright:'OmniTrace Global. All rights reserved.',
+    foot_privacy:'Privacy Policy', foot_terms:'Terms of Service',
+    q1:'OmniTrace transformed our maintenance operation. We went from reactive break-fix to zero unplanned downtime in 90 days. The DTC decoder alone paid for the system.',
+    q1a:'Head of Fleet Operations', q1c:'3PL Logistics Group · Germany',
+    q2:'Battery DNA caught two packs degrading months before failure. We re-planned charging shifts and extended pack life by a full season.',
+    q2a:'Reliability Engineering Lead', q2c:'Cold Storage Network · Netherlands',
+    q3:'Driver parameter control is the killer feature. New operators are speed-limited automatically by their RFID badge. Incidents fell 64% in one quarter.',
+    q3a:'HSE Director', q3c:'Automotive Tier-1 Plant · Türkiye',
+    q4:'We run 540 ZASS trucks across 11 sites. OmniTrace is the only platform that gave us one pane of glass — and the uptime SLA is real.',
+    q4a:'VP of Operations', q4c:'Distribution Network · USA',
+    q5:'The geofence alerts ended unauthorized cold-zone entries overnight. Audit prep went from two weeks to two hours.',
+    q5a:'Compliance Manager', q5c:'Food & Beverage Producer · Poland',
+    q6:'Sub-200ms telemetry over LTE at the quay, in salt fog, all year. Our reach stackers have never been this visible.',
+    q6a:'Terminal Systems Manager', q6c:'Container Port Authority · UAE'
+  }
+};
+
+/* callout elements by position */
+var CALLOUTS = [
+  {key:'cl_4g', sub:'cl_4g_sub'}, {key:'cl_can', sub:'cl_can_sub'},
+  {key:'cl_ip', sub:'cl_ip_sub'}, {key:'cl_temp', sub:'cl_temp_sub'},
+  {key:'cl_aes', sub:'cl_aes_sub'}, {key:'cl_bat', sub:'cl_bat_sub'}
+];
+/* step paragraphs by order */
+var STEP_PARAS = ['step1_p','step2_p','step3_p','step4_p'];
+/* scene desc paragraphs */
+var SCENE_DESCS = ['s1_desc','s2_desc','s3_desc','s4_desc','s5_desc','s6_desc'];
+/* industries card paragraphs */
+var IND_PARAS = ['ind1_p','ind2_p','ind3_p','ind4_p','ind5_p'];
+/* fault meta/act */
+var FAULT_META = ['fault1_meta','fault2_meta','fault3_meta'];
+var FAULT_ACT  = ['fault1_act','fault2_act','fault3_act'];
+
+function setLang(lang) {
+  lang = (lang === 'en') ? 'en' : 'tr';
+  localStorage.setItem('omni_lang', lang);
+  document.documentElement.lang = lang === 'tr' ? 'tr' : 'en';
+  var T = LANGS[lang];
+  document.getElementById('btnTr').classList.toggle('lactive', lang === 'tr');
+  document.getElementById('btnEn').classList.toggle('lactive', lang === 'en');
+
+  /* text nodes via data-i18n */
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var k = el.getAttribute('data-i18n');
+    if (T[k] !== undefined) el.textContent = T[k];
+  });
+  /* html nodes via data-i18n-h */
+  document.querySelectorAll('[data-i18n-h]').forEach(function(el) {
+    var k = el.getAttribute('data-i18n-h');
+    if (T[k] !== undefined) el.innerHTML = T[k];
+  });
+
+  /* scene desc paragraphs (class="desc") */
+  var descs = document.querySelectorAll('.scene-panel .desc');
+  descs.forEach(function(el, i) { if (SCENE_DESCS[i] && T[SCENE_DESCS[i]]) el.textContent = T[SCENE_DESCS[i]]; });
+
+  /* step paragraphs */
+  var stepPs = document.querySelectorAll('.step > .rv > p');
+  stepPs.forEach(function(el, i) { if (STEP_PARAS[i] && T[STEP_PARAS[i]]) el.textContent = T[STEP_PARAS[i]]; });
+
+  /* field section paragraph */
+  var fieldP = document.querySelector('.field .sec-head > p.rv');
+  if (fieldP) fieldP.textContent = T.field_desc;
+
+  /* how-it-works section paragraph */
+  var howP = document.querySelector('.how .sec-head > p.rv');
+  if (howP) howP.textContent = T.how_desc;
+
+  /* cta paragraph */
+  var ctaP = document.querySelector('.cta-box > p.rv');
+  if (ctaP) ctaP.textContent = T.cta_p;
+
+  /* industries card paragraphs */
+  var indPs = document.querySelectorAll('.ind-body > p');
+  indPs.forEach(function(el, i) { if (IND_PARAS[i] && T[IND_PARAS[i]]) el.textContent = T[IND_PARAS[i]]; });
+
+  /* fault cards */
+  var faultMetas = document.querySelectorAll('.fault-meta');
+  faultMetas.forEach(function(el, i) { if (FAULT_META[i] && T[FAULT_META[i]]) el.textContent = T[FAULT_META[i]]; });
+  var faultActs = document.querySelectorAll('.fault-act');
+  faultActs.forEach(function(el, i) {
+    if (FAULT_ACT[i] && T[FAULT_ACT[i]]) el.innerHTML = '<b>' + (lang==='tr' ? 'Aksiyon:' : 'Action:') + '</b> ' + T[FAULT_ACT[i]];
+  });
+
+  /* callout texts */
+  var callouts = document.querySelectorAll('.callout .txt');
+  callouts.forEach(function(el, i) {
+    if (!CALLOUTS[i]) return;
+    var b = el.querySelector('b'), sp = el.querySelector('span');
+    if (b && T[CALLOUTS[i].key]) b.textContent = T[CALLOUTS[i].key];
+    if (sp && T[CALLOUTS[i].sub]) sp.textContent = T[CALLOUTS[i].sub];
+  });
+
+  /* footer columns */
+  var footCols = document.querySelectorAll('.foot-col');
+  var colMap = [
+    {h4:'foot_col1_h4', links:['GPS & Positioning|GPS & Konumlandırma','Battery Telemetry|Batarya Telemetrisi','CAN Bus Intelligence|CAN Bus Zekası','Fault Decoder|Arıza Çözümleyici','Driver Parameters|Sürücü Parametreleri','Fleet Analytics|Filo Analitiği']},
+    {h4:'foot_col2_h4', links:['About|Hakkımızda','Team|Ekip','Careers|Kariyer','Press|Basın']},
+    {h4:'foot_col3_h4', links:['Docs|Belgeler','API Reference|API Referansı','Case Studies|Vaka Çalışmaları','Blog|Blog']},
+    {h4:'foot_col4_h4', links:null}
+  ];
+  footCols.forEach(function(col, ci) {
+    var cm = colMap[ci]; if (!cm) return;
+    var h4 = col.querySelector('h4');
+    if (h4 && T[cm.h4]) h4.textContent = T[cm.h4];
+    if (cm.links) {
+      var anchors = col.querySelectorAll('a');
+      anchors.forEach(function(a, ai) {
+        var pair = cm.links[ai]; if (!pair) return;
+        var parts = pair.split('|');
+        a.textContent = lang === 'tr' ? parts[1] : parts[0];
+      });
+    } else {
+      /* contact col — update HQ text */
+      col.querySelectorAll('a').forEach(function(a) {
+        if (a.textContent.indexOf('İstanbul') !== -1 || a.textContent.indexOf('Rotterdam') !== -1 || a.textContent.indexOf('Global HQ') !== -1) {
+          a.textContent = T.foot_hq || a.textContent;
+        }
+      });
+    }
+  });
+
+  /* footer brand description */
+  var footBrandP = document.querySelector('.foot-brand > p');
+  if (footBrandP) { var sp2 = footBrandP.querySelector('[data-i18n="foot_desc"]'); if (sp2) sp2.textContent = T.foot_desc; else footBrandP.textContent = T.foot_desc; }
+
+  /* footer copyright */
+  var copy = document.querySelector('.foot-bottom > span:first-child');
+  if (copy) copy.innerHTML = '© <span id="yr">' + new Date().getFullYear() + '</span> ' + T.foot_copyright;
+
+  /* footer nav links */
+  var footNav = document.querySelectorAll('.foot-bottom nav a');
+  if (footNav[0]) footNav[0].textContent = T.foot_privacy;
+  if (footNav[1]) footNav[1].textContent = T.foot_terms;
+
+  /* rebuild testimonials with translated quotes */
+  var qs = [
+    {q:T.q1, a:T.q1a, c:T.q1c},
+    {q:T.q2, a:T.q2a, c:T.q2c},
+    {q:T.q3, a:T.q3a, c:T.q3c},
+    {q:T.q4, a:T.q4a, c:T.q4c},
+    {q:T.q5, a:T.q5a, c:T.q5c},
+    {q:T.q6, a:T.q6a, c:T.q6c}
+  ];
+  function rebuildMarq(id, items) {
+    var host = document.querySelector(id); if (!host) return;
+    var s = items.map(function(t) {
+      return '<div class="tcard glass"><q>' + t.q + '</q><div class="tauthor"><span class="avatar"></span><div><b>' + t.a + '</b><span>' + t.c + '</span></div></div></div>';
+    }).join('');
+    host.innerHTML = '';
+    var tr = document.createElement('div');
+    tr.className = 'marq-track';
+    tr.innerHTML = s + s;
+    host.appendChild(tr);
+  }
+  rebuildMarq('#marq1', [qs[0], qs[1], qs[2]]);
+  rebuildMarq('#marq2', [qs[3], qs[4], qs[5]]);
+}
+
+/* Init: default TR, or restore saved */
+(function() {
+  var saved = localStorage.getItem('omni_lang') || 'tr';
+  setLang(saved);
+})();
+
+/* refresh triggers after images settle */
+window.addEventListener('load', function(){ if (hasGSAP) ScrollTrigger.refresh(); });
+})();
+</script>
+</body>
+</html>
+
