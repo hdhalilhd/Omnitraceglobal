@@ -94,6 +94,25 @@ try {
       else      $pdo->prepare("INSERT IGNORE INTO musteri_cihaz (musteri_id,device_id) VALUES (?,?)")->execute([$m['id'], $dev]);
       out(200, ['status' => 'success', 'message' => ($sil ? 'Yetki kaldirildi' : 'Yetki verildi') . " ($kod <-> device $dev)"]);
     }
+    if ($action === 'admin_cihaz_uret') {
+      /* Sistem benzersiz + SIRALI OLMAYAN + tahmin edilemez device_id üretir.
+         random_int = kriptografik rastgele. STM32'ye bu sayı gömülür. */
+      $kod = trim((string)inp($body, 'kod'));
+      $ad = trim((string)(inp($body, 'ad') ?? '')); $sase = trim((string)(inp($body, 'sase_no') ?? '')); $model = trim((string)(inp($body, 'model') ?? ''));
+      $st = $pdo->prepare("SELECT id FROM musteriler WHERE kod=?"); $st->execute([$kod]); $m = $st->fetch();
+      if (!$m) out(404, ['status' => 'error', 'message' => 'Musteri bulunamadi']);
+      $dev = 0; $chk = $pdo->prepare("SELECT 1 FROM araclar WHERE device_id=?");
+      for ($i = 0; $i < 50; $i++) {
+        $cand = random_int(10000000, 999999999);   // 8–9 hane, benzersizlik kontrollü
+        $chk->execute([$cand]);
+        if (!$chk->fetch()) { $dev = $cand; break; }
+      }
+      if (!$dev) out(500, ['status' => 'error', 'message' => 'device_id uretilemedi, tekrar deneyin']);
+      $pdo->prepare("INSERT INTO araclar (device_id,ad,sase_no,model) VALUES (?,?,?,?)")
+          ->execute([$dev, $ad, $sase, $model]);
+      $pdo->prepare("INSERT IGNORE INTO musteri_cihaz (musteri_id,device_id) VALUES (?,?)")->execute([$m['id'], $dev]);
+      out(200, ['status' => 'success', 'device_id' => $dev, 'message' => "device_id uretildi: $dev ($kod)"]);
+    }
     if ($action === 'admin_cihaz_liste') {
       $rows = $pdo->query("SELECT a.device_id,a.ad,a.sase_no,a.model,
                 GROUP_CONCAT(m.kod ORDER BY m.kod) AS musteriler
@@ -102,6 +121,13 @@ try {
               LEFT JOIN musteriler m ON m.id=mc.musteri_id
               GROUP BY a.device_id ORDER BY a.device_id")->fetchAll();
       out(200, ['status' => 'success', 'cihazlar' => $rows]);
+    }
+    if ($action === 'admin_cihaz_sil') {
+      $dev = (int)inp($body, 'device_id');
+      if ($dev <= 0) out(400, ['status' => 'error', 'message' => 'device_id gerekli']);
+      $pdo->prepare("DELETE FROM musteri_cihaz WHERE device_id=?")->execute([$dev]);
+      $pdo->prepare("DELETE FROM araclar WHERE device_id=?")->execute([$dev]);
+      out(200, ['status' => 'success', 'message' => "Cihaz silindi: $dev"]);
     }
     if ($action === 'admin_musteri_sil') {
       $kod = trim((string)inp($body, 'kod'));

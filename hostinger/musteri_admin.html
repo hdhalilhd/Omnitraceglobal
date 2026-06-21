@@ -54,6 +54,12 @@ tr:last-child td{border-bottom:none}
 .hint{background:#fff7ed;border:1px solid #fed7aa;border-radius:11px;padding:13px 15px;font-size:12.5px;color:#9a3412;line-height:1.6;margin-top:14px}
 .hint b{color:#7c2d12}
 .hint code{background:#fff;border:1px solid #fed7aa;border-radius:5px;padding:1px 6px;font-family:Consolas,monospace}
+.genbox{margin-top:15px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:13px;padding:18px;text-align:center}
+.genbox .lbl{font-size:11.5px;color:#15803d;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.genbox .big{font-family:"JetBrains Mono",Consolas,monospace;font-weight:800;font-size:30px;color:#166534;margin:7px 0 11px;letter-spacing:1px;word-break:break-all}
+.genbox .cbtn{background:#16a34a;color:#fff;border:none;border-radius:9px;padding:9px 20px;font:inherit;font-weight:600;cursor:pointer}
+.genbox .cbtn:hover{filter:brightness(1.08)}
+.genbox .note{font-size:11.5px;color:#15803d;margin-top:9px}
 /* GATE */
 #gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);
   background-image:linear-gradient(rgba(148,168,196,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.13) 1px,transparent 1px);background-size:42px 42px}
@@ -132,13 +138,13 @@ tr:last-child td{border-bottom:none}
         </div>
 
         <div class="card">
-          <h2>Cihaz Ata</h2>
-          <p class="sub">Bir device_id'yi müşteriye yetkilendirin.</p>
+          <h2>Yeni Cihaz Üret</h2>
+          <p class="sub">Sistem <b>benzersiz, sıralı olmayan</b> bir device_id üretir. Kopyalayıp STM32'ye gömün.</p>
           <div class="field"><label>Müşteri</label><select id="aKod"></select></div>
-          <div class="field"><label>device_id (STM32'ye gömülecek sayı)</label><input id="aDev" type="number" min="1" placeholder="örn. 3"></div>
           <div class="row"><div class="field"><label>Cihaz Adı (ops.)</label><input id="aAd" placeholder="Forklift 1"></div>
             <div class="field"><label>Şase No (ops.)</label><input id="aSase" placeholder="304MB..."></div></div>
-          <button class="btn" id="devAssignBtn">🔗 Cihazı Müşteriye Ata</button>
+          <button class="btn" id="devGenBtn">🎲 device_id Üret + Ata</button>
+          <div id="genResult" class="genbox" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -226,10 +232,19 @@ function loadDevices(){
       var name = [d.ad, d.sase_no].filter(Boolean).map(esc).join(' · ') || '<span class="muted">—</span>';
       var tr = document.createElement('tr');
       tr.innerHTML = '<td><span class="devid">#' + d.device_id + '</span> <button class="copy" data-cp="' + d.device_id + '">kopyala</button></td>' +
-        '<td>' + name + '</td><td>' + owner + '</td>';
+        '<td>' + name + '</td><td>' + owner + ' <button class="btn x" data-devdel="' + d.device_id + '" style="float:right">Sil</button></td>';
       tb.appendChild(tr);
     });
     DEV_COUNT = list.length; updateStat();
+    tb.querySelectorAll('[data-devdel]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var dev = b.getAttribute('data-devdel');
+        if (!confirm('device_id ' + dev + ' tamamen silinsin mi?')) return;
+        api('admin_cihaz_sil', { device_id: parseInt(dev, 10) }).then(function(res){
+          toast(res.j.message || (res.ok ? 'Silindi' : 'Hata'), !res.ok); loadAll();
+        });
+      });
+    });
     tb.querySelectorAll('[data-cp]').forEach(function(b){
       b.addEventListener('click', function(){
         var v = b.getAttribute('data-cp');
@@ -253,14 +268,27 @@ $('#custAddBtn').addEventListener('click', function(){
     if (res.ok){ $('#cKod').value = ''; $('#cSifre').value = ''; $('#cAd').value = ''; loadCustomers(); }
   });
 });
-$('#devAssignBtn').addEventListener('click', function(){
-  var kod = $('#aKod').value, dev = parseInt($('#aDev').value, 10), ad = $('#aAd').value.trim(), sase = $('#aSase').value.trim();
-  if (!kod){ toast('Önce müşteri ekleyin', true); return; }
-  if (!dev || dev < 1){ toast('Geçerli bir device_id girin', true); return; }
-  api('admin_cihaz_ata', { kod: kod, device_id: dev, ad: ad, sase_no: sase }).then(function(res){
-    toast(res.j.message || (res.ok ? 'Atandı' : 'Hata'), !res.ok);
-    if (res.ok){ $('#aDev').value = ''; $('#aAd').value = ''; $('#aSase').value = ''; loadAll(); }
-  });
+$('#devGenBtn').addEventListener('click', function(){
+  var kod = $('#aKod').value, ad = $('#aAd').value.trim(), sase = $('#aSase').value.trim();
+  if (!kod){ toast('Önce bir müşteri ekleyin', true); return; }
+  var btn = $('#devGenBtn'); btn.disabled = true;
+  api('admin_cihaz_uret', { kod: kod, ad: ad, sase_no: sase }).then(function(res){
+    btn.disabled = false;
+    if (res.ok && res.j.status === 'success'){
+      var id = res.j.device_id, box = $('#genResult');
+      box.style.display = 'block';
+      box.innerHTML = '<div class="lbl">Üretilen device_id — STM32\'ye gömün</div>' +
+        '<div class="big">' + id + '</div>' +
+        '<button class="cbtn" id="genCopy">📋 Kopyala</button>' +
+        '<div class="note">Müşteri: ' + esc(kod) + (ad ? ' · ' + esc(ad) : '') + '</div>';
+      $('#genCopy').addEventListener('click', function(){
+        var self = this; if (navigator.clipboard) navigator.clipboard.writeText(String(id));
+        self.textContent = '✓ Kopyalandı'; setTimeout(function(){ self.textContent = '📋 Kopyala'; }, 1500);
+      });
+      toast('device_id ' + id + ' üretildi');
+      $('#aAd').value = ''; $('#aSase').value = ''; loadAll();
+    } else { toast(res.j.message || 'Üretilemedi', true); }
+  }).catch(function(){ btn.disabled = false; toast('Sunucu hatası', true); });
 });
 
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
