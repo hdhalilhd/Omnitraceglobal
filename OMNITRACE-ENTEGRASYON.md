@@ -171,6 +171,14 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-21 | **CANLIYA ALINDI** — FTP ile `index.html` + `telemetry.html` Hostinger `public_html`e yüklendi | canlı | ✅ |
 | 2026-06-21 | **Müşteri–Cihaz yetki matrisi (güvenlik) — BACKEND** kuruldu, canlıda test edildi | `hostinger/musteri_*.php` | ✅ |
 | 2026-06-21 | **Çift-mod giriş — FRONTEND** (demo vs müşteri) canlıya alındı + push | `omnitrace/telemetry.html` | ✅ |
+| 2026-06-22 | **Yönetim paneli** (müşteri ekle/sil + cihaz ata + device_id) canlıya alındı | `hostinger/musteri_admin.html` | ✅ |
+
+### Yönetim paneli (2026-06-22)
+**`musteri_admin.html`** — görsel panel: `https://omnitraceglobal.com/musteri_admin.html` (noindex). Admin anahtarı (gate, session'da) ile açılır; tüm işlemler `musteri_api.php` admin endpoint'leriyle.
+- **Müşteri ekle** (kod+şifre+ad), **sil**; **cihaz ata** (müşteri seç + device_id + ops. ad/şase); **cihaz listesi** her device_id'yi sahibi+kopyala butonuyla gösterir + STM32 gömme ipucu.
+- API'ye eklendi: `admin_cihaz_ata` cihaz isimlendirme, `admin_cihaz_liste`, `admin_musteri_sil`.
+- **Akış:** panelden müşteri oluştur → device_id ata → o device_id'yi STM32 firmware'ine göm (`main.c` → `#define DEVICE_ID`) → cihaz o ID ile POST atınca ilgili müşterinin panelinde canlı görünür.
+- Canlı test: gate+giriş ✅ · müşteri/cihaz listesi ✅ · UI'dan müşteri ekleme ✅ · 0 pageerror ✅.
 
 ### Çift-mod giriş — Frontend (2026-06-21)
 `telemetry.html` girişine **6 additive** değişiklik (demo yolu + animasyon/düzen hiç bozulmadı):
