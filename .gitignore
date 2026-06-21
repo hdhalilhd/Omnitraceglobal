@@ -28,3 +28,6 @@ frontend/dist/
 # PlatformIO
 firmware/.pio/
 firmware/.vscode/
+
+# Musteri token/admin anahtarlari — commit etme (sablon: musteri_secret.example.php)
+hostinger/musteri_secret.php

@@ -169,6 +169,20 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-21 | **VM canlı veri-alma entegrasyonu tamamlandı** (aşağıda detay) | `omnitrace/telemetry.html`, `omnitrace/vm_proxy.php` | ✅ |
 | 2026-06-21 | Site repoya eklendi + GitHub push (`91d11b9`) | `omnitrace/*` | ✅ |
 | 2026-06-21 | **CANLIYA ALINDI** — FTP ile `index.html` + `telemetry.html` Hostinger `public_html`e yüklendi | canlı | ✅ |
+| 2026-06-21 | **Müşteri–Cihaz yetki matrisi (güvenlik) — BACKEND** kuruldu, canlıda test edildi | `hostinger/musteri_*.php` | ✅ |
+
+### Müşteri–Cihaz yetki matrisi (8×8 güvenlik) — Backend (2026-06-21)
+**Amaç:** Her müşteri SADECE yetkili device_id'lerini görsün; yetkisiz aracı asla göremesin. Sunucu-taraflı, kurcalanamaz.
+**Tablolar** (`musteri_kurulum.php` ile tek seferde): `musteriler`(id,kod,sifre_hash,ad,aktif) · `musteri_cihaz`(musteri_id,device_id = **yetki matrisi**) · `araclar`(device_id UNIQUE = cihaz kütüğü).
+**API** (`musteri_api.php`, hepsi PHP+MySQL, secrets.php + musteri_secret.php require eder):
+- `?action=login` {kod,sifre} → `password_verify` → **HMAC-SHA256 imzalı durumsuz token** (12s) + yetkili cihaz listesi.
+- `?action=veri` (Bearer token) {device_id} → yetki **her istekte DB'den taze** kontrol; device_id ∈ matris değilse **403**; yetkiliyse VM'den (`34.175.200.205`) server-side proxy. ← güvenlik kapısı.
+- `?action=cihazlar` → yetkili cihazlar. Yönetim: `admin_liste/admin_musteri_ekle/admin_cihaz_ata` (ayrı `$ADMIN_KEY`) → elle SQL gerekmez.
+**Sırlar:** `musteri_secret.php` ($TOKEN_SECRET, $ADMIN_KEY) `.gitignore`'da, GitHub'a gitmez (şablon: `musteri_secret.example.php`).
+**Canlı test (curl):** doğru login→token ✅ · yanlış şifre→401 ✅ · yetkili device 1→200+VM ✅ · **yetkisiz device 2→403** ✅ · token yok→401 ✅ · admin ekle/ata/liste ✅ · CUST-002 sadece device 2 görür (izolasyon) ✅.
+**Örnek:** `CUST-001`/`Demo#2026`→device 1 · `CUST-002`/`Acme#2026`→device 2.
+**Sıradaki:** `telemetry.html` çift-mod giriş — demo şifresi→mevcut mock filo; müşteri kodu→`musteri_api`'den sadece yetkili gerçek cihazlar (demolar gizli).
+**Not (ingest):** Gerçek veri VM'de (ingest VM-taraflı, bizde erişim yok). Yetki/filtreleme **görüntüleme katmanında** (musteri_api) zorlandığı için kayıtsız/yetkisiz cihaz verisi hiçbir müşteriye ulaşmaz — "göstermeme" güvence altında. Cihaz-taraflı ret, VM erişimi gelince eklenebilir.
 
 ### Canlıya alma notları (2026-06-21)
 - **FTP:** `ftp://92.113.28.98:21`, kullanıcı `u834087667.omnitraceglobal.com` (parola `deploy.ps1`'de, gitignore). FTP kökü **doğrudan `public_html`**.
