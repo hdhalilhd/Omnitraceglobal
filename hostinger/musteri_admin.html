@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>OmniTrace — Yönetim Paneli</title>
+<style>
+:root{--crimson:#C0151F;--crimson-d:#8C0F17;--bg:#EAF0F7;--card:#fff;--line:#dbe3ee;--line2:#eef2f8;
+  --txt:#1b2738;--muted:#64748b;--muted2:#94a3b8;--ok:#16a34a;--green-bg:#e7f7ee;--shadow:0 1px 3px rgba(16,24,40,.07),0 8px 24px rgba(23,42,72,.05)}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Segoe UI",system-ui,Roboto,Arial,sans-serif;color:var(--txt);background:var(--bg);
+  background-image:linear-gradient(rgba(148,168,196,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.13) 1px,transparent 1px);
+  background-size:42px 42px;min-height:100vh}
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:14px;padding:14px 26px;color:#fff;
+  background:linear-gradient(135deg,var(--crimson),var(--crimson-d));box-shadow:0 6px 22px rgba(140,15,23,.28)}
+.top .mk{width:32px;height:32px;border-radius:9px;background:#ffffff22;display:grid;place-items:center;font-size:17px}
+.top b{font-size:18px;font-weight:800;letter-spacing:.2px}.top .tl{font-weight:400;opacity:.9;font-size:14px}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px}
+.top .chip{background:#ffffff22;padding:5px 12px;border-radius:999px;font-weight:600}
+.top button{background:#ffffff1f;border:1px solid #ffffff3a;color:#fff;padding:7px 14px;border-radius:9px;cursor:pointer;font:inherit;font-size:13px}
+.top button:hover{background:#ffffff33}
+.wrap{max-width:1120px;margin:0 auto;padding:26px}
+.grid{display:grid;grid-template-columns:1.25fr .85fr;gap:18px;align-items:start}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:17px}.card .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+label{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 6px}
+input,select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;background:#fff;color:var(--txt)}
+input:focus,select:focus{outline:none;border-color:var(--crimson);box-shadow:0 0 0 3px rgba(192,21,31,.1)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field{margin-bottom:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;cursor:pointer;
+  background:linear-gradient(135deg,var(--crimson),var(--crimson-d));color:#fff;padding:11px 18px;font:inherit;font-size:14px;font-weight:600;width:100%}
+.btn:hover{filter:brightness(1.07)}.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--txt);border:1px solid var(--line);font-weight:600}
+.btn.ghost:hover{border-color:var(--crimson);color:var(--crimson);filter:none}
+.btn.sm{padding:7px 11px;font-size:12.5px;width:auto}
+.btn.x{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:6px 10px;font-size:12px;width:auto}
+.btn.x:hover{background:#fee2e2}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:9px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;font-size:13.5px;border-bottom:1px solid var(--line2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;background:#eef2ff;color:#3730a3;margin:2px 3px 2px 0}
+.pill.none{background:#f1f5f9;color:var(--muted2)}
+.devid{display:inline-flex;align-items:center;gap:8px;font-family:"JetBrains Mono",Consolas,monospace;font-weight:800;font-size:15px;color:var(--crimson)}
+.copy{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 8px;font-size:11px;color:var(--muted)}
+.copy:hover{border-color:var(--crimson);color:var(--crimson)}
+.muted{color:var(--muted)}.mono{font-family:"JetBrains Mono",Consolas,monospace}
+.empty{padding:22px;text-align:center;color:var(--muted2);font-size:13px}
+.hint{background:#fff7ed;border:1px solid #fed7aa;border-radius:11px;padding:13px 15px;font-size:12.5px;color:#9a3412;line-height:1.6;margin-top:14px}
+.hint b{color:#7c2d12}
+.hint code{background:#fff;border:1px solid #fed7aa;border-radius:5px;padding:1px 6px;font-family:Consolas,monospace}
+/* GATE */
+#gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);
+  background-image:linear-gradient(rgba(148,168,196,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.13) 1px,transparent 1px);background-size:42px 42px}
+#gate .box{width:380px;max-width:92vw;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:30px}
+#gate .lg{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+#gate .lg .mk{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--crimson),var(--crimson-d));display:grid;place-items:center;color:#fff;font-size:19px}
+#gate h1{font-size:19px;margin:0}#gate .lg span{color:var(--crimson);font-weight:800}
+#gate p{color:var(--muted);font-size:13px;margin:0 0 18px}
+.err{border-color:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.12)!important}
+/* TOAST */
+#toasts{position:fixed;right:20px;bottom:20px;z-index:90;display:flex;flex-direction:column;gap:10px}
+.toast{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:12px;
+  box-shadow:0 8px 28px rgba(16,24,40,.16);padding:13px 16px;font-size:13.5px;min-width:240px;max-width:360px;
+  transform:translateX(120%);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.toast.on{transform:translateX(0)}.toast.err{border-left-color:#dc2626}
+</style>
+</head>
+<body>
+
+<!-- GATE: admin anahtarı -->
+<div id="gate">
+  <div class="box">
+    <div class="lg"><div class="mk">🛡️</div><h1>OmniTrace <span>Yönetim</span></h1></div>
+    <p>Müşteri ve cihaz yönetimi için <b>admin anahtarını</b> girin.</p>
+    <div class="field"><label>Admin Anahtarı</label>
+      <input id="gateKey" type="password" placeholder="admin_key" autocomplete="off"></div>
+    <button class="btn" id="gateBtn">Giriş</button>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel" style="display:none">
+  <div class="top">
+    <div class="mk">🚜</div><b>OmniTrace</b> <span class="tl">Yönetim Paneli</span>
+    <div class="right">
+      <span class="chip" id="statChip">— müşteri · — cihaz</span>
+      <button id="refreshBtn">↻ Yenile</button>
+      <button id="logoutBtn">Çıkış</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="grid">
+      <!-- SOL: müşteriler + cihazlar -->
+      <div>
+        <div class="card">
+          <h2>Müşteriler</h2>
+          <p class="sub">Her müşteri yalnızca atanmış device_id'lerini görür.</p>
+          <table id="custTable"><thead>
+            <tr><th>Kod (giriş)</th><th>Ad</th><th>Cihazlar</th><th></th></tr>
+          </thead><tbody id="custBody"></tbody></table>
+        </div>
+
+        <div class="card">
+          <h2>Cihazlar &amp; device_id</h2>
+          <p class="sub">Bu device_id'yi STM32 firmware'ine gömün; cihaz bu ID ile veri gönderir.</p>
+          <table id="devTable"><thead>
+            <tr><th>device_id</th><th>Ad / Şase</th><th>Sahip müşteri</th></tr>
+          </thead><tbody id="devBody"></tbody></table>
+          <div class="hint">
+            <b>STM32 entegrasyonu:</b> Aşağıdaki device_id'yi cihaz firmware'ine yazın
+            (<code>firmware/stm32/Core/Src/main.c</code> → <code>#define DEVICE_ID</code>).
+            Cihaz, sunucuya bu ID ile POST atınca ilgili müşterinin panelinde canlı görünür.
+          </div>
+        </div>
+      </div>
+
+      <!-- SAĞ: formlar -->
+      <div>
+        <div class="card">
+          <h2>Yeni Müşteri</h2>
+          <p class="sub">Müşteriye giriş kodu + şifre verin.</p>
+          <div class="field"><label>Müşteri Kodu (giriş adı)</label><input id="cKod" placeholder="örn. ACME-LOJISTIK"></div>
+          <div class="field"><label>Şifre (en az 6 hane)</label><input id="cSifre" placeholder="şifre"></div>
+          <div class="field"><label>Firma Adı (görünen)</label><input id="cAd" placeholder="örn. Acme Lojistik A.Ş."></div>
+          <button class="btn" id="custAddBtn">＋ Müşteri Ekle</button>
+        </div>
+
+        <div class="card">
+          <h2>Cihaz Ata</h2>
+          <p class="sub">Bir device_id'yi müşteriye yetkilendirin.</p>
+          <div class="field"><label>Müşteri</label><select id="aKod"></select></div>
+          <div class="field"><label>device_id (STM32'ye gömülecek sayı)</label><input id="aDev" type="number" min="1" placeholder="örn. 3"></div>
+          <div class="row"><div class="field"><label>Cihaz Adı (ops.)</label><input id="aAd" placeholder="Forklift 1"></div>
+            <div class="field"><label>Şase No (ops.)</label><input id="aSase" placeholder="304MB..."></div></div>
+          <button class="btn" id="devAssignBtn">🔗 Cihazı Müşteriye Ata</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+var API = 'musteri_api.php';
+var KEY = sessionStorage.getItem('ot_admin_key') || '';
+var $ = function(s){ return document.querySelector(s); };
+
+function toast(msg, err){
+  var t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : '');
+  t.textContent = msg; $('#toasts').appendChild(t);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('on'); }); });
+  setTimeout(function(){ t.classList.remove('on'); setTimeout(function(){ t.remove(); }, 450); }, 3600);
+}
+function api(action, extra){
+  var body = Object.assign({ admin_key: KEY }, extra || {});
+  return fetch(API + '?action=' + action, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, status: r.status, j: j }; }); });
+}
+
+/* ── GATE ── */
+function openPanel(){ $('#gate').style.display = 'none'; $('#panel').style.display = 'block'; loadAll(); }
+$('#gateBtn').addEventListener('click', function(){
+  var k = $('#gateKey').value.trim();
+  if (!k){ $('#gateKey').classList.add('err'); return; }
+  KEY = k;
+  // doğrula: admin_liste çağır
+  api('admin_liste').then(function(res){
+    if (res.ok && res.j.status === 'success'){
+      sessionStorage.setItem('ot_admin_key', KEY); openPanel();
+    } else { $('#gateKey').classList.add('err'); toast(res.j.message || 'Anahtar geçersiz', true); }
+  }).catch(function(){ toast('Sunucuya ulaşılamadı', true); });
+});
+$('#gateKey').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('#gateBtn').click(); });
+$('#gateKey').addEventListener('input', function(){ $('#gateKey').classList.remove('err'); });
+$('#logoutBtn').addEventListener('click', function(){ sessionStorage.removeItem('ot_admin_key'); location.reload(); });
+$('#refreshBtn').addEventListener('click', loadAll);
+
+/* ── YÜKLE ── */
+var CUSTOMERS = [];
+function loadAll(){ return Promise.all([loadCustomers(), loadDevices()]); }
+
+function loadCustomers(){
+  return api('admin_liste').then(function(res){
+    if (!res.ok || res.j.status !== 'success'){ toast(res.j.message || 'Liste alınamadı', true); return; }
+    CUSTOMERS = res.j.musteriler || [];
+    var tb = $('#custBody'); tb.innerHTML = '';
+    if (!CUSTOMERS.length){ tb.innerHTML = '<tr><td colspan="4" class="empty">Henüz müşteri yok.</td></tr>'; }
+    CUSTOMERS.forEach(function(c){
+      var devs = c.devices ? c.devices.split(',').map(function(d){ return '<span class="pill">#' + d + '</span>'; }).join('') : '<span class="pill none">cihaz yok</span>';
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="mono"><b>' + esc(c.kod) + '</b></td><td>' + esc(c.ad || '—') + '</td><td>' + devs + '</td>' +
+        '<td style="text-align:right"><button class="btn x" data-del="' + esc(c.kod) + '">Sil</button></td>';
+      tb.appendChild(tr);
+    });
+    // dropdown'u güncelle
+    var sel = $('#aKod'); sel.innerHTML = CUSTOMERS.map(function(c){ return '<option value="' + esc(c.kod) + '">' + esc(c.kod) + (c.ad ? ' — ' + esc(c.ad) : '') + '</option>'; }).join('');
+    updateStat();
+    tb.querySelectorAll('[data-del]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var kod = b.getAttribute('data-del');
+        if (!confirm(kod + ' müşterisini silmek istediğine emin misin?')) return;
+        api('admin_musteri_sil', { kod: kod }).then(function(res){
+          toast(res.j.message || (res.ok ? 'Silindi' : 'Hata'), !res.ok); loadAll();
+        });
+      });
+    });
+  });
+}
+
+function loadDevices(){
+  return api('admin_cihaz_liste').then(function(res){
+    if (!res.ok || res.j.status !== 'success') return;
+    var tb = $('#devBody'); tb.innerHTML = '';
+    var list = res.j.cihazlar || [];
+    if (!list.length){ tb.innerHTML = '<tr><td colspan="3" class="empty">Henüz cihaz yok.</td></tr>'; updateStat(0); return; }
+    list.forEach(function(d){
+      var owner = d.musteriler ? d.musteriler.split(',').map(function(k){ return '<span class="pill">' + esc(k) + '</span>'; }).join('') : '<span class="pill none">atanmamış</span>';
+      var name = [d.ad, d.sase_no].filter(Boolean).map(esc).join(' · ') || '<span class="muted">—</span>';
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><span class="devid">#' + d.device_id + '</span> <button class="copy" data-cp="' + d.device_id + '">kopyala</button></td>' +
+        '<td>' + name + '</td><td>' + owner + '</td>';
+      tb.appendChild(tr);
+    });
+    DEV_COUNT = list.length; updateStat();
+    tb.querySelectorAll('[data-cp]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var v = b.getAttribute('data-cp');
+        navigator.clipboard && navigator.clipboard.writeText(v);
+        b.textContent = '✓ kopyalandı'; setTimeout(function(){ b.textContent = 'kopyala'; }, 1400);
+        toast('device_id ' + v + ' kopyalandı — STM32 firmware\'ine gömün');
+      });
+    });
+  });
+}
+
+var DEV_COUNT = 0;
+function updateStat(){ $('#statChip').textContent = CUSTOMERS.length + ' müşteri · ' + DEV_COUNT + ' cihaz'; }
+
+/* ── EKLE / ATA ── */
+$('#custAddBtn').addEventListener('click', function(){
+  var kod = $('#cKod').value.trim(), sifre = $('#cSifre').value, ad = $('#cAd').value.trim();
+  if (!kod || sifre.length < 6){ toast('Kod ve en az 6 haneli şifre gerekli', true); return; }
+  api('admin_musteri_ekle', { kod: kod, sifre: sifre, ad: ad }).then(function(res){
+    toast(res.j.message || (res.ok ? 'Eklendi' : 'Hata'), !res.ok);
+    if (res.ok){ $('#cKod').value = ''; $('#cSifre').value = ''; $('#cAd').value = ''; loadCustomers(); }
+  });
+});
+$('#devAssignBtn').addEventListener('click', function(){
+  var kod = $('#aKod').value, dev = parseInt($('#aDev').value, 10), ad = $('#aAd').value.trim(), sase = $('#aSase').value.trim();
+  if (!kod){ toast('Önce müşteri ekleyin', true); return; }
+  if (!dev || dev < 1){ toast('Geçerli bir device_id girin', true); return; }
+  api('admin_cihaz_ata', { kod: kod, device_id: dev, ad: ad, sase_no: sase }).then(function(res){
+    toast(res.j.message || (res.ok ? 'Atandı' : 'Hata'), !res.ok);
+    if (res.ok){ $('#aDev').value = ''; $('#aAd').value = ''; $('#aSase').value = ''; loadAll(); }
+  });
+});
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+
+/* otomatik giriş (anahtar session'da varsa) */
+if (KEY){ api('admin_liste').then(function(res){ if (res.ok && res.j.status === 'success') openPanel(); }); }
+</script>
+</body>
+</html>

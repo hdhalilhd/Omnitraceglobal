@@ -79,12 +79,37 @@ try {
     }
     if ($action === 'admin_cihaz_ata') {
       $kod = trim((string)inp($body, 'kod')); $dev = (int)inp($body, 'device_id'); $sil = (int)(inp($body, 'sil') ?? 0);
+      $ad = trim((string)(inp($body, 'ad') ?? '')); $sase = trim((string)(inp($body, 'sase_no') ?? '')); $model = trim((string)(inp($body, 'model') ?? ''));
+      if ($dev <= 0) out(400, ['status' => 'error', 'message' => 'Gecerli device_id gerekli']);
       $st = $pdo->prepare("SELECT id FROM musteriler WHERE kod=?"); $st->execute([$kod]); $m = $st->fetch();
       if (!$m) out(404, ['status' => 'error', 'message' => 'Musteri bulunamadi']);
-      $pdo->prepare("INSERT IGNORE INTO araclar (device_id) VALUES (?)")->execute([$dev]); // kütüğe ekle
+      if ($ad !== '' || $sase !== '' || $model !== '') {
+        $pdo->prepare("INSERT INTO araclar (device_id,ad,sase_no,model) VALUES (?,?,?,?)
+                       ON DUPLICATE KEY UPDATE ad=VALUES(ad), sase_no=VALUES(sase_no), model=VALUES(model)")
+            ->execute([$dev, $ad, $sase, $model]);
+      } else {
+        $pdo->prepare("INSERT IGNORE INTO araclar (device_id) VALUES (?)")->execute([$dev]);
+      }
       if ($sil) $pdo->prepare("DELETE FROM musteri_cihaz WHERE musteri_id=? AND device_id=?")->execute([$m['id'], $dev]);
       else      $pdo->prepare("INSERT IGNORE INTO musteri_cihaz (musteri_id,device_id) VALUES (?,?)")->execute([$m['id'], $dev]);
       out(200, ['status' => 'success', 'message' => ($sil ? 'Yetki kaldirildi' : 'Yetki verildi') . " ($kod <-> device $dev)"]);
+    }
+    if ($action === 'admin_cihaz_liste') {
+      $rows = $pdo->query("SELECT a.device_id,a.ad,a.sase_no,a.model,
+                GROUP_CONCAT(m.kod ORDER BY m.kod) AS musteriler
+              FROM araclar a
+              LEFT JOIN musteri_cihaz mc ON mc.device_id=a.device_id
+              LEFT JOIN musteriler m ON m.id=mc.musteri_id
+              GROUP BY a.device_id ORDER BY a.device_id")->fetchAll();
+      out(200, ['status' => 'success', 'cihazlar' => $rows]);
+    }
+    if ($action === 'admin_musteri_sil') {
+      $kod = trim((string)inp($body, 'kod'));
+      $st = $pdo->prepare("SELECT id FROM musteriler WHERE kod=?"); $st->execute([$kod]); $m = $st->fetch();
+      if (!$m) out(404, ['status' => 'error', 'message' => 'Musteri bulunamadi']);
+      $pdo->prepare("DELETE FROM musteri_cihaz WHERE musteri_id=?")->execute([$m['id']]);
+      $pdo->prepare("DELETE FROM musteriler WHERE id=?")->execute([$m['id']]);
+      out(200, ['status' => 'success', 'message' => "Musteri silindi: $kod"]);
     }
     out(400, ['status' => 'error', 'message' => 'Bilinmeyen admin islemi']);
   }
