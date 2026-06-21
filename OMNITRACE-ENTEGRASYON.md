@@ -170,6 +170,15 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-21 | Site repoya eklendi + GitHub push (`91d11b9`) | `omnitrace/*` | ✅ |
 | 2026-06-21 | **CANLIYA ALINDI** — FTP ile `index.html` + `telemetry.html` Hostinger `public_html`e yüklendi | canlı | ✅ |
 | 2026-06-21 | **Müşteri–Cihaz yetki matrisi (güvenlik) — BACKEND** kuruldu, canlıda test edildi | `hostinger/musteri_*.php` | ✅ |
+| 2026-06-21 | **Çift-mod giriş — FRONTEND** (demo vs müşteri) canlıya alındı + push | `omnitrace/telemetry.html` | ✅ |
+
+### Çift-mod giriş — Frontend (2026-06-21)
+`telemetry.html` girişine **6 additive** değişiklik (demo yolu + animasyon/düzen hiç bozulmadı):
+- **Login akışı:** kod `OT-DEMO01` değilse önce `musteri_api?action=login` denenir → başarılıysa **müşteri modu**; 401/başarısızsa demo şifresi (`OT-DEMO01/zass2026`) kontrol edilir.
+- **Müşteri modu:** `buildCustomerFleet()` VEH'i **sadece yetkili cihazlarla** yeniden kurar (mock filo kalkar); `pollCustomer()` her cihazı **Bearer token** ile `musteri_api?action=veri`'den 2sn'de çeker → `applyVehicleLive()` ile mevcut animasyona bağlar; chip "N CİHAZ CANLI". Reload'da oturum geri yüklenir (storage).
+- **Demo modu:** mevcut mock filo + VM device-1 canlı (`pollLive`) aynen korundu. Sadece `http(s)`'te müşteri girişi denenir.
+- **Canlı test (production):** demo→15 araç ✅ · CUST-001→sadece device 1 (304MB) ✅ · canlı SoC/Hız bağlanması (mock VM ile 64%/7.2km/h) ✅ · yanlış şifre→reddedildi ✅ · QA temiz, 0 pageerror ✅.
+- **Test müşterileri (canlı DB):** `CUST-001`/`Demo#2026`→device 1, `CUST-002`/`Acme#2026`→device 2 (admin testi; istenirse `admin_cihaz_ata` sil / silinebilir).
 
 ### Müşteri–Cihaz yetki matrisi (8×8 güvenlik) — Backend (2026-06-21)
 **Amaç:** Her müşteri SADECE yetkili device_id'lerini görsün; yetkisiz aracı asla göremesin. Sunucu-taraflı, kurcalanamaz.
