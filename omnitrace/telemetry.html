@@ -773,12 +773,33 @@ var loginActive = !AUTH;
 })();
 
 /* ═══════ LOGIN FLOW ═══════ */
+/* müşteri modunda VEH'i SADECE yetkili gerçek cihazlarla yeniden kur (mock filo kalkar) */
+function buildCustomerFleet(cihazlar){
+  if (!cihazlar) return;
+  var boxes=[BA,BB,BC], zp=['A','B','C'];
+  VEH.length = 0;
+  cihazlar.forEach(function(d,i){
+    var bx=boxes[i%3];
+    var x=(bx[0]+(bx[1]-bx[0])*(0.3+0.4*Math.random()))|0;
+    var y=(bx[2]+(bx[3]-bx[2])*(0.3+0.4*Math.random()))|0;
+    var label=d.sase_no||d.ad||('DEVICE-'+d.device_id);
+    var v=mkV(label, d.ad||('Cihaz '+d.device_id), '••••', 'offline', zp[i%3]+'-0'+((i%5)+1), 50, x, y, bx);
+    v.deviceId=d.device_id; v.real=true; v._live=null;
+    VEH.push(v);
+  });
+}
 function showDash(instant){
   loginActive = false;
   loginView.style.display = 'none';
   dashView.hidden = false;
   document.body.style.overflow = 'hidden';
+  if (OT_CUST && OT_CUST.cihazlar) buildCustomerFleet(OT_CUST.cihazlar);
   initDash();
+  if (OT_CUST){
+    var ub=document.querySelector('.sb-user b'), us=document.querySelector('.sb-user div span');
+    if(ub) ub.textContent = OT_CUST.ad || 'Müşteri';
+    if(us) us.textContent = (OT_CUST.cihazlar?OT_CUST.cihazlar.length:0) + (LANG==='tr'?' cihaz':' devices');
+  }
   if (!instant && hasGSAP && !REDUCED){
     gsap.fromTo('.sb', {x:-30, opacity:0}, {x:0, opacity:1, duration:.7, ease:'power3.out'});
     gsap.fromTo('.main', {opacity:0}, {opacity:1, duration:.7, ease:'power2.out', delay:.1});
@@ -786,6 +807,13 @@ function showDash(instant){
 }
 
 if (LANG === 'tr') setTimeout(applyLang, 0);
+/* müşteri oturumu (çift-mod giriş) — reload'da geri yükle */
+var OT_CUST = null;
+(function(){ try{
+  var tk = sessionStorage.getItem('ot_cust_token') || localStorage.getItem('ot_cust_token');
+  var dv = sessionStorage.getItem('ot_cust_devs')  || localStorage.getItem('ot_cust_devs');
+  if (tk && dv) OT_CUST = { token:tk, cihazlar:JSON.parse(dv) };
+}catch(e){} })();
 if (AUTH){
   /* dashboard verisi aşağıda tanımlı — IIFE bitince çalıştır */
   setTimeout(function(){ showDash(true); }, 0);
@@ -810,9 +838,8 @@ if (AUTH){
     btn.classList.add('busy');
     alertBar.classList.remove('on');
     setTimeout(function(){
-      var okId = fid.value.trim().toUpperCase() === 'OT-DEMO01';
-      var okPw = fpw.value === 'zass2026';
-      if (okId && okPw){
+      var id = fid.value.trim(), pw = fpw.value;
+      function enter(){
         sessionStorage.setItem('ot_auth', '1');
         if ($('#rememberMe').checked) localStorage.setItem('ot_auth', '1');
         btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -824,7 +851,8 @@ if (AUTH){
               gsap.to(wipe, {clipPath:'circle(0% at 50% 50%)', duration:.6, ease:'power3.inOut', delay:.15});
             }});
         } else { showDash(true); }
-      } else {
+      }
+      function fail(){
         btn.classList.remove('busy');
         alertBar.classList.add('on');
         [fid, fpw].forEach(function(inp){
@@ -834,6 +862,27 @@ if (AUTH){
         if (hasGSAP && !REDUCED)
           gsap.to('#loginPanel', {keyframes:[{x:-8},{x:8},{x:-8},{x:8},{x:-4},{x:4},{x:0}], duration:.42, ease:'none'});
       }
+      function clearCust(){ try{ ['ot_cust_token','ot_cust_devs'].forEach(function(k){ sessionStorage.removeItem(k); localStorage.removeItem(k); }); }catch(e){} }
+      function demoCheck(){
+        if (id.toUpperCase() === 'OT-DEMO01' && pw === 'zass2026'){ OT_CUST = null; clearCust(); enter(); }
+        else fail();
+      }
+      /* önce MÜŞTERİ girişi (sunucu-taraflı yetki); başarısızsa demo dene */
+      if (/^https?:/.test(location.protocol) && id.toUpperCase() !== 'OT-DEMO01'){
+        fetch('musteri_api.php?action=login', {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({kod:id, sifre:pw})})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+          .then(function(res){
+            if (res.ok && res.j && res.j.status === 'success' && res.j.token){
+              OT_CUST = { token:res.j.token, cihazlar:res.j.cihazlar || [], ad:res.j.ad || id };
+              var store = $('#rememberMe').checked ? localStorage : sessionStorage;
+              try { store.setItem('ot_cust_token', OT_CUST.token);
+                    store.setItem('ot_cust_devs', JSON.stringify(OT_CUST.cihazlar)); } catch(e){}
+              enter();
+            } else demoCheck();
+          })
+          .catch(function(){ demoCheck(); });
+      } else demoCheck();
     }, 750);
   });
 }
@@ -1556,7 +1605,7 @@ function initDash(){
         v.amp = 18 + Math.random()*8;
         v.volt = 54 + Math.random()*1.5;
       }
-      if (v.real && OT_LIVE.everOk) applyLive(v);   /* gerçek VM verisi rastgeleyi ezer */
+      if (v.real){ if (OT_CUST) applyVehicleLive(v); else if (OT_LIVE.everOk) applyLive(v); }   /* gerçek veri rastgeleyi ezer */
       v.volt = 49 + (v.soc/100)*6 + (Math.random()-.5)*.2;
       v.hist.push({s:v.soc, t:v.btemp});
       if (v.hist.length > 60) v.hist.shift();
@@ -1613,7 +1662,49 @@ function initDash(){
       })
       .catch(function(){ /* VM/proxy yok → sessiz, demo sürer */ });
   }
-  pollLive(); setInterval(pollLive, 2000);
+  /* ── müşteri modu: her yetkili cihazı musteri_api ile (Bearer token) çek ── */
+  function vehByDevice(dev){ for (var i=0;i<VEH.length;i++) if (VEH[i].deviceId===dev) return VEH[i]; return null; }
+  function applyVehicleLive(v){
+    var L = v._live; if (!L || !L.everOk) return;
+    if (L.secAgo >= 10){ v.st = 'offline'; return; }
+    var r = L.row;
+    var soc=liveNum(r,['batarya_soc']);   if(soc!=null) v.soc=Math.max(0,Math.min(100,soc));
+    var spd=liveNum(r,['gercek_hiz']);     if(spd!=null) v.speed=spd;
+    var mt =liveNum(r,['motor_sic_sag','motor_sic_sol']); if(mt!=null) v.btemp=mt;
+    var ma =liveNum(r,['motor_akim_sag','dc_akim']); if(ma!=null) v.mamp=Math.abs(ma);
+    var dc =liveNum(r,['dc_akim']);        if(dc!=null) v.amp=-Math.abs(dc);
+    var lf =liveNum(r,['lift']);           if(lf!=null) v.lift=lf;
+    var sa =liveNum(r,['aci_deger']);      if(sa!=null) v.steer=sa;
+    var ch =liveNum(r,['calisma_saati']);  if(ch!=null) v.hours=ch+'h';
+    v.volt = 49 + (v.soc/100)*6;
+    if (v.st==='offline') v.st='online';
+  }
+  function liveChipCustomer(){
+    var chip=$('#liveChip'); if(!chip||!OT_CUST) return;
+    var fresh=0; VEH.forEach(function(v){ if(v._live&&v._live.everOk&&v._live.secAgo<10) fresh++; });
+    chip.innerHTML='<span class="pulse-dot" style="width:5px;height:5px;background:'+(fresh?'#00C896':'#FF3B4E')+'"></span>'+
+      (fresh ? (LANG==='tr'?fresh+' CİHAZ CANLI':fresh+' DEVICE LIVE') : (LANG==='tr'?'CANLI VERİ YOK':'NO LIVE DATA'));
+  }
+  function pollCustomer(){
+    if (!/^https?:/.test(location.protocol) || !OT_CUST || !OT_CUST.cihazlar) return;
+    OT_CUST.cihazlar.forEach(function(d){
+      var dev = d.device_id;
+      fetch('musteri_api.php?action=veri', {method:'POST', cache:'no-store',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+OT_CUST.token},
+        body: JSON.stringify({device_id:dev, limit:1})})
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+          if (j && j.status==='success' && j.data && j.data.length){
+            var v = vehByDevice(dev); if(!v) return;
+            v._live = { row:j.data[0], secAgo:parseInt(j.data[0].seconds_ago!=null?j.data[0].seconds_ago:9999,10), everOk:true };
+          }
+        }).catch(function(){});
+    });
+    liveChipCustomer();
+  }
+  /* mod seçimi: müşteri → pollCustomer, demo → pollLive (VM device 1) */
+  if (OT_CUST){ pollCustomer(); setInterval(pollCustomer, 2000); }
+  else { pollLive(); setInterval(pollLive, 2000); }
 
   /* dil değişiminde dinamik görünümleri tazele */
   i18nHooks.push(function(){
