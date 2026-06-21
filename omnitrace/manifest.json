@@ -1,0 +1,14 @@
+{
+  "name": "OmniTrace Global — Fleet Intelligence",
+  "short_name": "OmniTrace",
+  "description": "Telemetry and intelligence platform for ZASS electric forklift fleets.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#EAF0F7",
+  "theme_color": "#C0151F",
+  "lang": "en",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blog — OmniTrace Global | Forklift Telemetrisi ve Filo Zekâsı</title>
+<meta name="description" content="Elektrikli forklift filolarında enerji optimizasyonu, CAN bus telemetrisi ve öngörülü bakım üzerine uzman rehberleri — OmniTrace Global blog." />
+<link rel="canonical" href="https://omnitraceglobal.com/blog.html" />
+<meta name="theme-color" content="#C0151F" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%23C0151F'/%3E%3Cellipse cx='16' cy='16' rx='13' ry='5' fill='none' stroke='%23C0151F' stroke-width='1.6' transform='rotate(-24 16 16)' opacity='0.8'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --void:#EAF0F7; --surface:#FFFFFF; --border-subtle:#D7DFE9; --border:#C2CEDC;
+  --red:#C0151F; --red-d:#A6121B; --t1:#161F2C; --t2:#46586E; --t3:#7C8DA3;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background-color:var(--void);
+  background-image:linear-gradient(rgba(148,168,196,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.16) 1px,transparent 1px);
+  background-size:42px 42px;
+  color:var(--t1);font:400 1rem/1.75 'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:860px;margin-inline:auto;padding:0 clamp(1.2rem,4vw,2rem)}
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-subtle)}
+.hbar{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font:700 1.1rem 'Space Grotesk',sans-serif}
+.brand i{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#D9404A,#8C0F17 60%,#730C12);box-shadow:0 0 14px rgba(192,21,31,.3);font-style:normal}
+.brand span{font-weight:500;color:var(--t3)}
+.back{font:600 .85rem 'Inter';color:var(--red-d)}
+.back:hover{color:var(--red)}
+.hero{padding:clamp(3rem,7vw,5rem) 0 clamp(2rem,4vw,3rem)}
+.kicker{font:600 .74rem 'JetBrains Mono',monospace;letter-spacing:.2em;color:var(--red);text-transform:uppercase}
+h1{font:700 clamp(2rem,5vw,3rem)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:14px 0 12px}
+.lede{color:var(--t2);max-width:620px}
+.toc{display:grid;gap:10px;margin:26px 0 0}
+.toc a{display:flex;gap:12px;align-items:baseline;padding:14px 18px;border-radius:14px;background:var(--surface);border:1px solid var(--border-subtle);font:600 .95rem 'Inter';transition:transform .25s,border-color .25s}
+.toc a:hover{transform:translateX(6px);border-color:var(--red)}
+.toc a b{font:700 .78rem 'JetBrains Mono';color:var(--red)}
+article{background:var(--surface);border:1px solid var(--border-subtle);border-radius:20px;padding:clamp(1.6rem,4vw,3rem);margin:34px 0;box-shadow:0 14px 40px rgba(23,42,72,.07)}
+article h2{font:700 clamp(1.4rem,3vw,1.9rem)/1.2 'Space Grotesk',sans-serif;letter-spacing:-.015em;margin:8px 0 6px}
+article h3{font:700 1.08rem 'Space Grotesk',sans-serif;margin:26px 0 8px}
+article .meta{font:500 .72rem 'JetBrains Mono';color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+article p{color:var(--t2);margin:12px 0}
+article ul{margin:12px 0 12px 20px;color:var(--t2)}
+article li{margin:7px 0}
+article b{color:var(--t1)}
+.tip{margin:18px 0;padding:14px 18px;border-left:3px solid var(--red);background:rgba(192,21,31,.04);border-radius:0 12px 12px 0;font-size:.92rem;color:var(--t2)}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin:40px 0 60px;padding:24px 26px;border-radius:18px;background:linear-gradient(135deg,#C0151F,#8C0F17);color:#fff}
+.cta b{font:700 1.15rem 'Space Grotesk',sans-serif}
+.cta p{font-size:.85rem;opacity:.85;margin-top:3px}
+.cta a{flex:none;padding:13px 24px;border-radius:11px;background:#fff;color:var(--red-d);font:600 .9rem 'Inter';transition:transform .2s}
+.cta a:hover{transform:scale(1.04)}
+footer{padding:26px 0 40px;color:var(--t3);font-size:.8rem;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="wrap hbar">
+  <a class="brand" href="index.html"><i></i>OmniTrace <span>Blog</span></a>
+  <a class="back" href="index.html">← omnitraceglobal.com</a>
+</div></header>
+
+<div class="wrap">
+  <div class="hero">
+    <p class="kicker">Bilgi Merkezi</p>
+    <h1>Forklift filonuzu veriyle yönetin.</h1>
+    <p class="lede">Elektrikli forklift operasyonlarında enerji, bakım ve güvenlik üzerine — sahadan gelen deneyimle yazılmış rehberler.</p>
+    <nav class="toc">
+      <a href="#enerji"><b>01</b>Elektrikli forklift filosunda enerji maliyetini %20 düşürmenin 5 yolu</a>
+      <a href="#canbus"><b>02</b>CAN bus telemetrisi nedir? Forklift verisinin tam rehberi</a>
+      <a href="#bakim"><b>03</b>Öngörülü bakım: arızayı olmadan önce yakalamak</a>
+    </nav>
+  </div>
+
+  <article id="enerji">
+    <p class="meta">Enerji · 6 dk okuma</p>
+    <h2>Elektrikli forklift filosunda enerji maliyetini %20 düşürmenin 5 yolu</h2>
+    <p>Elektrikli forklift filolarında enerji, toplam sahip olma maliyetinin en hızlı büyüyen kalemi. İyi haber: doğru veriyle yönetildiğinde, araç değiştirmeden %15–25 arası tasarruf çoğu filoda ulaşılabilir bir hedef.</p>
+    <h3>1. Şarjı tarife penceresine planlayın</h3>
+    <p>Çoğu tesiste araçlar vardiya bitince fişe takılır — yani tüketim, elektriğin en pahalı olduğu saatlere yığılır. Şarj başlangıcını gece tarifesine kaydırmak tek başına %8–12 tasarruf sağlar. Bunun için her aracın <b>gerçek SoC değerini</b> bilmek gerekir; "göz kararı" şarj planı yapılamaz.</p>
+    <h3>2. Fırsat şarjını disipline edin</h3>
+    <p>Mola aralarında yapılan kısa "fırsat şarjları" pratik görünür ama Li-Ion paketlerde döngü sayısını şişirir ve verimsiz şarj bölgesinde çalışır. Telemetri, hangi aracın gerçekten şarja ihtiyacı olduğunu gösterir — %55 SoC ile fişe takılan araç, listenin sonuna alınır.</p>
+    <h3>3. Rölantiyi görünür yapın</h3>
+    <p>Saha verilerimizde tipik bir filoda çalışma saatlerinin <b>%6–11'i rölanti</b>: araç açık, operatör yok. Sürücü bazlı rölanti raporu yayınlamak, hiçbir yaptırım olmadan bile bu oranı birkaç haftada yarıya indirir.</p>
+    <h3>4. Rejeneratif freni doğru ayarlayın</h3>
+    <p>Rejeneratif fren şiddeti çoğu araçta fabrika ayarında kalır. Rampa ve yük profiline göre ayarlanmış rejen, vardiya başına ölçülebilir kWh geri kazandırır — OTA parametre yönetimiyle bu, tüm filoya dakikalar içinde uygulanır.</p>
+    <h3>5. Rota yoğunluğunu ısı haritasıyla izleyin</h3>
+    <p>Aynı koridoru günde 400 kez kat eden bir araç, yerleşim hatasının semptomudur. Konum ısı haritaları, raf yerleşimini değiştirerek toplam kat edilen mesafeyi düşürmenin en hızlı yoludur.</p>
+    <div class="tip">💡 <b>OmniTrace verisi:</b> Bu beş adımı uygulayan 540 araçlık bir 3PL filosu, vardiya başına enerji maliyetini %22 düşürdü ve batarya ömrünü tam bir sezon uzattı.</div>
+  </article>
+
+  <article id="canbus">
+    <p class="meta">Teknoloji · 8 dk okuma</p>
+    <h2>CAN bus telemetrisi nedir? Forklift verisinin tam rehberi</h2>
+    <p>GPS takip cihazı aracın <b>nerede</b> olduğunu söyler. CAN bus telemetrisi ise aracın <b>nasıl</b> olduğunu söyler — ve filo yönetiminde asıl parayı kazandıran ikincisidir.</p>
+    <h3>CAN bus aslında nedir?</h3>
+    <p>CAN (Controller Area Network), aracın içindeki elektronik kontrol ünitelerinin — batarya yönetimi (BMS), motor sürücü (MCU), fren kontrol (BCU), hidrolik, gösterge paneli — birbiriyle konuştuğu ortak veri hattıdır. Elektrikli bir forkliftte bu hat üzerinde saniyede yüzlerce mesaj akar: motor akımı, paket voltajı, hücre sıcaklıkları, direksiyon açısı, asansör yüksekliği, arıza kodları…</p>
+    <h3>Telemetri ünitesi ne yapar?</h3>
+    <p>OT-1 gibi bir telemetri ünitesi, CAN portuna takılır ve bu mesajları <b>pasif olarak dinler</b> — araç davranışına müdahale etmez. Mesajları çözümler (decode), anlamlı parametrelere çevirir ve LTE üzerinden şifreli olarak buluta aktarır. ZASS araçlarında üretici protokolü bilindiği için 200'den fazla parametre okunabilir; jenerik araçlarda J1939 standardı temel seti sağlar.</p>
+    <h3>Hangi veriler gerçekten önemli?</h3>
+    <ul>
+      <li><b>Hücre seviyesi voltaj/sıcaklık:</b> Paket "sağlıklı görünürken" tek hücrenin çökmesini aylar önce haber verir.</li>
+      <li><b>Motor ve kontrolcü sıcaklığı:</b> Aşırı yük ve soğutma problemlerinin ilk sinyali.</li>
+      <li><b>DTC arıza kodları:</b> Ham kod değil; çözümlenmiş açıklama + önerilen aksiyon operasyonel değer üretir.</li>
+      <li><b>Hidrolik basınç ve asansör profili:</b> Kaçak ve aşınmanın erken göstergesi.</li>
+      <li><b>Çalışma saati ve rölanti:</b> Bakım planının ve verimlilik raporlarının temeli.</li>
+    </ul>
+    <h3>Güvenlik boyutu</h3>
+    <p>Veri araçtan çıktığı anda TLS 1.3 ile sarılmalı, uçtan uca AES-256 ile şifrelenmeli ve KVKK/GDPR kapsamında <b>veri sahipliği filoda</b> kalmalıdır. Telemetri seçerken "veriyi kim görüyor, nerede saklanıyor, nasıl silinir" sorularının net cevabını isteyin.</p>
+    <div class="tip">💡 Kısa kural: GPS takip <b>kayıp aracı</b> bulur; CAN telemetrisi <b>kaybedilecek parayı</b> bulur.</div>
+  </article>
+
+  <article id="bakim">
+    <p class="meta">Bakım · 7 dk okuma</p>
+    <h2>Öngörülü bakım: arızayı olmadan önce yakalamak</h2>
+    <p>Filolarda üç bakım kültürü vardır: <b>reaktif</b> (bozulunca tamir), <b>periyodik</b> (takvime göre) ve <b>öngörülü</b> (veriye göre). Aradaki fark, plansız duruş maliyetinde gizlidir: tek bir forkliftin vardiya ortasında durması, dakikada palet kaybettiren zincirleme bir gecikme başlatır.</p>
+    <h3>Periyodik bakım neden yetmez?</h3>
+    <p>Takvim bazlı bakım iki hatayı aynı anda yapar: sağlam parçayı erken değiştirir (gereksiz maliyet) ve takvim arasında gelişen arızayı kaçırır (plansız duruş). Aynı modeldeki iki araç, kullanım profiline göre bambaşka hızlarda yıpranır — takvim bunu göremez, veri görür.</p>
+    <h3>Öngörülü bakım pratikte nasıl çalışır?</h3>
+    <ul>
+      <li><b>Temel çizgi:</b> Her aracın normal davranışı (sıcaklık eğrileri, akım profilleri, döngü sayıları) öğrenilir.</li>
+      <li><b>Sapma tespiti:</b> Motor sıcaklığının aynı yükte haftalar içinde 4–5°C tırmanması gibi yavaş trendler yakalanır — insan gözünün kaçırdığı tam da budur.</li>
+      <li><b>Pencere planlama:</b> Model, "bu kontrolcü 2–4 hafta içinde servis istiyor" dediğinde bakım, üretimi durdurmayan bir pencereye yerleştirilir ve parça otomatik rezerve edilir.</li>
+    </ul>
+    <h3>Nereden başlamalı?</h3>
+    <p>Üç sinyal, yatırım getirisinin %80'ini taşır: <b>batarya sağlığı (SoH) trendi</b>, <b>kontrolcü/motor sıcaklık trendi</b> ve <b>aktif DTC geçmişi</b>. Bu üçünü düzenli izleyen bir filo, plansız duruşların çoğunu daha ilk çeyrekte planlı bakıma çevirir.</p>
+    <div class="tip">💡 <b>OmniTrace verisi:</b> Soğuk zincir müşterimiz, hücre seviyesi izleme + ML bakım pencereleriyle 12 ay boyunca <b>sıfır plansız duruş</b> yaşadı.</div>
+  </article>
+
+  <div class="cta">
+    <div><b>Filonu veriyle yönetmeye hazır mısın?</b><p>OT-1 platformunu canlı demo hesabıyla keşfet.</p></div>
+    <a href="index.html#contact">Demo Talep Et →</a>
+  </div>
+</div>
+<footer>© 2026 OmniTrace Global · <a href="index.html" style="color:var(--red-d);font-weight:600">omnitraceglobal.com</a></footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "_comment": "OmniTrace veri katmanı. Gerçek OT-1 bağlandığında bu dosya canlı API endpoint'i ile değiştirilir; şema aynı kalır. Dashboard http(s) üzerinde bu dosyayı otomatik okur; file:// açılışında gömülü demo veriye düşer.",
+  "generated": "2026-06-13T00:00:00Z",
+  "sites": [
+    { "id": 0, "name": "WAREHOUSE 03 — İSTANBUL DC", "zones": ["ZONE A — RECEIVING", "ZONE B — HIGH BAY STORAGE", "ZONE C — RESTRICTED", "CHARGING BAYS"] },
+    { "id": 1, "name": "GEBZE PLANT — ASSEMBLY", "zones": ["ZONE A — PRESS SHOP", "ZONE B — ASSEMBLY LINE", "ZONE C — BATTERY ROOM", "CHARGING BAYS"] },
+    { "id": 2, "name": "İZMİR PORT — QUAY OPS", "zones": ["ZONE A — QUAY 1", "ZONE B — CONTAINER YARD", "ZONE C — CUSTOMS", "CHARGING BAYS"] }
+  ],
+  "vehicles": [
+    { "id": "FLT-0042", "driver": "Mehmet Yılmaz", "rfid": "****2841", "status": "fault", "zone": "C-07", "soc": 82.4, "site": 0 },
+    { "id": "FLT-0008", "driver": "Jakub Kowalski", "rfid": "****1190", "status": "online", "zone": "B-12", "soc": 91.2, "site": 0 },
+    { "id": "FLT-0023", "driver": "Daniel Müller", "rfid": "****3327", "status": "online", "zone": "B-04", "soc": 77.5, "site": 0 },
+    { "id": "FLT-0031", "driver": "Sven van Dijk", "rfid": "****8810", "status": "online", "zone": "A-02", "soc": 88.1, "site": 0 },
+    { "id": "FLT-0078", "driver": "Carla Johnson", "rfid": "****4452", "status": "online", "zone": "A-05", "soc": 69.4, "site": 0 },
+    { "id": "FLT-0017", "driver": "Ayşe Demir", "rfid": "****7203", "status": "charging", "zone": "BAY-2", "soc": 64.0, "site": 0 },
+    { "id": "FLT-0056", "driver": "Luca Rossi", "rfid": "****0915", "status": "charging", "zone": "BAY-3", "soc": 97.2, "site": 0 },
+    { "id": "FLT-0064", "driver": "Anna Nowak", "rfid": "****6671", "status": "offline", "zone": "DOCK-1", "soc": 41.0, "site": 0 }
+  ],
+  "alerts": [
+    { "sev": "crit", "code": "ERR_0x2A14", "vehicle": "FLT-0042", "desc": "Motor Controller Overtemperature", "age": "5 min ago", "action": "Reduce load, inspect cooling fan." },
+    { "sev": "warn", "code": "ERR_0x1B03", "vehicle": "FLT-0042", "desc": "Battery Cell Voltage Imbalance", "age": "32 min ago", "action": "Schedule equalization charge." },
+    { "sev": "warn", "code": "GEO_0x0021", "vehicle": "FLT-0078", "desc": "Geofence Breach — Zone C (Restricted)", "age": "1 h ago", "action": "Verify operator authorization." }
+  ]
+}

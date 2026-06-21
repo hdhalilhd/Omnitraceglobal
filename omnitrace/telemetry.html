@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Fleet Telemetry — OmniTrace Global</title>
+<meta name="description" content="OmniTrace Global Fleet Telemetry — authorized personnel only." />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#C0151F" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%23C0151F'/%3E%3Cellipse cx='16' cy='16' rx='13' ry='5' fill='none' stroke='%23C0151F' stroke-width='1.6' transform='rotate(-24 16 16)' opacity='0.8'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --void:#EAF0F7; --abyss:#E0E8F1; --surface-1:#FFFFFF; --surface-2:#F2F6FB;
+  --border-subtle:#D7DFE9; --border:#C2CEDC;
+  --omni-200:#E87078; --omni-300:#D9404A; --omni-400:#C0151F; --omni-500:#A6121B; --omni-600:#8C0F17;
+  --omni-glow:rgba(192,21,31,.30);
+  --signal-400:#FFB800; --signal-glow:rgba(255,184,0,.4);
+  --online-400:#00E5A0; --online-glow:rgba(0,229,160,.35);
+  --alert-400:#FF3B4E; --alert-glow:rgba(255,59,78,.35);
+  --text-1:#161F2C; --text-2:#46586E; --text-3:#7C8DA3;
+  --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background-color:var(--void);
+  background-image:
+    linear-gradient(rgba(148,168,196,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,168,196,.16) 1px,transparent 1px);
+  background-size:42px 42px;
+  color:var(--text-1);font-family:var(--font-body);overflow:hidden;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+ul{list-style:none}
+img,svg,canvas{display:block;max-width:100%}
+::selection{background:rgba(192,21,31,.18)}
+.mono{font-family:var(--font-mono)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-subtle);border-radius:5px}
+.glass{background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(244,248,252,.85));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(190,202,218,.85);box-shadow:0 0 0 1px rgba(192,21,31,.04),0 18px 44px rgba(23,42,72,.14),inset 0 1px 0 rgba(255,255,255,.95)}
+.pulse-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--online-400);box-shadow:0 0 12px var(--online-glow);animation:pdot 2.2s ease-in-out infinite}
+@keyframes pdot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.55}}
+
+/* ═══════ LOGIN ═══════ */
+.login{position:fixed;inset:0;display:grid;place-items:center;overflow:hidden}
+#loginBg{position:absolute;inset:0;width:100%;height:100%}
+.login::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(192,21,31,.07) 0%,rgba(234,240,247,.92) 72%);pointer-events:none}
+.login::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(23,42,72,.03) 0 1px,transparent 1px 3px);pointer-events:none;opacity:.6}
+.back{position:absolute;top:22px;left:26px;z-index:5;font:500 .82rem var(--font-body);color:var(--text-3);transition:color .2s;display:flex;align-items:center;gap:7px}
+.back:hover{color:var(--text-2)}
+.login-panel{position:relative;z-index:4;width:min(380px,92vw);padding:34px 30px 26px;border-radius:20px;background:rgba(255,255,255,.88);backdrop-filter:blur(32px) saturate(150%);-webkit-backdrop-filter:blur(32px) saturate(150%);border:1px solid rgba(190,202,218,.9);box-shadow:0 0 0 1px rgba(192,21,31,.05),0 28px 80px rgba(23,42,72,.22)}
+.lp-logo{display:flex;justify-content:center;margin-bottom:18px}
+.brand-mark{width:44px;height:44px;position:relative}
+.brand-mark .core{position:absolute;inset:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#D9404A,#8C0F17 60%,#730C12);box-shadow:0 0 18px -2px var(--omni-glow);animation:corePulse 3s ease-in-out infinite}
+@keyframes corePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.brand-mark .orbit{position:absolute;inset:0}
+.brand-mark .orbit::before{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:17px;margin-top:-8.5px;border:1.5px solid var(--omni-400);border-radius:50%;transform:rotate(-24deg);opacity:.85}
+.lp-title{text-align:center;font:700 1.06rem var(--font-display);letter-spacing:.16em}
+.lp-badge{display:block;text-align:center;margin:9px auto 0;font:600 .62rem var(--font-mono);letter-spacing:.18em;color:#B57500}
+.lp-rule{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:18px 0;transform:scaleX(0)}
+.alertbar{display:none;margin-bottom:14px;padding:10px 13px;border-radius:10px;background:rgba(255,59,78,.08);border:1px solid rgba(255,59,78,.35);color:#C2202C;font-size:.78rem}
+.alertbar.on{display:block}
+.field{margin-bottom:15px}
+.field label{display:block;font:600 .68rem var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px}
+.fwrap{position:relative}
+.fwrap .fic{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-3);transition:stroke .2s;pointer-events:none}
+.fwrap input{width:100%;padding:12px 42px 12px 40px;border-radius:11px;background:rgba(244,248,252,.75);border:1px solid var(--border);color:var(--text-1);font:500 .9rem var(--font-mono);letter-spacing:.04em;outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+.fwrap input::placeholder{color:var(--text-3);opacity:.7}
+.fwrap input:focus{border-color:var(--omni-400);box-shadow:0 4px 18px rgba(192,21,31,.22)}
+.fwrap input:focus ~ .fic{stroke:var(--omni-400)}
+.fwrap input.err{border-color:var(--alert-400)!important}
+.eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:grid;place-items:center;border-radius:8px}
+.eye svg{width:16px;height:16px;stroke:var(--text-3);transition:stroke .2s}
+.eye:hover svg{stroke:var(--text-2)}
+.remember{display:flex;align-items:center;gap:9px;margin:4px 0 18px;font-size:.78rem;color:var(--text-2);cursor:pointer;user-select:none}
+.remember input{appearance:none;width:16px;height:16px;border-radius:5px;border:1px solid var(--border);background:rgba(244,248,252,.8);cursor:pointer;position:relative;transition:background-color .2s,border-color .2s}
+.remember input:checked{background:var(--omni-500);border-color:var(--omni-400)}
+.remember input:checked::after{content:"";position:absolute;left:4.5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}
+.btn-signin{position:relative;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border-radius:11px;font:600 .92rem var(--font-body);color:#fff;background:linear-gradient(135deg,#C0151F,#8C0F17);border:1px solid rgba(192,21,31,.5);box-shadow:0 0 24px -8px rgba(192,21,31,.6),0 4px 16px rgba(0,0,0,.4);overflow:hidden;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.btn-signin:hover{transform:scale(1.02);box-shadow:0 0 40px -4px rgba(192,21,31,.8),0 8px 24px rgba(0,0,0,.5)}
+.btn-signin:active{transform:scale(.97)}
+.btn-signin::after{content:"";position:absolute;top:-40%;bottom:-40%;left:-30%;width:36%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.33),transparent);transform:translateX(-160%) skewX(-18deg);animation:shimmer 3s ease-in-out infinite;pointer-events:none}
+@keyframes shimmer{0%,55%{transform:translateX(-160%) skewX(-18deg)}85%,100%{transform:translateX(520%) skewX(-18deg)}}
+.btn-signin .spin{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.btn-signin.busy .spin{display:block}
+.btn-signin.busy .arr{display:none}
+.lp-help{margin-top:18px;padding-top:16px;border-top:1px solid var(--border-subtle);text-align:center;font-size:.74rem;color:var(--text-3)}
+.lp-help a{color:var(--omni-300);font-weight:600}
+.lp-help a:hover{color:var(--omni-200)}
+.lp-sec{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font:400 .64rem var(--font-mono);color:var(--text-3)}
+.lp-sec svg{width:11px;height:11px;stroke:var(--text-3)}
+.lp-demo{margin-top:12px;text-align:center;font:500 .68rem var(--font-mono);color:var(--omni-300);background:rgba(192,21,31,.06);border:1px dashed rgba(192,21,31,.3);border-radius:9px;padding:8px}
+.wipe{position:fixed;inset:0;z-index:90;background:var(--void);clip-path:circle(0% at 50% 50%);pointer-events:none}
+/* ═══════ DASHBOARD SHELL ═══════ */
+.dash{display:flex;height:100dvh;background:var(--void)}
+.dash[hidden]{display:none}
+.sb{width:240px;flex:none;display:flex;flex-direction:column;background:#FFFFFF;border-right:1px solid var(--border-subtle);padding:18px 14px;z-index:10;box-shadow:2px 0 18px rgba(23,42,72,.05)}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;border-bottom:1px solid var(--border-subtle);margin-bottom:14px}
+.sb-brand .brand-mark{width:30px;height:30px}
+.sb-brand .brand-mark .core{inset:7px}
+.sb-brand .brand-mark .orbit::before{height:12px;margin-top:-6px}
+.sb-brand b{font:700 .98rem var(--font-display)}
+.sb-brand span{color:var(--text-3);font-weight:400}
+.sb-nav{flex:1;display:flex;flex-direction:column;gap:4px}
+.sb-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border-radius:11px;font:500 .88rem var(--font-body);color:var(--text-2);transition:background-color .2s,color .2s;position:relative;text-align:left}
+.sb-item svg{width:18px;height:18px;stroke:currentColor;flex:none}
+.sb-item:hover{background:rgba(192,21,31,.06);color:var(--text-1)}
+.sb-item.on{background:rgba(192,21,31,.09);color:var(--omni-500);box-shadow:inset 0 0 0 1px rgba(192,21,31,.22)}
+.sb-badge{margin-left:auto;background:var(--alert-400);color:#fff;font:700 .62rem var(--font-mono);padding:2px 7px;border-radius:99px;box-shadow:0 0 12px var(--alert-glow)}
+.sb-badge:empty{display:none}
+.sb-user{border-top:1px solid var(--border-subtle);padding-top:14px;display:flex;align-items:center;gap:11px}
+.sb-user .avatar{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#D9525C,#5C1216);border:1px solid var(--border);flex:none}
+.sb-user b{display:block;font:600 .82rem}
+.sb-user span{font:400 .68rem var(--font-mono);color:var(--text-3)}
+.sb-out{margin-top:10px;width:100%;text-align:left;padding:8px 12px;border-radius:9px;font:500 .78rem var(--font-body);color:var(--text-3);transition:color .2s,background-color .2s}
+.sb-out:hover{color:var(--alert-400);background:rgba(255,59,78,.07)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 22px;border-bottom:0;background:linear-gradient(135deg,#C0151F,#8C0F17);box-shadow:0 6px 22px rgba(140,15,23,.28)}
+.crumb{font:600 .9rem var(--font-display);letter-spacing:.01em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb span{color:rgba(255,255,255,.62);font-weight:400}
+.top-right{display:flex;align-items:center;gap:18px}
+.sysstat{display:flex;align-items:center;gap:8px;font:500 .76rem var(--font-body);white-space:nowrap}
+.sysstat.ok{color:#8FF5D2}
+.sysstat.warn{color:#FFD37A}
+.clock{font:500 .8rem var(--font-mono);color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
+.bell{position:relative;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.3);transition:border-color .2s,background-color .2s}
+.bell:hover{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
+.bell svg{width:16px;height:16px;stroke:#fff}
+.bell i{position:absolute;top:-5px;right:-5px;background:#FFB800;color:#4A2B00;font:700 .6rem var(--font-mono);font-style:normal;padding:1px 5.5px;border-radius:99px}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:22px}
+.view{display:none;animation:viewIn .4s cubic-bezier(.22,1,.36,1)}
+.view.on{display:block}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* cards & layout */
+.pc{background:var(--surface-1);border:1px solid var(--border-subtle);border-radius:14px;padding:18px}
+.pc-title{display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .68rem var(--font-mono);letter-spacing:.14em;color:var(--text-3);text-transform:uppercase;margin-bottom:14px}
+.live-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;background:rgba(0,178,128,.08);border:1px solid rgba(0,178,128,.3);color:#009E72;font:600 .62rem var(--font-mono);letter-spacing:.1em}
+.fleet-grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+.map-box{position:relative;border-radius:10px;overflow:hidden;background:#04070D}
+#fleetMap{width:100%;height:auto;display:block}
+.popup{position:absolute;z-index:5;width:218px;padding:13px 14px;border-radius:13px;opacity:0;visibility:hidden;transform:translate(-50%,calc(-100% - 14px)) scale(.92);transition:opacity .25s,transform .25s cubic-bezier(.34,1.56,.64,1),visibility .25s;pointer-events:none}
+.popup.on{opacity:1;visibility:visible;transform:translate(-50%,calc(-100% - 18px)) scale(1);pointer-events:auto}
+.popup h6{font:700 .85rem var(--font-mono);margin-bottom:2px}
+.popup .pz{font:400 .7rem var(--font-body);color:var(--text-3);margin-bottom:9px}
+.popup .pr{display:flex;justify-content:space-between;font:500 .72rem var(--font-body);color:var(--text-2);padding:3px 0}
+.popup .pr b{font-family:var(--font-mono);color:var(--text-1);font-weight:500}
+.popup a{display:inline-block;margin-top:9px;font:600 .74rem var(--font-body);color:var(--omni-300)}
+.sum-chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.sum-chip{padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border-subtle);display:flex;align-items:center;gap:9px;font:500 .76rem var(--font-body);color:var(--text-2)}
+.sum-chip b{font:600 1.05rem var(--font-mono);color:var(--text-1)}
+.sdot{width:8px;height:8px;border-radius:50%;flex:none}
+.sdot.online{background:#00C896;box-shadow:0 0 10px rgba(0,200,150,.4)}
+.sdot.charging{background:var(--signal-400);box-shadow:0 0 10px var(--signal-glow)}
+.sdot.fault{background:var(--alert-400);box-shadow:0 0 10px var(--alert-glow)}
+.sdot.offline{background:var(--text-3)}
+.vrow{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;width:100%;padding:10px;border-radius:10px;text-align:left;transition:background-color .2s;border:1px solid transparent}
+.vrow:hover{background:rgba(192,21,31,.06)}
+.vrow.sel{background:rgba(192,21,31,.1);border-color:rgba(192,21,31,.3)}
+.vrow .vid{font:600 .78rem var(--font-mono);color:var(--text-1)}
+.vrow .vdr{font:400 .68rem var(--font-body);color:var(--text-3)}
+.vrow .vz{font:500 .66rem var(--font-mono);color:var(--text-3)}
+.bbar{width:54px;height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin-top:4px}
+.bbar i{display:block;height:100%;border-radius:3px;background:var(--online-400);transform-origin:left;transition:transform .6s ease}
+.bbar.mid i{background:var(--signal-400)}
+.bbar.low i{background:var(--alert-400)}
+
+/* vehicle detail */
+.det-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start}
+.det-col{display:grid;gap:18px}
+.vsel{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.vchip{padding:8px 14px;border-radius:99px;border:1px solid var(--border-subtle);font:600 .74rem var(--font-mono);color:var(--text-2);transition:all .2s}
+.vchip:hover{border-color:var(--border);color:var(--text-1)}
+.vchip.on{background:rgba(192,21,31,.09);border-color:var(--omni-400);color:var(--omni-500)}
+.meter{margin-bottom:13px}
+.meter-top{display:flex;justify-content:space-between;font:500 .78rem var(--font-body);color:var(--text-2);margin-bottom:7px}
+.meter-top b{font:600 .8rem var(--font-mono);color:var(--text-1)}
+.mtrack{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.mtrack i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--omni-600),var(--omni-400));transform-origin:left;transform:scaleX(0);transition:transform .8s cubic-bezier(.22,1,.36,1)}
+.mtrack.green i{background:linear-gradient(90deg,#00A874,var(--online-400))}
+.rrows{display:grid;gap:2px}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;font:500 .8rem var(--font-body);color:var(--text-2)}
+.rrow b{font:500 .82rem var(--font-mono);color:var(--text-1);font-variant-numeric:tabular-nums}
+.rrow.upd{animation:flash .6s ease-out}
+@keyframes flash{from{background:rgba(192,21,31,.18)}to{background:transparent}}
+.cellgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-top:14px}
+.cellgrid i{height:26px;border-radius:3px;background:#E6ECF4;border:1px solid var(--border-subtle);position:relative;overflow:hidden}
+.cellgrid i::after{content:"";position:absolute;inset:0;background:var(--cf,rgba(0,229,160,.55));transform:scaleY(var(--cv,0));transform-origin:bottom;transition:transform .7s ease}
+.fault-card{padding:14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border-subtle);border-left:3px solid var(--alert-400);margin-bottom:11px}
+.fault-card.warn{border-left-color:var(--signal-400)}
+.fault-card.info{border-left-color:var(--omni-400)}
+.fault-card.acked{opacity:.45}
+.sev{display:inline-flex;padding:2px 8px;border-radius:99px;font:700 .58rem var(--font-mono);letter-spacing:.12em}
+.sev.crit{background:rgba(255,59,78,.12);color:var(--alert-400);border:1px solid rgba(255,59,78,.3)}
+.sev.warn{background:rgba(255,184,0,.1);color:var(--signal-400);border:1px solid rgba(255,184,0,.3)}
+.sev.info{background:rgba(192,21,31,.1);color:var(--omni-300);border:1px solid rgba(192,21,31,.3)}
+.fcode{font:600 .82rem var(--font-mono);margin-left:9px}
+.fdesc{margin-top:8px;font:600 .86rem var(--font-body)}
+.fmeta{font-size:.7rem;color:var(--text-3);margin-top:2px}
+.fact{margin-top:7px;font-size:.76rem;color:var(--text-2)}
+.fact b{color:var(--omni-300)}
+.fbtns{display:flex;gap:8px;margin-top:10px}
+.fbtn{padding:6px 12px;border-radius:8px;border:1px solid var(--border-subtle);font:600 .7rem var(--font-body);color:var(--text-2);transition:all .2s}
+.fbtn:hover{border-color:var(--omni-400);color:var(--omni-300)}
+/* params */
+.prow{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border-radius:9px;font:500 .8rem var(--font-body);color:var(--text-2);border:1px solid transparent;transition:border-color .2s}
+.prow b{font:500 .8rem var(--font-mono);color:var(--text-1)}
+.prow .pedit{margin-left:12px;font:600 .7rem var(--font-body);color:var(--omni-300);opacity:.8}
+.prow .pedit:hover{opacity:1}
+.prow.editing{border-color:rgba(192,21,31,.35);background:rgba(192,21,31,.05)}
+.prow input[type=range]{width:110px;accent-color:var(--omni-400)}
+.btn-push{position:relative;width:100%;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;border-radius:11px;font:600 .86rem var(--font-body);color:#fff;background:linear-gradient(135deg,#C0151F,#8C0F17);border:1px solid rgba(192,21,31,.5);box-shadow:0 0 24px -8px rgba(192,21,31,.6);overflow:hidden;transition:transform .2s,box-shadow .25s}
+.btn-push:hover{transform:scale(1.015);box-shadow:0 0 40px -4px rgba(192,21,31,.8)}
+.btn-push:disabled{opacity:.55;cursor:wait}
+.pushprog{position:absolute;left:0;top:0;bottom:0;width:100%;background:rgba(255,255,255,.16);transform:scaleX(0);transform-origin:left;pointer-events:none}
+/* analytics */
+.an-grid2{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+.an-grid3{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.bars{display:flex;align-items:flex-end;gap:8px;height:120px}
+.bars i{flex:1;height:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--omni-400),var(--omni-600));transform-origin:bottom;transform:scaleY(0);transition:transform .9s cubic-bezier(.22,1,.36,1)}
+.bars i.hi{background:linear-gradient(180deg,var(--online-400),#00A874)}
+.heat{display:grid;grid-template-columns:repeat(24,1fr);gap:3px}
+.heat i{height:10px;border-radius:2px;background:var(--omni-400);opacity:.05;transition:opacity .5s}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.kpi{padding:7px 13px;border-radius:99px;font:600 .72rem var(--font-mono);background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.25);color:var(--online-400)}
+.kpi.blue{background:rgba(192,21,31,.08);border-color:rgba(192,21,31,.3);color:var(--omni-300)}
+table.tt{width:100%;border-collapse:collapse;font:500 .78rem var(--font-body)}
+.tt th{text-align:left;font:600 .62rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);padding:8px 10px;border-bottom:1px solid var(--border-subtle)}
+.tt td{padding:9px 10px;color:var(--text-2);border-bottom:1px solid rgba(26,45,66,.45)}
+.tt td.mono,.tt td b{font-family:var(--font-mono);color:var(--text-1);font-weight:500}
+/* alerts view */
+.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.fchip{padding:7px 15px;border-radius:99px;border:1px solid var(--border-subtle);font:600 .74rem var(--font-body);color:var(--text-2);transition:all .2s}
+.fchip.on{background:rgba(192,21,31,.09);border-color:var(--omni-400);color:var(--omni-500)}
+/* settings */
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.tgl{display:flex;justify-content:space-between;align-items:center;padding:11px 10px;border-radius:9px;font:500 .82rem var(--font-body);color:var(--text-2)}
+.tgl input{appearance:none;width:38px;height:21px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);position:relative;cursor:pointer;transition:background-color .25s;flex:none}
+.tgl input::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--text-2);transition:transform .25s cubic-bezier(.34,1.56,.64,1),background-color .25s}
+.tgl input:checked{background:var(--omni-600);border-color:var(--omni-400)}
+.tgl input:checked::after{transform:translateX(17px);background:#fff}
+/* toast + modal */
+.toasts{position:fixed;right:20px;bottom:20px;z-index:200;display:flex;flex-direction:column;gap:10px}
+.toast{display:flex;align-items:center;gap:11px;padding:13px 16px;border-radius:13px;font:500 .82rem var(--font-body);color:var(--text-1);min-width:280px;transform:translateX(120%);transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.toast.on{transform:none}
+.toast .ti{width:9px;height:9px;border-radius:50%;flex:none}
+.toast.ok .ti{background:var(--online-400);box-shadow:0 0 12px var(--online-glow)}
+.toast.err .ti{background:var(--alert-400);box-shadow:0 0 12px var(--alert-glow)}
+.modal{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(23,42,72,.38);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.modal.on{opacity:1;visibility:visible}
+.modal-card{width:min(400px,92vw);padding:24px;border-radius:18px;transform:scale(.94);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.modal.on .modal-card{transform:scale(1)}
+.modal-card h4{font:700 1.05rem var(--font-display);margin-bottom:8px}
+.modal-card p{font-size:.84rem;color:var(--text-2);margin-bottom:18px}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end}
+.mbtn{padding:10px 18px;border-radius:10px;font:600 .82rem var(--font-body);border:1px solid var(--border);color:var(--text-2);transition:all .2s}
+.mbtn:hover{color:var(--text-1);border-color:var(--text-3)}
+.mbtn.primary{background:linear-gradient(135deg,#C0151F,#8C0F17);color:#fff;border-color:rgba(192,21,31,.5)}
+/* responsive */
+@media (max-width:1100px){.fleet-grid,.det-grid,.an-grid2,.an-grid3,.set-grid{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .sb{width:66px;padding:14px 9px}
+  .sb-brand b,.sb-brand span,.sb-item span,.sb-badge,.sb .sb-user div,.sb-out{display:none}
+  .sb-item{justify-content:center;padding:12px 0}
+  .sb-user{justify-content:center}
+  .clock{display:none}
+}
+@media (max-width:640px){
+  .content{padding:13px}
+  .pc{padding:13px}
+  /* fleet toolbar: select + butonlar alta sarsın, genişliği zorlamasın */
+  .pc-title{flex-wrap:wrap;gap:8px}
+  .siteSel{max-width:100%;min-width:0}
+  /* tüm grid çocukları daralabilsin (1fr min-content taşmasını önler) */
+  .fleet-grid>*,.det-grid>*,.an-grid2>*,.an-grid3>*,.set-grid>*{min-width:0}
+  .vrow{grid-template-columns:10px minmax(0,1fr) auto}
+  /* tek sütuna düşür */
+  .sum-chips,.score-grid{grid-template-columns:1fr}
+  /* topbar daralt: uyarı etiketini gizle (sayaç zilde zaten var), boşluk aç */
+  .sysstat{display:none}
+  .topbar{padding:0 12px;gap:10px}
+  .crumb{font-size:.82rem}
+  /* yoğun ızgaralar telefonda da sığsın */
+  .heat{grid-template-columns:repeat(24,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .btn-signin::after{animation:none}
+  .view{animation:none}
+}
+.topbar{position:relative}
+.lang-t{padding:6px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.35);font:700 .7rem var(--font-mono);color:#fff;letter-spacing:.06em;transition:background-color .2s}
+.lang-t:hover{background:rgba(255,255,255,.12)}
+.lang-l{position:absolute;top:20px;right:24px;z-index:6;padding:7px 12px;border-radius:9px;border:1px solid var(--border);font:700 .72rem var(--font-mono);color:var(--text-2);letter-spacing:.06em;transition:border-color .2s,color .2s}
+.lang-l:hover{border-color:var(--omni-400);color:var(--omni-500)}
+.siteSel{font:600 .68rem var(--font-mono);letter-spacing:.08em;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:8px;padding:6px 9px;text-transform:uppercase;cursor:pointer;outline:none}
+.siteSel:hover{border-color:var(--omni-400)}
+.notif{position:absolute;top:60px;right:16px;width:340px;border-radius:16px;padding:10px;z-index:140;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .25s,transform .25s cubic-bezier(.34,1.56,.64,1),visibility .25s}
+.notif.on{opacity:1;visibility:visible;transform:none}
+.notif-head{display:flex;justify-content:space-between;align-items:center;padding:6px 10px 10px;border-bottom:1px solid var(--border-subtle);font:600 .72rem var(--font-mono);letter-spacing:.1em;color:var(--text-3);text-transform:uppercase}
+.notif-head a{color:var(--omni-500);font:600 .72rem var(--font-body);letter-spacing:0;text-transform:none;cursor:pointer}
+.nrow{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;font-size:.78rem;color:var(--text-2);transition:background-color .2s}
+.nrow:hover{background:rgba(192,21,31,.05)}
+.nrow .ndot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:5px}
+.nrow b{color:var(--text-1);font-family:var(--font-mono);font-size:.74rem}
+.nrow .nt{margin-left:auto;flex:none;color:var(--text-3);font:500 .64rem var(--font-mono)}
+/* ═══ GECE MODU ═══ */
+body.night{--void:#0A0F18;--abyss:#0D1422;--surface-1:#111A2A;--surface-2:#16203A;--border-subtle:#23324A;--border:#33455F;--text-1:#E8EFF8;--text-2:#9DB0C8;--text-3:#5E748F}
+body.night{background-image:linear-gradient(rgba(60,84,120,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(60,84,120,.13) 1px,transparent 1px)}
+body.night .sb{background:#0D1422;box-shadow:2px 0 18px rgba(0,0,0,.4)}
+body.night .glass{background:linear-gradient(135deg,rgba(17,26,42,.92),rgba(22,32,50,.82));border-color:rgba(51,69,95,.7);box-shadow:0 18px 44px rgba(0,0,0,.5)}
+body.night .pc{background:var(--surface-1);border-color:var(--border-subtle)}
+body.night .cellgrid i{background:#0A1322}
+body.night .sum-chip,body.night .fault-card,body.night .an-card,body.night .nrow:hover{background:var(--surface-2)}
+body.night .bell svg{stroke:#fff}
+.moon{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.35);color:#fff;display:grid;place-items:center;transition:background-color .2s}
+.moon:hover{background:rgba(255,255,255,.12)}
+.moon svg{width:16px;height:16px;stroke:currentColor;fill:none}
+/* ═══ GEOFENCE EDİTÖRÜ ═══ */
+#geoBtn.arming{background:rgba(192,21,31,.12);border-color:var(--omni-400);color:var(--omni-500)}
+.map-box.drawing{cursor:crosshair}
+.geo-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;padding:7px 14px;border-radius:99px;background:rgba(192,21,31,.92);color:#fff;font:600 .68rem var(--font-mono);letter-spacing:.06em;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s}
+.map-box.drawing .geo-hint{opacity:1}
+/* ═══ SÜRÜCÜ SKOR KARTI ═══ */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.score-card{border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.score-top{display:flex;align-items:center;gap:12px}
+.score-top .avatar{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#D9525C,#5C1216);border:1px solid var(--border);flex:none}
+.score-top b{display:block;font:600 .92rem var(--font-body)}
+.score-top span{font:400 .68rem var(--font-mono);color:var(--text-3)}
+.score-ring{margin-left:auto;width:54px;height:54px;flex:none;position:relative}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 .92rem var(--font-mono)}
+.score-bars{display:grid;gap:7px}
+.score-row{display:grid;grid-template-columns:84px 1fr 34px;gap:9px;align-items:center;font:500 .7rem var(--font-body);color:var(--text-2)}
+.score-row .sb-track{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.score-row .sb-track i{display:block;height:100%;border-radius:4px;transform-origin:left;transform:scaleX(0);transition:transform .8s cubic-bezier(.22,1,.36,1)}
+.score-row b{font:600 .72rem var(--font-mono);color:var(--text-1);text-align:right}
+.score-badge{font:700 .58rem var(--font-mono);letter-spacing:.1em;padding:2px 8px;border-radius:99px}
+.score-badge.a{background:rgba(0,200,150,.1);color:#009E72;border:1px solid rgba(0,200,150,.3)}
+.score-badge.b{background:rgba(240,168,0,.1);color:#B57500;border:1px solid rgba(240,168,0,.3)}
+.score-badge.c{background:rgba(255,59,78,.1);color:var(--alert-400);border:1px solid rgba(255,59,78,.3)}
+/* ═══ BAKIM TAKVİMİ ═══ */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-head h3{font:700 1.1rem var(--font-display)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-dow{font:600 .62rem var(--font-mono);letter-spacing:.08em;color:var(--text-3);text-align:center;padding:6px 0;text-transform:uppercase}
+.cal-cell{min-height:74px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border-subtle);padding:7px;font:500 .72rem var(--font-mono);color:var(--text-3);position:relative}
+.cal-cell.empty{background:transparent;border:0}
+.cal-cell.today{border-color:var(--omni-400);box-shadow:inset 0 0 0 1px rgba(192,21,31,.3)}
+.cal-ev{display:block;margin-top:4px;padding:3px 6px;border-radius:6px;font:600 .58rem var(--font-body);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+.cal-ev.plan{background:linear-gradient(135deg,#C0151F,#8C0F17)}
+.cal-ev.ml{background:linear-gradient(135deg,#0E8C6A,#00A874)}
+.cal-ev.done{background:var(--text-3);opacity:.7}
+.cal-legend{display:flex;gap:18px;margin-top:16px;font:500 .72rem var(--font-body);color:var(--text-2);flex-wrap:wrap}
+.cal-legend span{display:flex;align-items:center;gap:7px}
+.cal-legend i{width:11px;height:11px;border-radius:3px;flex:none}
+/* yazdırılabilir analitik raporu */
+@media print{
+  body{overflow:visible!important;background:#fff!important;background-image:none!important}
+  .sb,.topbar,.toasts,.modal,.login,.wipe,#printBtn{display:none!important}
+  .dash{display:block;height:auto}
+  .content{overflow:visible;padding:0}
+  .view{display:none!important}
+  #view-analytics{display:block!important;animation:none}
+  .pc{break-inside:avoid;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<!-- ═══════ LOGIN ═══════ -->
+<div class="login" id="loginView">
+  <canvas id="loginBg"></canvas>
+  <button class="lang-l langSw" type="button">TR</button>
+  <a class="back" href="index.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to omnitraceglobal.com</a>
+  <div class="login-panel" id="loginPanel">
+    <div class="lp-logo lp-a"><span class="brand-mark"><span class="core"></span><span class="orbit"></span></span></div>
+    <h1 class="lp-title lp-a" data-tr="FİLO TELEMETRİ ERİŞİMİ">FLEET TELEMETRY ACCESS</h1>
+    <span class="lp-badge lp-a" data-tr="⚠ YALNIZCA YETKİLİ PERSONEL">⚠ AUTHORIZED PERSONNEL ONLY</span>
+    <div class="lp-rule" id="lpRule"></div>
+    <div class="alertbar" id="loginAlert">Invalid credentials. Please verify your Fleet Account ID and password.</div>
+    <form id="loginForm" novalidate>
+      <div class="field lp-a">
+        <label for="fid" data-tr="Filo Hesap No">Fleet Account ID</label>
+        <div class="fwrap">
+          <input id="fid" type="text" placeholder="OT-XXXXXX" autocomplete="username" spellcheck="false" />
+          <svg class="fic" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.7 9a.6.6 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z"/></svg>
+        </div>
+      </div>
+      <div class="field lp-a">
+        <label for="fpw" data-tr="Erişim Şifresi">Access Password</label>
+        <div class="fwrap">
+          <input id="fpw" type="password" placeholder="••••••••••••" autocomplete="current-password" />
+          <svg class="fic" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <button type="button" class="eye" id="eyeBtn" aria-label="Toggle password visibility"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+      <label class="remember lp-a"><input type="checkbox" id="rememberMe" /><span data-tr="Bu cihazı hatırla">Remember this device</span></label>
+      <button type="submit" class="btn-signin lp-a" id="signBtn"><span data-tr="Giriş Yap">Sign In</span><svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span class="spin"></span></button>
+    </form>
+    <div class="lp-help lp-a"><span data-tr="Bilgilerini mi unuttun? Filo yöneticinle iletişime geç.">Forgot credentials? Contact your fleet administrator.</span><br /><a href="mailto:access@omnitraceglobal.com" data-tr="Erişim Talep Et →">Request Access →</a></div>
+    <div class="lp-sec lp-a"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>OmniTrace Global · Secured with TLS 1.3 · AES-256</div>
+    <div class="lp-demo lp-a">DEMO ACCESS — ID: OT-DEMO01 · PASS: zass2026</div>
+  </div>
+</div>
+<div class="wipe" id="wipe"></div>
+
+<!-- ═══════ DASHBOARD ═══════ -->
+<div class="dash" id="dashView" hidden>
+  <aside class="sb">
+    <div class="sb-brand"><span class="brand-mark"><span class="core"></span><span class="orbit"></span></span><div><b>OmniTrace</b> <span>OS</span></div></div>
+    <nav class="sb-nav" id="sbNav">
+      <button class="sb-item on" data-view="fleet"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 20-6 2V6l6-2 6 2 6-2v16l-6 2-6-2Z"/><path d="M9 4v16M15 6v16"/></svg><span data-tr="Filo Haritası">Fleet Map</span></button>
+      <button class="sb-item" data-view="vehicles"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V8l4-1v5h5"/><path d="M14 12V4h2l3 8"/><circle cx="7" cy="19" r="2"/><circle cx="16" cy="19" r="2"/><path d="M19 4v13"/></svg><span data-tr="Araçlar">Vehicles</span></button>
+      <button class="sb-item" data-view="analytics"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M8 17v-6M13 17V7M18 17v-3"/></svg><span data-tr="Analitik">Analytics</span></button>
+      <button class="sb-item" data-view="alerts"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span data-tr="Uyarılar">Alerts</span><i class="sb-badge" id="alertBadge">3</i></button>
+      <button class="sb-item" data-view="drivers"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 11-2 2-1-1"/></svg><span data-tr="Sürücü Skoru">Driver Score</span></button>
+      <button class="sb-item" data-view="maintenance"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg><span data-tr="Bakım Takvimi">Maintenance</span></button>
+      <button class="sb-item" data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span data-tr="Ayarlar">Settings</span></button>
+    </nav>
+    <div class="sb-user"><span class="avatar"></span><div><b>Fleet Admin</b><span>OT-DEMO01</span></div></div>
+    <button class="sb-out" id="signOut" data-tr="Çıkış Yap →">Sign Out →</button>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb" id="crumb">Fleet <span>/ Live Map</span></div>
+      <div class="top-right">
+        <span class="sysstat warn" id="sysStat"><span class="pulse-dot" style="background:var(--signal-400);box-shadow:0 0 12px var(--signal-glow)"></span>2 Active Alerts</span>
+        <button class="moon" id="nightBtn" type="button" aria-label="Night mode"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
+        <button class="lang-t langSw" type="button">TR</button>
+        <span class="clock" id="clock">--:--:--</span>
+        <button class="bell" aria-label="Notifications" id="bellBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><i id="bellBadge">3</i></button>
+      </div>
+    </header>
+    <div class="notif glass" id="notifPanel">
+      <div class="notif-head"><span data-tr="BİLDİRİMLER">NOTIFICATIONS</span><a id="notifAll" data-tr="Tümünü gör →">View all →</a></div>
+      <div id="notifList"></div>
+    </div>
+    <div class="content">
+
+      <!-- FLEET MAP -->
+      <section class="view on" id="view-fleet">
+        <div class="fleet-grid">
+          <div class="pc">
+            <div class="pc-title"><select id="siteSel" class="siteSel" aria-label="Site">
+              <option value="0">WAREHOUSE 03 — İSTANBUL DC</option>
+              <option value="1">GEBZE PLANT — ASSEMBLY</option>
+              <option value="2">İZMİR PORT — QUAY OPS</option>
+            </select><span style="display:flex;gap:10px;align-items:center"><button class="fbtn" id="geoBtn" type="button" data-tr="+ BÖLGE">+ ZONE</button><button class="fbtn" id="replayBtn" type="button">⟲ REPLAY 1H</button><span class="live-chip" id="liveChip"><span class="pulse-dot" style="width:5px;height:5px"></span>LIVE · WEBSOCKET</span></span></div>
+            <div class="map-box">
+              <svg id="fleetMap" viewBox="0 0 900 540" aria-label="Live fleet map">
+                <rect width="900" height="540" fill="#04070D"/>
+                <g fill="#0A1220" stroke="#16263A">
+                  <rect x="410" y="60" width="430" height="26"/><rect x="410" y="106" width="430" height="26"/>
+                  <rect x="410" y="152" width="430" height="26"/><rect x="410" y="198" width="430" height="26"/>
+                  <rect x="410" y="244" width="430" height="26"/>
+                  <rect x="60" y="300" width="280" height="24"/><rect x="60" y="344" width="280" height="24"/>
+                </g>
+                <rect x="36" y="36" width="330" height="210" rx="8" fill="rgba(192,21,31,.05)" stroke="#C0151F" stroke-width="1.2" stroke-dasharray="7 6"/>
+                <text x="48" y="58" font-family="JetBrains Mono" font-size="12" fill="#4A6478" id="zt1">ZONE A — RECEIVING</text>
+                <rect x="396" y="36" width="460" height="252" rx="8" fill="rgba(192,21,31,.03)" stroke="#1F3A52" stroke-width="1.2" stroke-dasharray="7 6"/>
+                <text x="408" y="58" font-family="JetBrains Mono" font-size="12" fill="#4A6478" id="zt2">ZONE B — HIGH BAY STORAGE</text>
+                <rect x="560" y="330" width="296" height="170" rx="8" fill="rgba(255,184,0,.04)" stroke="#FFB800" stroke-width="1.2" stroke-dasharray="7 6"/>
+                <text x="572" y="352" font-family="JetBrains Mono" font-size="12" fill="#8A6A2B" id="zt3">ZONE C — RESTRICTED</text>
+                <rect x="36" y="420" width="240" height="84" rx="8" fill="rgba(0,229,160,.04)" stroke="rgba(0,229,160,.45)" stroke-width="1.2"/>
+                <text x="48" y="442" font-family="JetBrains Mono" font-size="12" fill="#2E6B4F" id="zt4">CHARGING BAYS</text>
+                <g stroke="rgba(0,229,160,.3)"><line x1="96" y1="452" x2="96" y2="496"/><line x1="156" y1="452" x2="156" y2="496"/><line x1="216" y1="452" x2="216" y2="496"/></g>
+                <g id="mkLayer"></g>
+              </svg>
+              <div class="popup glass" id="mapPopup"></div>
+              <div class="geo-hint" id="geoHint" data-tr="Yeni bölge çizmek için haritada sürükle">Drag on the map to draw a new zone</div>
+            </div>
+          </div>
+          <div class="pc">
+            <div class="pc-title"><span data-tr="FİLO DURUMU">FLEET STATUS</span></div>
+            <div class="sum-chips" id="sumChips"></div>
+            <div id="vehList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VEHICLE DETAIL -->
+      <section class="view" id="view-vehicles">
+        <div class="vsel" id="vselWrap"></div>
+        <div class="det-grid">
+          <div class="det-col">
+            <div class="pc">
+              <div class="pc-title"><span data-tr="BATARYA SAĞLIĞI">BATTERY HEALTH</span><span class="live-chip"><span class="pulse-dot" style="width:5px;height:5px"></span>LIVE</span></div>
+              <div class="meter"><div class="meter-top"><span data-tr="Şarj Durumu (SoC)">State of Charge</span><b id="dSocV">—</b></div><div class="mtrack"><i id="dSocB"></i></div></div>
+              <div class="meter"><div class="meter-top"><span data-tr="Batarya Sağlığı (SoH)">State of Health</span><b id="dSohV">—</b></div><div class="mtrack green"><i id="dSohB"></i></div></div>
+              <svg id="dSpark" viewBox="0 0 560 80" preserveAspectRatio="none" style="width:100%;height:64px;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:10px;margin:4px 0 6px">
+                <polyline id="spTemp" fill="none" stroke="#F0A800" stroke-width="1.6" opacity=".75"/>
+                <polyline id="spSoc" fill="none" stroke="#C0151F" stroke-width="2.2"/>
+              </svg>
+              <div style="display:flex;gap:14px;margin-bottom:10px;font:500 .62rem var(--font-mono);color:var(--text-3)"><span style="color:#C0151F">— SoC %</span><span style="color:#B8860B">— TEMP °C</span><span style="margin-left:auto" data-tr="SON 60 ÖRNEK · CANLI">LAST 60 SAMPLES · LIVE</span></div>
+              <div class="rrows">
+                <div class="rrow" data-k="volt"><span data-tr="Paket Voltajı">Pack Voltage</span><b>—</b></div>
+                <div class="rrow" data-k="amp"><span data-tr="Paket Akımı">Pack Current</span><b>—</b></div>
+                <div class="rrow" data-k="btemp"><span data-tr="Sıcaklık (Maks. Hücre)">Temperature (Max Cell)</span><b>—</b></div>
+                <div class="rrow" data-k="cycles"><span data-tr="Şarj Döngüsü">Charge Cycles</span><b>—</b></div>
+                <div class="rrow" data-k="range"><span data-tr="Tahmini Kalan Süre">Est. Range Remaining</span><b>—</b></div>
+              </div>
+              <div class="cellgrid" id="dCells"></div>
+            </div>
+            <div class="pc">
+              <div class="pc-title"><span data-tr="ARAÇ DURUMU">VEHICLE STATUS</span><span class="live-chip" id="dMode">IN OPERATION</span></div>
+              <div class="rrows">
+                <div class="rrow" data-k="speed"><span data-tr="Sürüş Hızı">Drive Speed</span><b>—</b></div>
+                <div class="rrow" data-k="mamp"><span data-tr="Motor Akımı">Motor Current</span><b>—</b></div>
+                <div class="rrow" data-k="lift"><span data-tr="Asansör Yüksekliği">Lift Height</span><b>—</b></div>
+                <div class="rrow" data-k="hyd"><span data-tr="Hidrolik Basınç">Hydraulic Pressure</span><b>—</b></div>
+                <div class="rrow" data-k="steer"><span data-tr="Direksiyon Açısı">Steering Angle</span><b>—</b></div>
+                <div class="rrow" data-k="hours"><span data-tr="Bugünkü Çalışma">Hours Today</span><b>—</b></div>
+                <div class="rrow" data-k="gps"><span data-tr="GPS Konumu">GPS Position</span><b>—</b></div>
+                <div class="rrow" data-k="head"><span data-tr="Yön">Heading</span><b>—</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="det-col">
+            <div class="pc">
+              <div class="pc-title"><span data-tr="AKTİF ARIZA KODLARI">ACTIVE DIAGNOSTIC CODES</span><span class="live-chip" id="dFaultN" style="color:var(--alert-400);border-color:rgba(255,59,78,.3);background:rgba(255,59,78,.07)">2 ACTIVE</span></div>
+              <div id="vFaults"></div>
+            </div>
+            <div class="pc">
+              <div class="pc-title"><span data-tr="SÜRÜCÜ VE PARAMETRELER — ZASS OTA">DRIVER &amp; PARAMETERS — ZASS OTA</span></div>
+              <div class="sb-user" style="border:0;padding:0 0 14px"><span class="avatar"></span><div><b id="dDriver">—</b><span id="dRfid">RFID ****----</span></div></div>
+              <div class="rrows" id="paramRows"></div>
+              <button class="btn-push" id="pushBtn"><span class="pushprog" id="pushProg"></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span id="pushLbl">Push New Parameters to Vehicle</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS -->
+      <section class="view" id="view-analytics">
+        <div class="an-grid2">
+          <div class="pc">
+            <div class="pc-title"><span data-tr="ENERJİ TÜKETİMİ — kWh / GÜN (7G)">ENERGY CONSUMPTION — kWh / DAY (7D)</span><span style="display:flex;gap:10px;align-items:center"><button class="fbtn" id="printBtn" type="button">⎙ PRINT REPORT</button><span class="live-chip">AUTO REPORT</span></span></div>
+            <svg viewBox="0 0 640 170" aria-hidden="true">
+              <defs><linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C0151F" stop-opacity=".32"/><stop offset="1" stop-color="#C0151F" stop-opacity="0"/></linearGradient></defs>
+              <path id="anFill" d="M0,134 C50,124 88,110 130,116 C172,122 210,86 260,80 C310,74 348,96 396,84 C444,72 484,48 532,44 C576,40 612,52 640,46 L640,170 L0,170 Z" fill="url(#ag2)" opacity="0"/>
+              <path id="anLine" d="M0,134 C50,124 88,110 130,116 C172,122 210,86 260,80 C310,74 348,96 396,84 C444,72 484,48 532,44 C576,40 612,52 640,46" fill="none" stroke="#C0151F" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            <div class="kpis"><span class="kpi">▲ 22% Energy Saved</span><span class="kpi">3 Faults Prevented</span><span class="kpi blue">98.1% Uptime</span><span class="kpi blue">412 kWh Total</span></div>
+          </div>
+          <div class="pc">
+            <div class="pc-title"><span data-tr="KULLANIM / VARDİYA">UTILIZATION / SHIFT</span></div>
+            <div class="bars" id="anBars"></div>
+          </div>
+        </div>
+        <div class="an-grid3">
+          <div class="pc">
+            <div class="pc-title"><span data-tr="HAFTALIK YOĞUNLUK — SAAT × GÜN">WEEKLY INTENSITY — HOUR × DAY</span></div>
+            <div class="heat" id="anHeat"></div>
+          </div>
+          <div class="pc">
+            <div class="pc-title"><span data-tr="EN ÇOK ÇALIŞANLAR — BU HAFTA">TOP VEHICLES — HOURS THIS WEEK</span></div>
+            <table class="tt"><thead><tr><th data-tr="Araç">Vehicle</th><th data-tr="Sürücü">Driver</th><th data-tr="Saat">Hours</th><th data-tr="Enerji">Energy</th></tr></thead><tbody id="anTable"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTS -->
+      <section class="view" id="view-alerts">
+        <div class="filters" id="alertFilters">
+          <button class="fchip on" data-f="all" data-tr="Tümü">All</button>
+          <button class="fchip" data-f="crit" data-tr="Kritik">Critical</button>
+          <button class="fchip" data-f="warn" data-tr="Uyarı">Warning</button>
+          <button class="fchip" data-f="info" data-tr="Bilgi">Info</button>
+          <button class="fchip" data-f="ackall" style="margin-left:auto" data-tr="Tümünü Onayla">Acknowledge All</button>
+        </div>
+        <div id="alertList"></div>
+      </section>
+
+      <!-- DRIVER SCORECARD -->
+      <section class="view" id="view-drivers">
+        <div class="pc">
+          <div class="pc-title"><span data-tr="SÜRÜCÜ GÜVENLİK SKORLARI — BU HAFTA">DRIVER SAFETY SCORES — THIS WEEK</span><span class="live-chip">RANKED</span></div>
+          <div class="score-grid" id="scoreGrid"></div>
+        </div>
+      </section>
+
+      <!-- MAINTENANCE CALENDAR -->
+      <section class="view" id="view-maintenance">
+        <div class="pc">
+          <div class="cal-head"><h3 id="calTitle">—</h3><span class="live-chip" data-tr="ÖNGÖRÜLÜ + PLANLI">PREDICTIVE + PLANNED</span></div>
+          <div class="cal-grid" id="calDow"></div>
+          <div class="cal-grid" id="calGrid" style="margin-top:6px"></div>
+          <div class="cal-legend">
+            <span><i style="background:#C0151F"></i><span data-tr="Planlı bakım">Planned service</span></span>
+            <span><i style="background:#00A874"></i><span data-tr="ML öngörülü">ML-predicted</span></span>
+            <span><i style="background:var(--text-3)"></i><span data-tr="Tamamlandı">Completed</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings">
+        <div class="set-grid">
+          <div class="pc">
+            <div class="pc-title"><span data-tr="FİLO HESABI">FLEET ACCOUNT</span></div>
+            <div class="rrows">
+              <div class="rrow"><span data-tr="Hesap No">Account ID</span><b>OT-DEMO01</b></div>
+              <div class="rrow"><span>Plan</span><b>Enterprise</b></div>
+              <div class="rrow"><span data-tr="Bağlı Cihaz">Connected Devices</span><b>8 × OT-1</b></div>
+              <div class="rrow"><span data-tr="Cihaz Yazılımı">Device Firmware</span><b>v2.4.1 — up to date</b></div>
+              <div class="rrow"><span data-tr="Veri Saklama">Data Retention</span><b>24 months</b></div>
+              <div class="rrow"><span data-tr="API Erişimi">API Access</span><b>Enabled · 2 keys</b></div>
+            </div>
+          </div>
+          <div class="pc">
+            <div class="pc-title"><span data-tr="BİLDİRİM KANALLARI">NOTIFICATION CHANNELS</span></div>
+            <label class="tgl"><span data-tr="E-posta uyarıları">E-mail alerts</span><input type="checkbox" checked /></label>
+            <label class="tgl"><span data-tr="Kritik arızada SMS">SMS for critical faults</span><input type="checkbox" checked /></label>
+            <label class="tgl"><span data-tr="Anlık bildirimler">Push notifications</span><input type="checkbox" checked /></label>
+            <label class="tgl"><span data-tr="Bölge ihlali uyarıları">Geofence breach alerts</span><input type="checkbox" checked /></label>
+            <label class="tgl"><span data-tr="Haftalık filo raporu">Weekly fleet report</span><input type="checkbox" /></label>
+            <button class="btn-push" id="saveSet" style="margin-top:16px"><span data-tr="Tercihleri Kaydet">Save Preferences</span></button>
+          </div>
+        </div>
+        <div class="pc" style="margin-top:18px">
+          <div class="pc-title"><span data-tr="SÜRÜCÜ KADROSU — PARAMETRE PROFİLLERİ">DRIVER ROSTER — PARAMETER PROFILES</span></div>
+          <table class="tt"><thead><tr><th data-tr="Sürücü">Driver</th><th>RFID</th><th data-tr="Maks. Hız">Max Speed</th><th data-tr="İvme Profili">Accel Profile</th><th data-tr="Asansör Hızı">Lift Speed</th><th data-tr="Durum">Status</th></tr></thead><tbody id="setDrivers"></tbody></table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="modal" id="modal">
+  <div class="modal-card glass">
+    <h4 id="modalTitle">Confirm OTA Push</h4>
+    <p id="modalText">…</p>
+    <div class="modal-btns">
+      <button class="mbtn" id="modalNo" data-tr="Vazgeç">Cancel</button>
+      <button class="mbtn primary" id="modalYes" data-tr="Gönderimi Onayla">Confirm Push</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* VERİ KATMANI: hosting'de data.json'ı okur; file:// veya hata → gömülü demo veri.
+   Gerçek OT-1 bağlandığında data.json'ı canlı API'ye yönlendirmek yeterli. */
+window.__OT_REMOTE = null;
+(function(){
+  if (!/^https?:/.test(location.protocol)) return;
+  try { var x = new XMLHttpRequest(); x.open('GET','data.json',false); x.send();
+    if (x.status >= 200 && x.status < 300) window.__OT_REMOTE = JSON.parse(x.responseText); } catch(e){}
+})();
+</script>
+<!-- CDN'ler ÖNCE, tek inline script SONRA -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var hasGSAP = typeof gsap !== 'undefined';
+var hasTHREE = typeof THREE !== 'undefined';
+function $(s,c){ return (c||document).querySelector(s); }
+function $$(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); }
+
+/* ═══ TR/EN ═══ */
+var LANG = localStorage.getItem('ot_lang') || 'en';
+function T(en, tr){ return LANG === 'tr' ? tr : en; }
+var i18nHooks = [];
+function applyLang(){
+  document.documentElement.lang = LANG;
+  $$('[data-tr]').forEach(function(el){
+    if (!el.hasAttribute('data-en')) el.setAttribute('data-en', el.innerHTML);
+    el.innerHTML = LANG === 'tr' ? el.getAttribute('data-tr') : el.getAttribute('data-en');
+  });
+  $$('.langSw').forEach(function(b){ b.textContent = LANG === 'tr' ? 'EN' : 'TR'; });
+  for (var i = 0; i < i18nHooks.length; i++) i18nHooks[i]();
+}
+$$('.langSw').forEach(function(b){
+  b.addEventListener('click', function(){
+    LANG = LANG === 'tr' ? 'en' : 'tr';
+    localStorage.setItem('ot_lang', LANG);
+    applyLang();
+  });
+});
+
+/* ═══ GECE MODU ═══ */
+(function(){
+  if (localStorage.getItem('ot_night') === '1') document.body.classList.add('night');
+  var nb = $('#nightBtn');
+  if (nb) nb.addEventListener('click', function(){
+    var on = document.body.classList.toggle('night');
+    localStorage.setItem('ot_night', on ? '1' : '0');
+  });
+})();
+
+var loginView = $('#loginView'), dashView = $('#dashView'), wipe = $('#wipe');
+var AUTH = sessionStorage.getItem('ot_auth') === '1' || localStorage.getItem('ot_auth') === '1';
+var loginActive = !AUTH;
+
+/* ═══════ LOGIN 3D BACKGROUND — data sphere ═══════ */
+(function(){
+  var cv = $('#loginBg');
+  if (!cv || !hasTHREE || REDUCED || AUTH) return;
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true, powerPreference:'high-performance'}); }
+  catch(e){ return; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+  var scene = new THREE.Scene();
+  var cam = new THREE.PerspectiveCamera(55, 1, .1, 60);
+  cam.position.set(0, 0, 3.4);
+
+  var g = new THREE.Group(); scene.add(g);
+  /* sphere shell points */
+  var N = 850, pos = new Float32Array(N*3), pts3 = [];
+  for (var i=0;i<N;i++){
+    var th = Math.random()*6.283, ph = Math.acos(2*Math.random()-1);
+    var r = 1.25 + (Math.random()-.5)*.16;
+    var x = r*Math.sin(ph)*Math.cos(th), y = r*Math.cos(ph), z = r*Math.sin(ph)*Math.sin(th);
+    pos[i*3] = x; pos[i*3+1] = y; pos[i*3+2] = z;
+    if (i < 380) pts3.push([x, y, z]);
+  }
+  var pg = new THREE.BufferGeometry();
+  pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.add(new THREE.Points(pg, new THREE.PointsMaterial({color:0xD9404A, size:.018, transparent:true, opacity:.8})));
+  /* proximity mesh lines */
+  var lp = [];
+  for (var a=0;a<pts3.length;a++) for (var b=a+1;b<pts3.length;b++){
+    var dx = pts3[a][0]-pts3[b][0], dy = pts3[a][1]-pts3[b][1], dz = pts3[a][2]-pts3[b][2];
+    if (dx*dx + dy*dy + dz*dz < .12){
+      lp.push(pts3[a][0], pts3[a][1], pts3[a][2], pts3[b][0], pts3[b][1], pts3[b][2]);
+    }
+  }
+  var lg = new THREE.BufferGeometry();
+  lg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lp), 3));
+  /* açık zeminde additive blending görünmez — normal blend, koyu kırmızı çizgiler */
+  g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({color:0xA6121B, transparent:true, opacity:.16})));
+  /* ambient drift field */
+  var FN = 1600, fp = new Float32Array(FN*3);
+  for (var f=0;f<FN;f++){
+    fp[f*3] = (Math.random()-.5)*9; fp[f*3+1] = (Math.random()-.5)*5.5; fp[f*3+2] = (Math.random()-.5)*4;
+  }
+  var fg = new THREE.BufferGeometry();
+  fg.setAttribute('position', new THREE.BufferAttribute(fp, 3));
+  var field = new THREE.Points(fg, new THREE.PointsMaterial({color:0xC0151F, size:.012, transparent:true, opacity:.35}));
+  scene.add(field);
+
+  var mx = 0, my = 0;
+  window.addEventListener('pointermove', function(e){
+    mx = (e.clientX/innerWidth - .5)*2; my = (e.clientY/innerHeight - .5)*2;
+  }, {passive:true});
+  function fit(){
+    renderer.setSize(innerWidth, innerHeight, false);
+    cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix();
+  }
+  fit(); window.addEventListener('resize', fit);
+  var clock = new THREE.Clock();
+  (function frame(){
+    if (!loginActive) return;
+    var dt = Math.min(clock.getDelta(), .05);
+    g.rotation.x += dt*.0105; g.rotation.y += dt*.0157; g.rotation.z += dt*.005;
+    field.rotation.y += dt*.006;
+    cam.position.x += ((-mx*.55) - cam.position.x)*.05;
+    cam.position.y += ((my*.35) - cam.position.y)*.05;
+    cam.lookAt(0, 0, 0);
+    renderer.render(scene, cam);
+    requestAnimationFrame(frame);
+  })();
+})();
+
+/* ═══════ LOGIN FLOW ═══════ */
+function showDash(instant){
+  loginActive = false;
+  loginView.style.display = 'none';
+  dashView.hidden = false;
+  document.body.style.overflow = 'hidden';
+  initDash();
+  if (!instant && hasGSAP && !REDUCED){
+    gsap.fromTo('.sb', {x:-30, opacity:0}, {x:0, opacity:1, duration:.7, ease:'power3.out'});
+    gsap.fromTo('.main', {opacity:0}, {opacity:1, duration:.7, ease:'power2.out', delay:.1});
+  }
+}
+
+if (LANG === 'tr') setTimeout(applyLang, 0);
+if (AUTH){
+  /* dashboard verisi aşağıda tanımlı — IIFE bitince çalıştır */
+  setTimeout(function(){ showDash(true); }, 0);
+} else {
+  /* entry animation */
+  if (hasGSAP && !REDUCED){
+    gsap.from('.lp-logo', {scale:.8, opacity:0, duration:.6, ease:'back.out(1.6)', delay:.1});
+    gsap.to('#lpRule', {scaleX:1, duration:.45, ease:'power2.inOut', delay:.5});
+    gsap.from(['.lp-title', '.lp-badge', '.field', '.remember', '.btn-signin', '.lp-help', '.lp-sec', '.lp-demo'],
+      {opacity:0, y:16, duration:.6, ease:'power3.out', stagger:.08, delay:.35});
+  } else { $('#lpRule').style.transform = 'scaleX(1)'; }
+
+  var eyeBtn = $('#eyeBtn'), fpw = $('#fpw'), fid = $('#fid');
+  eyeBtn.addEventListener('click', function(){
+    fpw.type = fpw.type === 'password' ? 'text' : 'password';
+  });
+
+  $('#loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = $('#signBtn'), alertBar = $('#loginAlert');
+    if (btn.classList.contains('busy')) return;
+    btn.classList.add('busy');
+    alertBar.classList.remove('on');
+    setTimeout(function(){
+      var okId = fid.value.trim().toUpperCase() === 'OT-DEMO01';
+      var okPw = fpw.value === 'zass2026';
+      if (okId && okPw){
+        sessionStorage.setItem('ot_auth', '1');
+        if ($('#rememberMe').checked) localStorage.setItem('ot_auth', '1');
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+        if (hasGSAP && !REDUCED){
+          gsap.to('#loginPanel', {scale:.98, opacity:0, duration:.3, ease:'power2.in', delay:.35});
+          gsap.to(wipe, {clipPath:'circle(141% at 50% 50%)', duration:.65, ease:'power3.inOut', delay:.55,
+            onComplete:function(){
+              showDash();
+              gsap.to(wipe, {clipPath:'circle(0% at 50% 50%)', duration:.6, ease:'power3.inOut', delay:.15});
+            }});
+        } else { showDash(true); }
+      } else {
+        btn.classList.remove('busy');
+        alertBar.classList.add('on');
+        [fid, fpw].forEach(function(inp){
+          inp.classList.add('err');
+          setTimeout(function(){ inp.classList.remove('err'); }, 1400);
+        });
+        if (hasGSAP && !REDUCED)
+          gsap.to('#loginPanel', {keyframes:[{x:-8},{x:8},{x:-8},{x:8},{x:-4},{x:4},{x:0}], duration:.42, ease:'none'});
+      }
+    }, 750);
+  });
+}
+/* ═══════ DASHBOARD ═══════ */
+var dashStarted = false;
+var SC = {online:'#00C896', charging:'#F0A800', fault:'#FF3B4E', offline:'#7C8DA3'};
+var SL_EN = {online:'Online', charging:'Charging', fault:'Fault', offline:'Offline'};
+var SL_TR = {online:'Çevrimiçi', charging:'Şarjda', fault:'Arıza', offline:'Çevrimdışı'};
+var SL = LANG === 'tr' ? SL_TR : SL_EN;
+function P(k, v, unit, max, opts){ return {k:k, v:v, unit:unit||'', max:max||0, opts:opts||null}; }
+function mkV(id, drv, rfid, st, zone, soc, x, y, box){
+  return {
+    id:id, drv:drv, rfid:rfid, st:st, zone:zone, soc:soc,
+    soh:87 + Math.random()*9, volt:50.5 + Math.random()*3.5,
+    amp:st === 'charging' ? 24 : -(10 + Math.random()*14),
+    btemp:29 + Math.random()*10, cycles:600 + (Math.random()*900|0),
+    range:2 + Math.random()*4,
+    speed:(st === 'online' || st === 'fault') ? 3 + Math.random()*6 : 0,
+    mamp:(st === 'online' || st === 'fault') ? 40 + Math.random()*40 : 0,
+    lift:0, hyd:160 + Math.random()*40, steer:0,
+    hours:(3 + Math.random()*5|0) + 'h ' + (Math.random()*59|0) + 'm',
+    x:x, y:y, dirX:Math.random() > .5 ? 1 : -1, dirY:Math.random() > .5 ? 1 : -1, box:box,
+    params:[P('Max Speed', 8, ' km/h', 12), P('Lift Speed', 75, '%', 100),
+            P('Regen Braking', 'Medium', '', 0, ['Low','Medium','High']),
+            P('Acceleration', 'Standard', '', 0, ['Smooth','Standard','Sport']),
+            P('Horn Mode', 'Standard', '', 0, ['Standard','Soft','Off'])],
+    faults:[], dirty:0, hist:[], site:0
+  };
+}
+var BA = [70, 330, 90, 220], BB = [420, 820, 75, 270], BC = [590, 820, 365, 480];
+var VEH = [
+  mkV('FLT-0042','Mehmet Yılmaz','****2841','fault','C-07',82.4,700,420,BC),
+  mkV('FLT-0008','Jakub Kowalski','****1190','online','B-12',91.2,520,140,BB),
+  mkV('FLT-0023','Daniel Müller','****3327','online','B-04',77.5,660,220,BB),
+  mkV('FLT-0031','Sven van Dijk','****8810','online','A-02',88.1,150,140,BA),
+  mkV('FLT-0078','Carla Johnson','****4452','online','A-05',69.4,250,180,BA),
+  mkV('FLT-0017','Ayşe Demir','****7203','charging','BAY-2',64.0,126,474,null),
+  mkV('FLT-0056','Luca Rossi','****0915','charging','BAY-3',97.2,186,474,null),
+  mkV('FLT-0064','Anna Nowak','****6671','offline','DOCK-1',41.0,330,490,null)
+];
+(function(){
+  function X(v, site){ v.site = site; return v; }
+  VEH.push(
+    X(mkV('GBZ-0101','Emre Kaya','****5512','online','B-02',84.0,520,150,BB), 1),
+    X(mkV('GBZ-0102','Fatma Şahin','****6620','online','A-04',76.5,180,150,BA), 1),
+    X(mkV('GBZ-0103','Murat Aksoy','****7731','charging','BAY-1',58.0,96,474,null), 1),
+    X(mkV('GBZ-0104','Elif Doğan','****8842','online','C-02',91.0,700,420,BC), 1),
+    X(mkV('IZM-0201','Hasan Çetin','****9953','online','A-01',88.0,150,130,BA), 2),
+    X(mkV('IZM-0202','Zeynep Arslan','****1064','online','B-05',71.0,600,200,BB), 2),
+    X(mkV('IZM-0203','Ali Vural','****2175','offline','DOCK-2',35.0,330,490,null), 2)
+  );
+  /* sparkline geçmişini doldur */
+  VEH.forEach(function(v){
+    var so = v.soc, tp = v.btemp;
+    for (var i = 0; i < 60; i++){
+      so = Math.max(8, Math.min(100, so + (Math.random() - .48)*.4));
+      tp = Math.max(24, Math.min(48, tp + (Math.random() - .5)*.7));
+      v.hist.push({s:so, t:tp});
+    }
+  });
+})();
+VEH[0].faults = [
+  {s:'crit', c:'ERR_0x2A14', d:'Motor Controller Overtemperature', t:'5 min ago', a:'Reduce load, inspect cooling fan circuit.'},
+  {s:'warn', c:'ERR_0x1B03', d:'Battery Cell Voltage Imbalance', t:'32 min ago', a:'Schedule equalization charge tonight.'}
+];
+var ALERTS = [
+  {s:'crit', c:'ERR_0x2A14', v:'FLT-0042', d:'Motor Controller Overtemperature', t:'5 min ago', a:'Reduce load, inspect cooling fan.', ack:false},
+  {s:'warn', c:'ERR_0x1B03', v:'FLT-0042', d:'Battery Cell Voltage Imbalance', t:'32 min ago', a:'Schedule equalization charge.', ack:false},
+  {s:'warn', c:'GEO_0x0021', v:'FLT-0078', d:'Geofence Breach — Zone C (Restricted)', t:'1 h ago', a:'Verify operator authorization.', ack:false},
+  {s:'info', c:'SRV_0x0090', v:'FLT-0008', d:'Planned Service In 18 Operating Hours', t:'3 h ago', a:'Auto-scheduled — parts reserved.', ack:true},
+  {s:'info', c:'BAT_0x0007', v:'FLT-0056', d:'Charge Complete — 100% SoC', t:'4 h ago', a:'Vehicle ready for next shift.', ack:true}
+];
+(function(){
+    var R = window.__OT_REMOTE;
+    if (!R || !R.vehicles) return;
+    var byId = {}; VEH.forEach(function(v){ byId[v.id] = v; });
+    R.vehicles.forEach(function(rv){
+      var v = byId[rv.id]; if (!v) return;
+      if (rv.driver) v.drv = rv.driver;
+      if (rv.status) v.st = rv.status;
+      if (typeof rv.soc === 'number') v.soc = rv.soc;
+      if (rv.zone) v.zone = rv.zone;
+    });
+    console.info('[OmniTrace] data.json yuklendi: ' + R.vehicles.length + ' arac');
+  })();
+  /* canlı VM cihazı: device_id 1 → bu araç (vm_proxy.php). Veri gelmezse demo kalır. */
+  (function(){ var rv = VEH[0]; if (rv){ rv.real = true; rv.deviceId = 1; } })();
+  var sel = VEH[0], curView = 'fleet', curSite = 0, NS = 'http://www.w3.org/2000/svg';
+var SITES = [
+  {labels:['ZONE A — RECEIVING','ZONE B — HIGH BAY STORAGE','ZONE C — RESTRICTED','CHARGING BAYS']},
+  {labels:['ZONE A — PRESS SHOP','ZONE B — ASSEMBLY LINE','ZONE C — BATTERY ROOM','CHARGING BAYS']},
+  {labels:['ZONE A — QUAY 1','ZONE B — CONTAINER YARD','ZONE C — CUSTOMS','CHARGING BAYS']}
+];
+
+function toast(msg, err){
+  var w = $('#toasts'), t = document.createElement('div');
+  t.className = 'toast glass ' + (err ? 'err' : 'ok');
+  t.innerHTML = '<span class="ti"></span><span>' + msg + '</span>';
+  w.appendChild(t);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('on'); }); });
+  setTimeout(function(){ t.classList.remove('on'); setTimeout(function(){ t.remove(); }, 500); }, 4200);
+}
+var modalYesFn = null;
+function openModal(title, text, onYes){
+  $('#modalTitle').textContent = title; $('#modalText').textContent = text;
+  modalYesFn = onYes; $('#modal').classList.add('on');
+}
+
+function initDash(){
+  if (dashStarted) return; dashStarted = true;
+  var mkLayer = $('#mkLayer'), popup = $('#mapPopup'), mapSvg = $('#fleetMap');
+
+  /* ── map markers ── */
+  VEH.forEach(function(v){
+    var g = document.createElementNS(NS, 'g');
+    g.style.cursor = 'pointer'; g.style.transition = 'transform 1.3s linear';
+    g.style.transform = 'translate(' + v.x + 'px,' + v.y + 'px)';
+    if (v.st !== 'offline'){
+      var ring = document.createElementNS(NS, 'circle');
+      ring.setAttribute('r', '7'); ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', SC[v.st]); ring.setAttribute('stroke-width', '1.5');
+      var a1 = document.createElementNS(NS, 'animate');
+      a1.setAttribute('attributeName', 'r'); a1.setAttribute('values', '7;19'); a1.setAttribute('dur', '2s'); a1.setAttribute('repeatCount', 'indefinite');
+      var a2 = document.createElementNS(NS, 'animate');
+      a2.setAttribute('attributeName', 'opacity'); a2.setAttribute('values', '.65;0'); a2.setAttribute('dur', '2s'); a2.setAttribute('repeatCount', 'indefinite');
+      ring.appendChild(a1); ring.appendChild(a2); g.appendChild(ring);
+    }
+    var dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('r', '6'); dot.setAttribute('fill', SC[v.st]);
+    dot.setAttribute('stroke', '#04070D'); dot.setAttribute('stroke-width', '1.5');
+    g.appendChild(dot);
+    g.addEventListener('click', function(e){ e.stopPropagation(); openPopup(v); });
+    mkLayer.appendChild(g); v.mk = g;
+  });
+  mapSvg.addEventListener('click', function(){ popup.classList.remove('on'); });
+
+  function openPopup(v){
+    var box = mapSvg.getBoundingClientRect();
+    popup.innerHTML = '<h6>' + v.id + '</h6><div class="pz">' + v.drv + ' · Zone ' + v.zone + '</div>'
+      + '<div class="pr"><span>' + T('Status','Durum') + '</span><b style="color:' + SC[v.st] + '">' + SL[v.st] + '</b></div>'
+      + '<div class="pr"><span>' + T('Battery SoC','Batarya SoC') + '</span><b>' + v.soc.toFixed(1) + '%</b></div>'
+      + '<div class="pr"><span>' + T('Speed','Hız') + '</span><b>' + v.speed.toFixed(1) + ' km/h</b></div>'
+      + '<div class="pr"><span>' + T('Last Update','Son Güncelleme') + '</span><b>' + T('just now','az önce') + '</b></div>'
+      + '<a href="#" data-id="' + v.id + '">' + T('View Details →','Detayları Gör →') + '</a>';
+    popup.style.left = (v.x/900*box.width) + 'px';
+    popup.style.top = (v.y/540*box.height) + 'px';
+    popup.classList.add('on');
+    $('a', popup).addEventListener('click', function(e){
+      e.preventDefault(); selectVehicle(v); setView('vehicles'); popup.classList.remove('on');
+    });
+  }
+
+  /* ── fleet side list ── */
+  var rowRefs = [];
+  (function buildSide(){
+    var list = $('#vehList');
+    VEH.forEach(function(v){
+      var b = document.createElement('button');
+      b.className = 'vrow';
+      b.innerHTML = '<span class="sdot ' + v.st + '"></span>'
+        + '<span><span class="vid">' + v.id + '</span><br /><span class="vdr">' + v.drv + '</span></span>'
+        + '<span style="text-align:right"><span class="vz">' + v.zone + '</span><span class="bbar"><i></i></span></span>';
+      b.addEventListener('click', function(){ openPopup(v); selectVehicle(v); });
+      list.appendChild(b);
+      rowRefs.push({v:v, el:b, bar:$('.bbar', b), fill:$('.bbar i', b), z:$('.vz', b), dot:$('.sdot', b)});
+    });
+  })();
+  function refreshSide(){
+    var counts = {online:0, charging:0, fault:0, offline:0};
+    VEH.forEach(function(v){ if (v.site === curSite) counts[v.st]++; });
+    $('#sumChips').innerHTML = ['online','charging','fault','offline'].map(function(k){
+      return '<div class="sum-chip"><span class="sdot ' + k + '"></span><b>' + counts[k] + '</b>' + SL[k] + '</div>';
+    }).join('');
+    rowRefs.forEach(function(r){
+      r.el.style.display = r.v.site === curSite ? '' : 'none';
+      r.fill.style.transform = 'scaleX(' + (r.v.soc/100) + ')';
+      r.bar.className = 'bbar' + (r.v.soc < 30 ? ' low' : (r.v.soc < 60 ? ' mid' : ''));
+      r.z.textContent = r.v.zone;
+      r.el.classList.toggle('sel', r.v === sel);
+    });
+  }
+
+  /* ── vehicle detail ── */
+  var RR = {};
+  $$('#view-vehicles .rrow').forEach(function(r){ if (r.getAttribute('data-k')) RR[r.getAttribute('data-k')] = r; });
+  function setRow(k, txt, flash){
+    var r = RR[k]; if (!r) return;
+    var b = $('b', r);
+    if (b.textContent !== txt){
+      b.textContent = txt;
+      if (flash && !REDUCED){ r.classList.remove('upd'); void r.offsetWidth; r.classList.add('upd'); }
+    }
+  }
+  function drawSpark(){
+    var so = $('#spSoc'), tp = $('#spTemp');
+    if (!so || !sel.hist.length) return;
+    var n = sel.hist.length;
+    function pts(key, min, max){
+      var out = [];
+      for (var i = 0; i < n; i++){
+        var val = sel.hist[i][key];
+        var y = 76 - ((val - min)/(max - min))*68;
+        out.push((i/(n-1)*560).toFixed(1) + ',' + Math.max(4, Math.min(76, y)).toFixed(1));
+      }
+      return out.join(' ');
+    }
+    so.setAttribute('points', pts('s', 0, 100));
+    tp.setAttribute('points', pts('t', 20, 50));
+  }
+  function selectVehicle(v){ sel = v; renderChips(); renderDetail(); refreshSide(); }
+  function renderChips(){
+    var w = $('#vselWrap'); w.innerHTML = '';
+    VEH.forEach(function(v){
+      if (v.site !== curSite) return;
+      var c = document.createElement('button');
+      c.className = 'vchip' + (v === sel ? ' on' : '');
+      c.textContent = v.id;
+      c.addEventListener('click', function(){ selectVehicle(v); });
+      w.appendChild(c);
+    });
+  }
+  function renderDetail(){
+    $('#dDriver').textContent = sel.drv;
+    $('#dRfid').textContent = 'RFID ' + sel.rfid + ' · Shift A';
+    $('#dMode').textContent = sel.st === 'charging' ? T('CHARGING','ŞARJDA') : (sel.st === 'offline' ? T('PARKED','PARK') : T('IN OPERATION','GÖREVDE'));
+    updateLive(false);
+    /* cells */
+    var cg = $('#dCells'); cg.innerHTML = '';
+    for (var i=0;i<32;i++){
+      var cv = Math.max(.06, Math.min(1, (sel.soc + (Math.random()*12 - 6))/100));
+      var c = document.createElement('i');
+      c.style.setProperty('--cv', cv);
+      c.style.setProperty('--cf', cv < .35 ? 'rgba(255,59,78,.6)' : (cv < .62 ? 'rgba(255,184,0,.55)' : 'rgba(0,229,160,.55)'));
+      cg.appendChild(c);
+    }
+    /* faults */
+    var fw = $('#vFaults');
+    if (!sel.faults.length){
+      fw.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-3);font-size:.82rem">' + T('No active diagnostic codes.<br />All systems nominal.','Aktif arıza kodu yok.<br />Tüm sistemler normal.') + '</div>';
+      $('#dFaultN').textContent = T('CLEAR','TEMİZ');
+    } else {
+      fw.innerHTML = sel.faults.map(function(f, i){
+        return '<div class="fault-card ' + (f.s === 'crit' ? '' : f.s) + '">'
+          + '<span class="sev ' + f.s + '">' + (f.s === 'crit' ? 'CRITICAL' : f.s.toUpperCase()) + '</span><span class="fcode">' + f.c + '</span>'
+          + '<div class="fdesc">' + f.d + '</div><div class="fmeta">' + T('Detected: ','Tespit: ') + f.t + '</div>'
+          + '<div class="fact"><b>Action:</b> ' + f.a + '</div>'
+          + '<div class="fbtns"><button class="fbtn">' + T('View History','Geçmiş') + '</button><button class="fbtn" data-fack="' + i + '">' + T('Acknowledge','Onayla') + '</button></div></div>';
+      }).join('');
+      $('#dFaultN').textContent = sel.faults.length + T(' ACTIVE',' AKTİF');
+      $$('[data-fack]', fw).forEach(function(btn){
+        btn.addEventListener('click', function(){
+          btn.closest('.fault-card').classList.add('acked');
+          btn.disabled = true; btn.textContent = T('Acknowledged','Onaylandı');
+          toast('Fault acknowledged — logged to maintenance history.');
+        });
+      });
+    }
+    renderParams();
+  }
+  function updateLive(flash){
+    $('#dSocV').textContent = sel.soc.toFixed(1) + '%';
+    $('#dSocB').style.transform = 'scaleX(' + sel.soc/100 + ')';
+    $('#dSohV').textContent = sel.soh.toFixed(1) + '%';
+    $('#dSohB').style.transform = 'scaleX(' + sel.soh/100 + ')';
+    setRow('volt', sel.volt.toFixed(1) + ' V', flash);
+    setRow('amp', sel.amp.toFixed(1) + ' A ' + (sel.amp < 0 ? T('(Discharging)','(Deşarj)') : T('(Charging)','(Şarj)')), flash);
+    setRow('btemp', sel.btemp.toFixed(0) + ' °C', flash);
+    setRow('cycles', sel.cycles.toLocaleString('en-US'), false);
+    setRow('range', sel.range.toFixed(1) + T(' h remaining',' sa kaldı'), flash);
+    setRow('speed', sel.speed.toFixed(1) + ' km/h', flash);
+    setRow('mamp', sel.mamp.toFixed(1) + ' A', flash);
+    setRow('lift', sel.lift.toFixed(2) + ' m' + (sel.lift < .05 ? ' (Lowered)' : ''), flash);
+    setRow('hyd', sel.hyd.toFixed(0) + ' bar', flash);
+    setRow('steer', sel.steer.toFixed(0) + '°', flash);
+    setRow('hours', sel.hours, false);
+    setRow('gps', 'Zone ' + sel.zone + ' · WH-03', false);
+    setRow('head', sel.head, flash);
+    drawSpark();
+  }
+
+  /* ── params + OTA push ── */
+  function renderParams(){
+    var w = $('#paramRows'); w.innerHTML = '';
+    sel.params.forEach(function(p, i){
+      var row = document.createElement('div'); row.className = 'prow';
+      row.innerHTML = '<span>' + p.k + '</span><span style="display:flex;align-items:center"><b>' + p.v + p.unit + '</b><button class="pedit">Edit ✎</button></span>';
+      $('.pedit', row).addEventListener('click', function(){ editParam(row, p); });
+      w.appendChild(row);
+    });
+    syncPush();
+  }
+  function editParam(row, p){
+    row.classList.add('editing');
+    if (p.opts){
+      var idx = p.opts.indexOf(p.v);
+      p.v = p.opts[(idx + 1) % p.opts.length];
+      sel.dirty++;
+      setTimeout(function(){ renderParams(); }, 120);
+    } else {
+      row.innerHTML = '<span>' + p.k + '</span><span style="display:flex;align-items:center;gap:10px">'
+        + '<input type="range" min="0" max="' + p.max + '" value="' + p.v + '" /><b>' + p.v + p.unit + '</b>'
+        + '<button class="pedit">Done</button></span>';
+      var rng = $('input', row), val = $('b', row);
+      rng.addEventListener('input', function(){ val.textContent = rng.value + p.unit; });
+      $('.pedit', row).addEventListener('click', function(){
+        if (parseFloat(rng.value) !== p.v){ p.v = parseFloat(rng.value); sel.dirty++; }
+        renderParams();
+      });
+    }
+  }
+  function syncPush(){
+    var btn = $('#pushBtn'), lbl = $('#pushLbl');
+    btn.disabled = sel.dirty === 0;
+    lbl.textContent = sel.dirty > 0
+      ? (LANG === 'tr' ? sel.dirty + ' Değişikliği Araca Gönder' : 'Push ' + sel.dirty + ' Change' + (sel.dirty > 1 ? 's' : '') + ' to Vehicle')
+      : T('Push New Parameters to Vehicle','Yeni Parametreleri Araca Gönder');
+  }
+  $('#pushBtn').addEventListener('click', function(){
+    if (sel.dirty === 0) return;
+    openModal(T('Confirm OTA Push','OTA Gönderimini Onayla'),
+      LANG === 'tr'
+        ? sel.id + ' aracına ' + sel.dirty + ' parametre değişikliği havadan gönderilsin mi? Araç yeni profili saniyeler içinde uygular. Bu işlem kayıt altına alınır.'
+        : 'Push ' + sel.dirty + ' parameter change' + (sel.dirty > 1 ? 's' : '') + ' to ' + sel.id +
+          ' over the air? The vehicle will apply the new profile within seconds. This action is logged.',
+      function(){
+        var btn = $('#pushBtn'), prog = $('#pushProg'), lbl = $('#pushLbl');
+        btn.disabled = true; lbl.textContent = T('Pushing via 4G LTE…','4G LTE ile gönderiliyor…');
+        prog.style.transition = 'transform 1.5s ease'; prog.style.transform = 'scaleX(1)';
+        setTimeout(function(){
+          prog.style.transition = 'none'; prog.style.transform = 'scaleX(0)';
+          sel.dirty = 0; syncPush();
+          toast('Parameters applied on ' + sel.id + ' — OTA push confirmed in 1.2s.');
+        }, 1600);
+      });
+  });
+  $('#modalNo').addEventListener('click', function(){ $('#modal').classList.remove('on'); });
+  $('#modalYes').addEventListener('click', function(){
+    $('#modal').classList.remove('on');
+    if (modalYesFn){ modalYesFn(); modalYesFn = null; }
+  });
+
+  /* ── alerts ── */
+  var filter = 'all';
+  function renderAlerts(){
+    var unack = ALERTS.filter(function(a){ return !a.ack; }).length;
+    $('#alertBadge').textContent = unack || '';
+    var ss = $('#sysStat');
+    if (unack){
+      ss.className = 'sysstat warn';
+      ss.innerHTML = '<span class="pulse-dot" style="background:var(--signal-400);box-shadow:0 0 12px var(--signal-glow)"></span>' + (LANG === 'tr' ? unack + ' Aktif Uyarı' : unack + ' Active Alert' + (unack > 1 ? 's' : ''));
+    } else {
+      ss.className = 'sysstat ok';
+      ss.innerHTML = '<span class="pulse-dot"></span>' + T('All Systems Operational','Tüm Sistemler Çalışıyor');
+    }
+    $('#alertList').innerHTML = ALERTS.filter(function(a){ return filter === 'all' || a.s === filter; })
+      .map(function(a){
+        var gi = ALERTS.indexOf(a);
+        return '<div class="fault-card ' + (a.s === 'crit' ? '' : a.s) + (a.ack ? ' acked' : '') + '">'
+          + '<span class="sev ' + a.s + '">' + (a.s === 'crit' ? 'CRITICAL' : a.s.toUpperCase()) + '</span><span class="fcode">' + a.c + '</span>'
+          + '<span class="fcode" style="color:var(--omni-300)">' + a.v + '</span>'
+          + '<div class="fdesc">' + a.d + '</div><div class="fmeta">' + a.t + '</div>'
+          + '<div class="fact"><b>Action:</b> ' + a.a + '</div>'
+          + (a.ack ? '' : '<div class="fbtns"><button class="fbtn" data-ai="' + gi + '">' + T('Acknowledge','Onayla') + '</button></div>')
+          + '</div>';
+      }).join('') || '<div style="padding:24px;text-align:center;color:var(--text-3)">No alerts in this category.</div>';
+    $$('#alertList [data-ai]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        ALERTS[parseInt(btn.getAttribute('data-ai'), 10)].ack = true;
+        renderAlerts(); toast('Alert acknowledged.');
+      });
+    });
+  }
+  $$('#alertFilters .fchip').forEach(function(ch){
+    ch.addEventListener('click', function(){
+      var f = ch.getAttribute('data-f');
+      if (f === 'ackall'){
+        ALERTS.forEach(function(a){ a.ack = true; });
+        renderAlerts(); toast('All alerts acknowledged.');
+        return;
+      }
+      filter = f;
+      $$('#alertFilters .fchip').forEach(function(c){ c.classList.toggle('on', c === ch); });
+      renderAlerts();
+    });
+  });
+
+  /* ── analytics (lazy) ── */
+  var anDone = false;
+  function showAnalytics(){
+    if (anDone) return; anDone = true;
+    var bw = $('#anBars');
+    [.58,.74,.92,.66,.81,.88,.45].forEach(function(h, i){
+      var b = document.createElement('i');
+      if (h > .85) b.className = 'hi';
+      bw.appendChild(b);
+      setTimeout(function(){ b.style.transform = 'scaleY(' + h + ')'; }, 60 + i*70);
+    });
+    var hw = $('#anHeat');
+    for (var d=0;d<7;d++) for (var h=0;h<24;h++){
+      var base = (h >= 6 && h <= 20) ? .28 + .6*Math.sin((h-6)/14*Math.PI) : .05;
+      if (d > 4) base *= .35;
+      var op = Math.min(1, Math.max(.05, base + (Math.random()-.5)*.22));
+      var c = document.createElement('i'); hw.appendChild(c);
+      (function(c, op, k){ setTimeout(function(){ c.style.opacity = op; }, 100 + k*3); })(c, op, d*24 + h);
+    }
+    $('#anTable').innerHTML = VEH.slice(0, 5).map(function(v){
+      return '<tr><td><b>' + v.id + '</b></td><td>' + v.drv + '</td><td class="mono">' + (28 + Math.random()*14).toFixed(1) + ' h</td><td class="mono">' + (40 + Math.random()*30).toFixed(0) + ' kWh</td></tr>';
+    }).join('');
+    var line = $('#anLine'), len = line.getTotalLength();
+    line.style.strokeDasharray = len; line.style.strokeDashoffset = len;
+    line.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(.65,0,.35,1)';
+    requestAnimationFrame(function(){
+      line.style.strokeDashoffset = '0';
+      setTimeout(function(){ $('#anFill').style.opacity = '1'; $('#anFill').style.transition = 'opacity .9s'; }, 900);
+    });
+  }
+
+  /* ── settings ── */
+  $('#setDrivers').innerHTML = VEH.map(function(v){
+    return '<tr><td>' + v.drv + '</td><td class="mono">' + v.rfid + '</td><td class="mono">' + v.params[0].v + ' km/h</td><td>' + v.params[3].v + '</td><td class="mono">' + v.params[1].v + '%</td><td style="color:' + SC[v.st] + '">' + SL[v.st] + '</td></tr>';
+  }).join('');
+  $('#saveSet').addEventListener('click', function(){ toast('Notification preferences saved.'); });
+
+  /* ── sürücü skor kartı ── */
+  var scoreDone = false;
+  function buildScores(){
+    var grid = $('#scoreGrid'); if (!grid) return;
+    grid.innerHTML = '';
+    var list = VEH.filter(function(v){ return v.site === curSite; }).map(function(v){
+      var seed = 0; for (var i = 0; i < v.id.length; i++) seed += v.id.charCodeAt(i);
+      function r(off, lo, hi){ return Math.round(lo + ((seed * 9301 + off * 49297) % 233280) / 233280 * (hi - lo)); }
+      var smooth = r(1, 62, 99), speed = r(2, 55, 99), idle = r(3, 60, 98), impact = r(4, 70, 100);
+      var total = Math.round((smooth + speed + idle + impact) / 4);
+      return { v: v, total: total, rows: [[T('Smoothness','Yumuşaklık'), smooth], [T('Speed limits','Hız limiti'), speed], [T('Idle time','Rölanti'), idle], [T('Impact-free','Darbesiz'), impact]] };
+    }).sort(function(a, b){ return b.total - a.total; });
+    list.forEach(function(d, rank){
+      var grade = d.total >= 85 ? 'a' : (d.total >= 72 ? 'b' : 'c');
+      var col = grade === 'a' ? '#00C896' : (grade === 'b' ? '#F0A800' : '#FF3B4E');
+      var card = document.createElement('div');
+      card.className = 'score-card glass';
+      card.innerHTML =
+        '<div class="score-top"><span class="avatar"></span><div><b>' + d.v.drv + '</b><span>' + d.v.id + ' · #' + (rank + 1) + '</span></div>'
+        + '<span class="score-ring"><svg width="54" height="54"><circle cx="27" cy="27" r="22" fill="none" stroke="var(--surface-2)" stroke-width="5"/><circle cx="27" cy="27" r="22" fill="none" stroke="' + col + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (d.total / 100 * 138).toFixed(1) + ' 138"/></svg><b>' + d.total + '</b></span></div>'
+        + '<div class="score-bars">' + d.rows.map(function(rr){
+            var rc = rr[1] >= 85 ? '#00C896' : (rr[1] >= 70 ? '#F0A800' : '#FF3B4E');
+            return '<div class="score-row"><span>' + rr[0] + '</span><span class="sb-track"><i data-w="' + rr[1] + '" style="background:' + rc + '"></i></span><b>' + rr[1] + '</b></div>';
+          }).join('') + '</div>'
+        + '<span class="score-badge ' + grade + '" style="align-self:flex-start">' + (grade === 'a' ? T('EXCELLENT','MÜKEMMEL') : grade === 'b' ? T('GOOD','İYİ') : T('NEEDS COACHING','GELİŞİM')) + '</span>';
+      grid.appendChild(card);
+    });
+    setTimeout(function(){ $$('.sb-track i', grid).forEach(function(bi){ bi.style.transform = 'scaleX(' + (+bi.getAttribute('data-w')) / 100 + ')'; }); }, 100);
+  }
+
+  /* ── bakım takvimi ── */
+  function buildCalendar(){
+    var grid = $('#calGrid'), dow = $('#calDow'), title = $('#calTitle');
+    if (!grid) return;
+    var now = new Date(), yr = now.getFullYear(), mo = now.getMonth();
+    var monthsEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var monthsTr = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    title.textContent = (LANG === 'tr' ? monthsTr : monthsEn)[mo] + ' ' + yr;
+    var dowEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], dowTr = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+    dow.innerHTML = (LANG === 'tr' ? dowTr : dowEn).map(function(d){ return '<div class="cal-dow">' + d + '</div>'; }).join('');
+    var first = new Date(yr, mo, 1).getDay(); first = (first + 6) % 7; /* Pzt=0 */
+    var days = new Date(yr, mo + 1, 0).getDate();
+    /* deterministik etkinlikler */
+    var EV = {};
+    function add(day, cls, txt){ (EV[day] = EV[day] || []).push({ cls: cls, txt: txt }); }
+    add(3, 'done', 'FLT-0023 ' + T('filter','filtre'));
+    add(8, 'done', 'FLT-0008 ' + T('service','servis'));
+    add(now.getDate(), 'plan', 'FLT-0042 ' + T('inspection','muayene'));
+    add(now.getDate() + 2 > days ? days : now.getDate() + 2, 'ml', 'FLT-0017 ' + T('battery','batarya'));
+    add(Math.min(days, now.getDate() + 5), 'plan', 'FLT-0056 ' + T('brakes','fren'));
+    add(Math.min(days, now.getDate() + 9), 'ml', 'FLT-0031 ' + T('motor check','motor'));
+    add(Math.min(days, now.getDate() + 14), 'plan', 'FLT-0064 ' + T('annual','yıllık'));
+    var html = '';
+    for (var i = 0; i < first; i++) html += '<div class="cal-cell empty"></div>';
+    for (var d = 1; d <= days; d++){
+      var evs = EV[d] || [];
+      html += '<div class="cal-cell' + (d === now.getDate() ? ' today' : '') + '">' + d
+        + evs.map(function(e){ return '<span class="cal-ev ' + e.cls + '" title="' + e.txt + '">' + e.txt + '</span>'; }).join('')
+        + '</div>';
+    }
+    grid.innerHTML = html;
+  }
+
+  /* ── view switching ── */
+  function CRUMBS(){
+    return LANG === 'tr'
+      ? {fleet:'Filo <span>/ Canlı Harita</span>', vehicles:'Filo <span>/ Araçlar /</span> ', analytics:'Filo <span>/ Analitik</span>', alerts:'Filo <span>/ Uyarılar</span>', drivers:'Filo <span>/ Sürücü Skoru</span>', maintenance:'Filo <span>/ Bakım Takvimi</span>', settings:'Filo <span>/ Ayarlar</span>'}
+      : {fleet:'Fleet <span>/ Live Map</span>', vehicles:'Fleet <span>/ Vehicles /</span> ', analytics:'Fleet <span>/ Analytics</span>', alerts:'Fleet <span>/ Alerts</span>', drivers:'Fleet <span>/ Driver Score</span>', maintenance:'Fleet <span>/ Maintenance</span>', settings:'Fleet <span>/ Settings</span>'};
+  }
+  function setView(name){
+    curView = name;
+    $$('.sb-item').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-view') === name); });
+    $$('.view').forEach(function(v){ v.classList.toggle('on', v.id === 'view-' + name); });
+    $('#crumb').innerHTML = CRUMBS()[name] + (name === 'vehicles' ? sel.id : '');
+    if (name === 'analytics') showAnalytics();
+    if (name === 'drivers') buildScores();
+    if (name === 'maintenance') buildCalendar();
+    if (name === 'vehicles') renderDetail();
+  }
+  $$('.sb-item').forEach(function(b){
+    b.addEventListener('click', function(){ setView(b.getAttribute('data-view')); });
+  });
+  /* bildirim merkezi */
+  var NOTIF = [], notifPanel = $('#notifPanel'), notifList = $('#notifList');
+  function pushNotif(v, txt, col){
+    NOTIF.unshift({v:v, txt:txt, col:col || '#C0151F', tm:new Date()});
+    if (NOTIF.length > 12) NOTIF.pop();
+    renderNotif(); bumpBell(NOTIF.unread = (NOTIF.unread || 0) + 1);
+  }
+  function bumpBell(n){
+    var bb = $('#bellBadge');
+    bb.textContent = n || '';
+    bb.style.display = n ? '' : 'none';
+  }
+  function fmtT(d){
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  function renderNotif(){
+    notifList.innerHTML = NOTIF.map(function(o){
+      return '<div class="nrow"><span class="ndot" style="background:' + o.col + '"></span><div><b>' + o.v + '</b> ' + o.txt + '</div><span class="nt">' + fmtT(o.tm) + '</span></div>';
+    }).join('') || '<div style="padding:18px;text-align:center;color:var(--text-3);font-size:.78rem">' + T('No notifications yet.','Henüz bildirim yok.') + '</div>';
+  }
+  ALERTS.filter(function(a){ return !a.ack; }).forEach(function(a){
+    NOTIF.push({v:a.v, txt:a.d, col:a.s === 'crit' ? '#FF3B4E' : '#F0A800', tm:new Date(Date.now() - Math.random()*3.6e6)});
+  });
+  NOTIF.unread = NOTIF.length; renderNotif(); bumpBell(NOTIF.unread);
+  $('#bellBtn').addEventListener('click', function(e){
+    e.stopPropagation();
+    var on = notifPanel.classList.toggle('on');
+    if (on){ NOTIF.unread = 0; bumpBell(0); }
+  });
+  $('#notifAll').addEventListener('click', function(){ notifPanel.classList.remove('on'); setView('alerts'); });
+  document.addEventListener('click', function(e){
+    if (!notifPanel.contains(e.target) && e.target !== $('#bellBtn')) notifPanel.classList.remove('on');
+  });
+  $('#signOut').addEventListener('click', function(){
+    sessionStorage.removeItem('ot_auth'); localStorage.removeItem('ot_auth');
+    location.reload();
+  });
+
+  /* ── geofence editörü ── */
+  (function(){
+    var geoBtn = $('#geoBtn'), box = $('.map-box'), svg = $('#fleetMap');
+    if (!geoBtn || !svg) return;
+    var arming = false, drawing = false, sx = 0, sy = 0, rect = null;
+    var colors = ['#C0151F', '#FFB800', '#00C896'];
+    function pt(e){
+      var r = svg.getBoundingClientRect();
+      return { x: (e.clientX - r.left) / r.width * 900, y: (e.clientY - r.top) / r.height * 540 };
+    }
+    geoBtn.addEventListener('click', function(){
+      arming = !arming;
+      geoBtn.classList.toggle('arming', arming);
+      box.classList.toggle('drawing', arming);
+    });
+    svg.addEventListener('pointerdown', function(e){
+      if (!arming) return;
+      drawing = true;
+      var p = pt(e); sx = p.x; sy = p.y;
+      rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('rx', '8'); rect.setAttribute('fill', 'rgba(192,21,31,.05)');
+      rect.setAttribute('stroke', '#C0151F'); rect.setAttribute('stroke-width', '1.2');
+      rect.setAttribute('stroke-dasharray', '7 6');
+      svg.insertBefore(rect, $('#mkLayer'));
+    });
+    svg.addEventListener('pointermove', function(e){
+      if (!drawing) return;
+      var p = pt(e);
+      rect.setAttribute('x', Math.min(sx, p.x)); rect.setAttribute('y', Math.min(sy, p.y));
+      rect.setAttribute('width', Math.abs(p.x - sx)); rect.setAttribute('height', Math.abs(p.y - sy));
+    });
+    window.addEventListener('pointerup', function(){
+      if (!drawing) return;
+      drawing = false;
+      var w = +rect.getAttribute('width'), h = +rect.getAttribute('height');
+      if (w < 30 || h < 20){ rect.remove(); return; }
+      var name = prompt(T('Zone name:', 'Bölge adı:'), T('NEW ZONE', 'YENİ BÖLGE'));
+      if (name === null){ rect.remove(); }
+      else {
+        var ci = +(prompt(T('Alert type — 1 Restricted (red), 2 Caution (amber), 3 Safe (green):', 'Uyarı tipi — 1 Yasak (kırmızı), 2 Dikkat (sarı), 3 Güvenli (yeşil):'), '1') || '1') - 1;
+        var col = colors[ci] || colors[0];
+        rect.setAttribute('stroke', col);
+        rect.setAttribute('fill', col === '#C0151F' ? 'rgba(192,21,31,.05)' : (col === '#FFB800' ? 'rgba(255,184,0,.05)' : 'rgba(0,200,150,.05)'));
+        var tx = document.createElementNS(NS, 'text');
+        tx.setAttribute('x', +rect.getAttribute('x') + 12); tx.setAttribute('y', +rect.getAttribute('y') + 22);
+        tx.setAttribute('font-family', 'JetBrains Mono'); tx.setAttribute('font-size', '12');
+        tx.setAttribute('fill', col); tx.textContent = name;
+        svg.insertBefore(tx, $('#mkLayer'));
+        toast(T('Zone created: ', 'Bölge oluşturuldu: ') + name);
+      }
+      arming = false; geoBtn.classList.remove('arming'); box.classList.remove('drawing');
+    });
+  })();
+
+  /* ── tesis seçici ── */
+  function applySite(){
+    VEH.forEach(function(v){ v.mk.style.display = v.site === curSite ? '' : 'none'; });
+    SITES[curSite].labels.forEach(function(t, i){
+      var el = $('#zt' + (i + 1)); if (el) el.textContent = t;
+    });
+    var first = VEH.filter(function(v){ return v.site === curSite; })[0];
+    if (sel.site !== curSite && first) sel = first;
+    popup.classList.remove('on');
+    refreshSide(); renderChips(); renderDetail();
+    setView(curView);
+  }
+  var siteSel = $('#siteSel');
+  if (siteSel) siteSel.addEventListener('change', function(){
+    curSite = +siteSel.value;
+    applySite();
+    toast(T('Switched to site: ','Tesise geçildi: ') + siteSel.options[siteSel.selectedIndex].text);
+  });
+
+  /* ── clock ── */
+  function tick(){
+    var d = new Date();
+    $('#clock').textContent = [d.getHours(), d.getMinutes(), d.getSeconds()]
+      .map(function(n){ return String(n).padStart(2, '0'); }).join(':');
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* ── harita REPLAY modu: son 1 saat, hızlandırılmış rota tekrarı ── */
+  var replaying = false;
+  var replayBtn = $('#replayBtn');
+  if (replayBtn) replayBtn.addEventListener('click', function(){
+    if (replaying) return;
+    replaying = true;
+    replayBtn.textContent = 'REPLAYING…'; replayBtn.disabled = true;
+    var lc = $('#liveChip'); if (lc) lc.textContent = '−60:00 → NOW';
+    var movers = VEH.filter(function(v){ return (v.st === 'online' || v.st === 'fault') && v.site === curSite; });
+    var routes = movers.map(function(v){
+      var pts = [];
+      for (var i = 0; i < 10; i++)
+        pts.push([v.box[0] + Math.random()*(v.box[1]-v.box[0]), v.box[2] + Math.random()*(v.box[3]-v.box[2])]);
+      pts.push([v.x, v.y]); /* şimdiki konumda biter */
+      var pl = document.createElementNS(NS, 'polyline');
+      pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', SC[v.st]);
+      pl.setAttribute('stroke-width', '1.6'); pl.setAttribute('stroke-opacity', '.45');
+      pl.setAttribute('stroke-dasharray', '4 5');
+      mkLayer.insertBefore(pl, mkLayer.firstChild);
+      v.mk.style.transition = 'none';
+      return {v:v, pts:pts, pl:pl};
+    });
+    var t0 = performance.now(), DUR = 8000;
+    (function step(now){
+      /* rAF zaman damgası t0'dan küçük gelebilir — negatif p'yi engelle */
+      var p = Math.max(0, Math.min(1, (now - t0)/DUR));
+      routes.forEach(function(r){
+        var seg = p*(r.pts.length - 1);
+        var i = Math.min(r.pts.length - 2, Math.floor(seg)), f = seg - i;
+        var x = r.pts[i][0] + (r.pts[i+1][0] - r.pts[i][0])*f;
+        var y = r.pts[i][1] + (r.pts[i+1][1] - r.pts[i][1])*f;
+        r.v.mk.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+        r.pl.setAttribute('points',
+          r.pts.slice(0, i + 1).map(function(q){ return q[0] + ',' + q[1]; }).join(' ') + ' ' + x + ',' + y);
+      });
+      if (p < 1) requestAnimationFrame(step);
+      else setTimeout(function(){
+        routes.forEach(function(r){
+          r.pl.remove();
+          r.v.mk.style.transition = 'transform 1.3s linear';
+          r.v.mk.style.transform = 'translate(' + r.v.x + 'px,' + r.v.y + 'px)';
+        });
+        replaying = false;
+        replayBtn.textContent = '⟲ REPLAY 1H'; replayBtn.disabled = false;
+        if (lc) lc.innerHTML = '<span class="pulse-dot" style="width:5px;height:5px"></span>LIVE · WEBSOCKET';
+        toast('Replay finished — back to live feed.');
+      }, 400);
+    })(t0);
+  });
+
+  /* ── yazdırılabilir rapor ── */
+  var printBtn = $('#printBtn');
+  if (printBtn) printBtn.addEventListener('click', function(){ window.print(); });
+
+  /* ── canlı olay simülasyonu (toast akışı) ── */
+  var EVENTS = [
+    ['FLT-0031', 'left Zone A — entering Aisle 4'],
+    ['FLT-0017', 'charge complete — 100% SoC'],
+    ['FLT-0008', 'shift report ready for review'],
+    ['FLT-0023', 'impact sensor: minor event logged'],
+    ['FLT-0078', 'entered Zone C — authorized access'],
+    ['FLT-0056', 'reconnected — firmware v2.4.1']
+  ];
+  setTimeout(function(){
+    setInterval(function(){
+      var e = EVENTS[Math.random()*EVENTS.length|0];
+      toast('<b>' + e[0] + '</b> ' + e[1]);
+      pushNotif(e[0], e[1], '#C0151F');
+    }, 38000);
+  }, 12000);
+
+  /* ── telemetry simulator (mock WebSocket) ── */
+  setInterval(function(){
+    VEH.forEach(function(v){
+      if (v.st === 'online' || v.st === 'fault'){
+        if (Math.random() < .14) v.dirX *= -1;
+        if (Math.random() < .14) v.dirY *= -1;
+        v.x += v.dirX*(5 + Math.random()*11); v.y += v.dirY*(3 + Math.random()*8);
+        if (v.x < v.box[0]){ v.x = v.box[0]; v.dirX = 1; }
+        if (v.x > v.box[1]){ v.x = v.box[1]; v.dirX = -1; }
+        if (v.y < v.box[2]){ v.y = v.box[2]; v.dirY = 1; }
+        if (v.y > v.box[3]){ v.y = v.box[3]; v.dirY = -1; }
+        if (!replaying) v.mk.style.transform = 'translate(' + v.x + 'px,' + v.y + 'px)';
+        v.speed = Math.max(0, Math.min(11, v.speed + (Math.random()-.5)*1.6));
+        v.mamp = Math.max(8, Math.min(120, v.mamp + (Math.random()-.5)*9));
+        v.steer = Math.max(-28, Math.min(28, v.steer + (Math.random()-.5)*9));
+        v.hyd = Math.max(120, Math.min(220, v.hyd + (Math.random()-.5)*6));
+        v.lift = Math.random() < .08 ? Math.random()*3.2 : Math.max(0, v.lift - .4);
+        v.soc = Math.max(8, v.soc - .015);
+        v.range = Math.max(.2, v.soc/100*5.1);
+        v.amp = -(8 + Math.random()*16);
+        v.btemp = Math.max(26, Math.min(46, v.btemp + (Math.random()-.5)*.8));
+        v.head = (v.dirX > 0 ? (v.dirY > 0 ? 'SE (135°)' : 'NE (45°)') : (v.dirY > 0 ? 'SW (225°)' : 'NW (315°)'));
+      } else if (v.st === 'charging'){
+        v.soc = Math.min(100, v.soc + .12);
+        v.amp = 18 + Math.random()*8;
+        v.volt = 54 + Math.random()*1.5;
+      }
+      if (v.real && OT_LIVE.everOk) applyLive(v);   /* gerçek VM verisi rastgeleyi ezer */
+      v.volt = 49 + (v.soc/100)*6 + (Math.random()-.5)*.2;
+      v.hist.push({s:v.soc, t:v.btemp});
+      if (v.hist.length > 60) v.hist.shift();
+    });
+    refreshSide();
+    if (curView === 'vehicles') updateLive(true);
+  }, 1400);
+
+  /* ═══════ CANLI VM VERİSİ (vm_proxy.php → `standart` tablosu) ═══════
+     Repo'daki dashboard.html veri-alma mantığının bizim modele uyarlanmışı.
+     VM/proxy erişilemezse (file:// veya VM kapalı) everOk=false kalır → site
+     tamamen demo modda, hiçbir görünüm değişmez. Gerçek veri gelince VEH[0]
+     (device_id 1) canlı değerlerle güncellenir; mevcut animasyon yumuşatır. */
+  var OT_LIVE = { row:null, secAgo:9999, everOk:false, ts:0 };
+  var OT_VPS  = (location.hostname === '34.175.200.205') ? 'veri_oku.php' : 'vm_proxy.php';
+  function liveNum(row, keys){
+    for (var i=0;i<keys.length;i++){ var k=keys[i], v=row[k];
+      if (v==null) v=row[k.toUpperCase()];
+      if (v!=null && v!=='' && !isNaN(v)) return Number(v); }
+    return null;
+  }
+  function applyLive(v){
+    var fresh = OT_LIVE.everOk && OT_LIVE.secAgo < 10;
+    if (!fresh){ v.st = 'offline'; return; }            /* ≥10sn → bağlantı koptu */
+    var r = OT_LIVE.row; if (!r) return;
+    var soc=liveNum(r,['batarya_soc']);                 if(soc!=null) v.soc=Math.max(0,Math.min(100,soc));
+    var spd=liveNum(r,['gercek_hiz']);                  if(spd!=null) v.speed=spd;
+    var mt =liveNum(r,['motor_sic_sag','motor_sic_sol']); if(mt!=null) v.btemp=mt;
+    var ma =liveNum(r,['motor_akim_sag','dc_akim']);    if(ma!=null) v.mamp=Math.abs(ma);
+    var dc =liveNum(r,['dc_akim']);                     if(dc!=null) v.amp=-Math.abs(dc);
+    var lf =liveNum(r,['lift']);                        if(lf!=null) v.lift=lf;
+    var sa =liveNum(r,['aci_deger']);                   if(sa!=null) v.steer=sa;
+    var ch =liveNum(r,['calisma_saati']);               if(ch!=null) v.hours=ch+'h';
+    v.volt = 49 + (v.soc/100)*6;
+    if (v.st==='offline') v.st='online';
+  }
+  function liveChipUpdate(){
+    var chip = $('#liveChip'); if (!chip || !OT_LIVE.everOk) return;
+    var on = OT_LIVE.secAgo < 10;
+    chip.innerHTML = '<span class="pulse-dot" style="width:5px;height:5px;background:'+(on?'#00C896':'#FF3B4E')+'"></span>'+
+      (on ? (LANG==='tr'?'CANLI · VM #1':'LIVE · VM #1') : (LANG==='tr'?'VM BAĞLANTISI KOPTU':'VM LINK LOST'));
+  }
+  function pollLive(){
+    if (!/^https?:/.test(location.protocol)) return;   /* file:// → saf demo, ağ yok */
+    fetch(OT_VPS+'?device_id=1&limit=1', {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (j && j.status==='success' && j.data && j.data.length){
+          OT_LIVE.row = j.data[0];
+          OT_LIVE.secAgo = parseInt(j.data[0].seconds_ago!=null ? j.data[0].seconds_ago : 9999, 10);
+          OT_LIVE.everOk = true; OT_LIVE.ts = Date.now();
+          liveChipUpdate();
+        }
+      })
+      .catch(function(){ /* VM/proxy yok → sessiz, demo sürer */ });
+  }
+  pollLive(); setInterval(pollLive, 2000);
+
+  /* dil değişiminde dinamik görünümleri tazele */
+  i18nHooks.push(function(){
+    SL = LANG === 'tr' ? SL_TR : SL_EN;
+    refreshSide(); renderChips(); renderDetail(); renderAlerts(); renderNotif();
+    if (curView === 'drivers') buildScores();
+    if (curView === 'maintenance') buildCalendar();
+    setView(curView); syncPush();
+  });
+
+  /* initial paint */
+  refreshSide(); renderChips(); renderDetail(); renderAlerts();
+  applySite();
+  if (LANG === 'tr') applyLang();
+}
+/* expose for login flow */
+window.__otInitDash = initDash;
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+})();
+</script>
+</body>
+</html>

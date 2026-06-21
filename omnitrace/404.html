@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>404 — Lost Pallet | OmniTrace Global</title>
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#C0151F" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%23C0151F'/%3E%3Cellipse cx='16' cy='16' rx='13' ry='5' fill='none' stroke='%23C0151F' stroke-width='1.6' transform='rotate(-24 16 16)' opacity='0.8'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+:root{--void:#EAF0F7;--surface:#FFF;--border-subtle:#D7DFE9;--border:#C2CEDC;--red:#C0151F;--red-d:#A6121B;--t1:#161F2C;--t2:#46586E;--t3:#7C8DA3}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:grid;place-items:center;background-color:var(--void);background-image:linear-gradient(rgba(148,168,196,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.16) 1px,transparent 1px);background-size:42px 42px;color:var(--t1);font:400 1rem/1.6 'Inter',sans-serif;-webkit-font-smoothing:antialiased;text-align:center;padding:24px}
+.box{max-width:540px}
+.scene{position:relative;width:300px;height:120px;margin:0 auto 30px}
+.road{position:absolute;left:0;right:0;bottom:24px;height:2px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.truck{position:absolute;bottom:25px;left:88px;width:96px;animation:idle 2.4s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.pallet{position:absolute;bottom:25px;left:30px;width:40px;animation:tip 3s ease-in-out infinite}
+@keyframes tip{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg)}}
+.code{font:700 clamp(4rem,14vw,7rem)/1 'Space Grotesk',sans-serif;letter-spacing:-.03em;background:linear-gradient(120deg,var(--red-d),var(--red),#E87078);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.kicker{font:600 .72rem 'JetBrains Mono',monospace;letter-spacing:.22em;color:var(--red);text-transform:uppercase;margin-bottom:8px}
+h1{font:700 clamp(1.5rem,4vw,2.2rem) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:4px 0 12px}
+p{color:var(--t2);max-width:420px;margin:0 auto 28px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:12px;font:600 .95rem 'Inter';color:#fff;background:linear-gradient(135deg,#C0151F,#8C0F17);border:1px solid rgba(192,21,31,.5);box-shadow:0 0 24px -8px rgba(192,21,31,.5),0 4px 16px rgba(23,42,72,.12);transition:transform .2s}
+.btn:hover{transform:scale(1.04)}
+a{text-decoration:none}
+.alt{display:block;margin-top:18px;font:500 .85rem 'Inter';color:var(--t3)}
+.alt a{color:var(--red-d);font-weight:600}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="scene" aria-hidden="true">
+    <div class="road"></div>
+    <svg class="pallet" viewBox="0 0 40 34"><rect x="2" y="1" width="18" height="18" rx="2" fill="#D9A441"/><path d="M2 8h18" stroke="#8A6A2B" stroke-width="1.5"/><rect x="0" y="21" width="36" height="4" fill="#8A6A2B"/><rect x="3" y="25" width="6" height="5" fill="#8A6A2B"/><rect x="15" y="25" width="6" height="5" fill="#8A6A2B"/><rect x="27" y="25" width="6" height="5" fill="#8A6A2B"/></svg>
+    <svg class="truck" viewBox="0 0 110 60"><rect x="10" y="24" width="48" height="20" rx="5" fill="#C0151F"/><text x="33" y="38" text-anchor="middle" font-family="Arial" font-weight="900" font-size="10" fill="#fff" letter-spacing="1.2">ZASS</text><path d="M16 24V12h22v12" fill="none" stroke="#46586E" stroke-width="2.5"/><rect x="56" y="4" width="5" height="44" rx="2" fill="#46586E"/><rect x="61" y="44" width="36" height="4" rx="2" fill="#46586E"/><circle cx="22" cy="51" r="8" fill="#161F2C"/><circle cx="48" cy="51" r="8" fill="#161F2C"/><circle cx="22" cy="51" r="3" fill="#7C8DA3"/><circle cx="48" cy="51" r="3" fill="#7C8DA3"/></svg>
+  </div>
+  <p class="kicker">ERR_0x0404 · PALLET NOT FOUND</p>
+  <div class="code">404</div>
+  <h1 data-tr="Bu palet yanlış rafa konmuş.">This pallet was put on the wrong rack.</h1>
+  <p data-tr="Aradığın sayfa taşınmış ya da hiç var olmamış. Forklift'i komuta merkezine geri sürelim.">The page you're looking for has moved or never existed. Let's drive the forklift back to the command center.</p>
+  <a class="btn" href="index.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-tr="Ana Sayfaya Dön">Back to Home</span></a>
+  <span class="alt"><a href="telemetry.html" data-tr="Telemetri Paneli">Telemetry Dashboard</a> · <a href="blog.html">Blog</a></span>
+</div>
+<script>
+if (localStorage.getItem('ot_lang') === 'tr') document.querySelectorAll('[data-tr]').forEach(function(e){ e.textContent = e.getAttribute('data-tr'); });
+</script>
+</body>
+</html>
