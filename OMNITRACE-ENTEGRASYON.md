@@ -167,6 +167,15 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 |---|---|---|---|
 | 2026-06-21 | Repo klonlandı, mimari uçtan uca incelendi, bu MD oluşturuldu | `OMNITRACE-ENTEGRASYON.md` | ✅ |
 | 2026-06-21 | **VM canlı veri-alma entegrasyonu tamamlandı** (aşağıda detay) | `omnitrace/telemetry.html`, `omnitrace/vm_proxy.php` | ✅ |
+| 2026-06-21 | Site repoya eklendi + GitHub push (`91d11b9`) | `omnitrace/*` | ✅ |
+| 2026-06-21 | **CANLIYA ALINDI** — FTP ile `index.html` + `telemetry.html` Hostinger `public_html`e yüklendi | canlı | ✅ |
+
+### Canlıya alma notları (2026-06-21)
+- **FTP:** `ftp://92.113.28.98:21`, kullanıcı `u834087667.omnitraceglobal.com` (parola `deploy.ps1`'de, gitignore). FTP kökü **doğrudan `public_html`**.
+- **Sadece 2 dosya** yüklendi (mobil-fix + VM entegrasyonu değişen tek dosyalar): `index.html` (183917B), `telemetry.html` (107210B). Alt sayfalar/assets/php backend **değişmedi → dokunulmadı**.
+- ⚠️ **Canlı `.htaccess`'e DOKUNULMADI** — kritik: `DirectoryIndex index.html index.php` (animasyonlu ana sayfa önde) + `veri_al.php`'yi HTTPS zorlamasından muaf tutar (SIM800L düz HTTP POST yapabilsin). Bizim CSP'li `.htaccess` ile ezmek cihaz veri girişini + dashboard.html Leaflet'ini kırardı.
+- **Canlı doğrulama:** ana sayfa render ✅ · `vm_proxy.php?device_id=1` → VM gerçek veri döndü (ID 9398, batarya_soc 70) ✅ · ama son kayıt 18 Haz (`seconds_ago≈264047`) → telemetry doğru şekilde "VM BAĞLANTISI KOPTU"/offline gösterdi ✅. Cihaz taze veri (≥`seconds_ago<10`) basınca otomatik "CANLI · VM #1" + değer akışı.
+- **Sıradaki (cihaz tarafı):** STM32+SIM800L'in `veri_al.php`/VM'ye **düzenli** POST atması; ayrıca veride `lat/lng` var (40.7654, 29.9408) → ileride haritada gerçek konum gösterimi eklenebilir.
 
 ### Detay — VM canlı veri entegrasyonu (2026-06-21)
 `telemetry.html`'e **3 additive** değişiklik (animasyon/düzen/i18n hiç bozulmadı):
