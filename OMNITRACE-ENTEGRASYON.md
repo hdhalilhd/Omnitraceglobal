@@ -172,7 +172,14 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-21 | **Müşteri–Cihaz yetki matrisi (güvenlik) — BACKEND** kuruldu, canlıda test edildi | `hostinger/musteri_*.php` | ✅ |
 | 2026-06-21 | **Çift-mod giriş — FRONTEND** (demo vs müşteri) canlıya alındı + push | `omnitrace/telemetry.html` | ✅ |
 | 2026-06-22 | **Yönetim paneli** (müşteri ekle/sil + cihaz ata + device_id) canlıya alındı | `hostinger/musteri_admin.html` | ✅ |
+| 2026-06-22 | **Otomatik device_id üretimi** (sıralı olmayan, tahmin edilemez) panele eklendi | `musteri_admin.html`, `musteri_api.php` | ✅ |
 | 2026-06-23 | **Admin Yapılandırma Konsolu** (firma/araç-tipi + CAN parametre builder + STM32 kod üreteci + görünürlük) canlıya alındı | `hostinger/admin.html` | ✅ |
+
+### Otomatik device_id üretimi (2026-06-22)
+- `musteri_api.php` → `admin_cihaz_uret` {kod,ad?,sase?}: `random_int(10_000_000, 999_999_999)` ile **kriptografik rastgele, benzersiz** (araclar'da çakışma kontrollü) device_id üretir, müşteriye atar, döner. + `admin_cihaz_sil` {device_id}.
+- Panel "**Yeni Cihaz Üret**" kartı: müşteri seç → "🎲 device_id Üret + Ata" → büyük yeşil kutuda id + 📋 Kopyala. Cihaz satırlarında Sil butonu.
+- **Mantık:** id'ler sıralı değil → tahmin/enumerate edilemez (ingest tarafı için ek savunma). Kullanıcı kopyalayıp STM32'ye gömer.
+- Canlı test: 3 üretim → 725988598 / 11932045 / 425068675 (rastgele, benzersiz) ✅ · panel UI üretim 420320744 ✅ · 0 pageerror ✅.
 
 ### Admin Yapılandırma Konsolu (2026-06-23) — `admin.html`
 **`https://omnitraceglobal.com/admin.html`** (noindex, gate şifresi `1234` — client-side, ileride sunucuya taşınacak). Amaç: **çok-firmalı kurulum sihirbazı** — her yeni müşteri/araç için CAN parametrelerini görsel tanımla, STM32 kodunu otomatik üret.
