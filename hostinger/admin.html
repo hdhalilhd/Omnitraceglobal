@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>OmniTrace — Yönetim / Yapılandırma</title>
+<style>
+:root{
+  --bg:#0f141b; --panel:#161d27; --panel2:#1d2733; --line:#2a3645; --line2:#222d3a;
+  --txt:#e7edf4; --muted:#8c9bad; --acc:#19c3a4; --acc2:#0ea88c; --acc-d:#0c5;
+  --yellow:#f5c518; --green:#1f9d57; --green-c:#16331f; --red:#e5484d; --red-c:#3a1a1c;
+  --or:#f47216; --blue:#3b82f6; --shadow:0 6px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Segoe UI",system-ui,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:14px}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+a{color:var(--acc)}
+
+/* ===== GATE ===== */
+#gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#16202c,#0b0f15)}
+#gate .box{width:340px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:var(--shadow);text-align:center}
+#gate .lg{font-size:26px;font-weight:800;letter-spacing:.5px;margin-bottom:4px}
+#gate .lg span{color:var(--acc)}
+#gate .sub{color:var(--muted);font-size:12.5px;margin-bottom:22px}
+#gate input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#0d131a;color:#fff;font-size:18px;text-align:center;letter-spacing:6px}
+#gate button{width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;background:var(--acc);color:#04201a;font-weight:800;font-size:15px}
+#gate .err{color:var(--red);font-size:12.5px;height:16px;margin-top:8px}
+
+/* ===== SHELL ===== */
+#app{display:none;min-height:100vh}
+.top{display:flex;align-items:center;gap:14px;padding:0 20px;height:58px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.top .brand{font-weight:800;font-size:17px}.top .brand span{color:var(--acc)}
+.top .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
+.top .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{padding:8px 13px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);color:#04201a;border-color:var(--acc);font-weight:800}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.dan{color:#ffb4b6;border-color:#5a2c2e;background:#26171a}
+.btn.sm{padding:5px 9px;font-size:12px}
+.layout{display:flex;min-height:calc(100vh - 58px)}
+.side{width:210px;background:var(--panel);border-right:1px solid var(--line);padding:12px 10px;flex:none}
+.side a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;margin-bottom:2px}
+.side a .i{width:20px;text-align:center}
+.side a:hover{background:var(--panel2);color:var(--txt)}
+.side a.active{background:#10302a;color:var(--acc)}
+.main{flex:1;padding:24px;min-width:0;max-width:1180px}
+h2.pt{font-size:20px;margin:0 0 4px}
+.pdesc{color:var(--muted);font-size:13px;margin:0 0 20px}
+.tab{display:none}.tab.show{display:block}
+
+/* ===== Kart / form ===== */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+.card h3{margin:0 0 14px;font-size:15px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+label.f{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.in,select.in,textarea.in{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:#0d131a;color:#fff;font-size:13.5px}
+.in:focus{outline:none;border-color:var(--acc)}
+.hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+
+/* ===== Tablo ===== */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line2)}
+tr:hover td{background:#121922}
+.pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.pill.gauge{background:#10302a;color:var(--acc)} .pill.label{background:#1a2433;color:#8fb6ff}
+.pill.status{background:#2a2410;color:#f5c518} .pill.counter{background:#2a1726;color:#e879c6}
+.empty{color:var(--muted);text-align:center;padding:26px;font-size:13px}
+
+/* ===== BYTE/BIT GRID ===== */
+.gridwrap{overflow-x:auto;padding:4px 0}
+.bitgrid{border-collapse:separate;border-spacing:3px;width:auto}
+.bitgrid th{border:none;padding:4px 6px;font-size:10px;color:var(--muted)}
+.bitcell{width:34px;height:30px;border-radius:6px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;
+  background:var(--green-c);color:#5fae7c;border:1px solid #234a30;user-select:none;transition:.08s}
+.bitcell:hover{filter:brightness(1.25)}
+.bitcell.sel{background:var(--yellow);color:#3a2c00;border-color:#caa00f}
+.bitcell.occ{background:var(--red-c);color:#ff9ea0;border-color:#5a2c2e;cursor:not-allowed}
+.bitcell.conf{background:var(--red);color:#fff;border-color:#ff6b6e;animation:pulse .6s infinite alternate}
+@keyframes pulse{to{filter:brightness(1.3)}}
+.legend{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:13px;height:13px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+.bytelbl{font-size:10px;color:var(--muted);font-weight:700;padding-right:6px;white-space:nowrap}
+
+/* ===== STM kod ===== */
+.code{width:100%;min-height:420px;background:#0a0e13;border:1px solid var(--line);border-radius:10px;color:#cfe3d6;
+  font-family:"Cascadia Code",Consolas,monospace;font-size:12px;line-height:1.55;padding:14px;white-space:pre;overflow:auto}
+.note{padding:11px 14px;border-radius:10px;background:#13202b;border:1px solid #1d3a44;color:#9fc7d4;font-size:12.5px;margin-top:14px}
+.warnbar{padding:10px 13px;border-radius:9px;background:var(--red-c);border:1px solid #5a2c2e;color:#ffb4b6;font-size:12.5px;margin-top:10px;display:none}
+.okbar{padding:10px 13px;border-radius:9px;background:#10302a;border:1px solid #1d5c47;color:#7fe3c0;font-size:12.5px;margin-top:10px;display:none}
+.chk{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:#0d131a;border:1px solid var(--line);margin-bottom:6px;font-size:13px}
+.chk input{width:16px;height:16px;accent-color:var(--acc)}
+.muted{color:var(--muted)}
+.scroller{max-height:340px;overflow:auto}
+@media(max-width:820px){.side{width:64px}.side a span.t{display:none}.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ===================== GATE ===================== -->
+<div id="gate">
+  <div class="box">
+    <div class="lg">Omni<span>Trace</span></div>
+    <div class="sub">Yönetim Paneli · Yetkili Girişi</div>
+    <input id="gpass" type="password" inputmode="numeric" placeholder="••••" maxlength="12" autocomplete="off">
+    <div class="err" id="gerr"></div>
+    <button onclick="tryGate()">Giriş</button>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <div class="top">
+    <div class="brand">Omni<span>Trace</span></div>
+    <span class="tag">Yapılandırma Konsolu</span>
+    <div class="right">
+      <button class="btn sm" onclick="exportJson()">⬇ Dışa Aktar</button>
+      <button class="btn sm" onclick="document.getElementById('imp').click()">⬆ İçe Aktar</button>
+      <input id="imp" type="file" accept="application/json" style="display:none" onchange="importJson(event)">
+      <button class="btn sm dan" onclick="logout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="side">
+      <a class="active" data-tab="firmalar" onclick="go('firmalar')"><span class="i">🏢</span><span class="t">Firmalar</span></a>
+      <a data-tab="tipler" onclick="go('tipler')"><span class="i">🚜</span><span class="t">Araç Tipleri</span></a>
+      <a data-tab="param" onclick="go('param')"><span class="i">🧩</span><span class="t">CAN Parametreleri</span></a>
+      <a data-tab="kod" onclick="go('kod')"><span class="i">💾</span><span class="t">STM32 Kodu</span></a>
+      <a data-tab="gorunur" onclick="go('gorunur')"><span class="i">👁</span><span class="t">Görünürlük</span></a>
+    </nav>
+
+    <main class="main">
+
+      <!-- ============ FIRMALAR ============ -->
+      <section class="tab show" id="t-firmalar">
+        <h2 class="pt">Firmalar (Müşteriler)</h2>
+        <p class="pdesc">Her kurulum bir firmaya bağlıdır. Müşteri ID + ad ile firma oluştur; sonra araç tipleri ve CAN parametreleri tanımlanır.</p>
+        <div class="card">
+          <h3>Yeni Firma</h3>
+          <div class="grid g3">
+            <div><label class="f">Müşteri ID / Kod</label><input class="in" id="c-id" placeholder="CUST-003"></div>
+            <div><label class="f">Firma Adı</label><input class="in" id="c-name" placeholder="Acme Lojistik A.Ş."></div>
+            <div><label class="f">Giriş Şifresi (müşteri paneli)</label><input class="in" id="c-pass" placeholder="Acme#2026"></div>
+          </div>
+          <div class="row" style="margin-top:14px"><button class="btn pri" onclick="addCustomer()">+ Firma Ekle</button></div>
+        </div>
+        <div class="card">
+          <h3>Tanımlı Firmalar</h3>
+          <table><thead><tr><th>ID</th><th>Ad</th><th>Araç Tipi</th><th>Parametre</th><th></th></tr></thead>
+            <tbody id="c-list"></tbody></table>
+        </div>
+      </section>
+
+      <!-- ============ ARAÇ TİPLERİ ============ -->
+      <section class="tab" id="t-tipler">
+        <h2 class="pt">Araç Tipleri</h2>
+        <p class="pdesc">Her firmanın araç tipleri (ör. "Doosan B30X-7"). CAN hat hızı (bitrate) burada belirlenir — STM32 CAN init'i buna göre üretilir.</p>
+        <div class="card">
+          <h3>Yeni Araç Tipi</h3>
+          <div class="grid g4">
+            <div><label class="f">Firma</label><select class="in" id="vt-cust"></select></div>
+            <div><label class="f">Araç Tipi Adı</label><input class="in" id="vt-name" placeholder="Doosan B30X-7"></div>
+            <div><label class="f">CAN Bitrate</label><select class="in" id="vt-rate">
+              <option value="125">125 kbps</option><option value="250" selected>250 kbps</option>
+              <option value="500">500 kbps</option><option value="1000">1 Mbps</option></select></div>
+            <div><label class="f">CAN Tipi</label><select class="in" id="vt-fd">
+              <option value="classic">Klasik CAN (8 byte)</option><option value="fd">CAN-FD (64 byte)</option></select></div>
+          </div>
+          <div class="row" style="margin-top:14px"><button class="btn pri" onclick="addVType()">+ Araç Tipi Ekle</button></div>
+        </div>
+        <div class="card">
+          <h3>Tanımlı Araç Tipleri</h3>
+          <table><thead><tr><th>Firma</th><th>Araç Tipi</th><th>Bitrate</th><th>CAN</th><th>Parametre</th><th></th></tr></thead>
+            <tbody id="vt-list"></tbody></table>
+        </div>
+      </section>
+
+      <!-- ============ CAN PARAMETRELERİ ============ -->
+      <section class="tab" id="t-param">
+        <h2 class="pt">CAN Parametre Tanımlama</h2>
+        <p class="pdesc">Node + PDO seç, byte/bit haritasından alanı işaretle (sarı=seçili, yeşil=boş, kırmızı=dolu/çakışma), ana ekran terimini ve STM değişken adını gir → <b>Tanımla</b>.</p>
+
+        <div class="card">
+          <div class="grid g3">
+            <div><label class="f">Firma</label><select class="in" id="p-cust" onchange="onParamScope()"></select></div>
+            <div><label class="f">Araç Tipi</label><select class="in" id="p-vtype" onchange="onParamScope()"></select></div>
+            <div><label class="f">CAN Bitrate</label><input class="in" id="p-rate" disabled></div>
+          </div>
+        </div>
+
+        <div class="card" id="p-builder">
+          <h3>Yeni Parametre</h3>
+          <div class="grid g4">
+            <div><label class="f">Node ID</label><input class="in" id="p-node" type="number" min="1" max="127" value="14" oninput="renderGrid()"></div>
+            <div><label class="f">PDO</label><select class="in" id="p-pdo" onchange="renderGrid()">
+              <option value="1">TPDO1</option><option value="2">TPDO2</option><option value="3">TPDO3</option><option value="4">TPDO4</option></select></div>
+            <div><label class="f">COB-ID (otomatik)</label><input class="in" id="p-cob" disabled></div>
+            <div><label class="f">Veri Tipi</label><select class="in" id="p-type" onchange="onTypeChange()">
+              <option value="bool">bool (1 bit)</option><option value="u8">uint8</option><option value="u16" selected>uint16</option>
+              <option value="u32">uint32</option><option value="s8">int8</option><option value="s16">int16</option>
+              <option value="s32">int32</option><option value="f32">float32</option></select></div>
+          </div>
+
+          <div style="margin:18px 0 6px"><label class="f">Byte / Bit Haritası — hücreye tıklayıp başlangıcı seç</label></div>
+          <div class="gridwrap"><table class="bitgrid" id="bitgrid"></table></div>
+          <div class="legend">
+            <span><i style="background:var(--yellow)"></i>Seçili alan</span>
+            <span><i style="background:var(--green-c);border:1px solid #234a30"></i>Boş</span>
+            <span><i style="background:var(--red-c);border:1px solid #5a2c2e"></i>Dolu (başka parametre)</span>
+            <span><i style="background:var(--red)"></i>Çakışma</span>
+          </div>
+
+          <div class="grid g4" style="margin-top:16px">
+            <div><label class="f">Başlangıç Byte</label><input class="in" id="p-byte" type="number" min="0" value="0" oninput="renderGrid()"></div>
+            <div><label class="f">Başlangıç Bit</label><input class="in" id="p-bit" type="number" min="0" max="7" value="0" oninput="renderGrid()"></div>
+            <div><label class="f">Uzunluk (bit)</label><input class="in" id="p-len" type="number" min="1" max="512" value="16" oninput="renderGrid()"></div>
+            <div><label class="f">Endian</label><select class="in" id="p-endian">
+              <option value="big">Big-Endian (Motorola)</option><option value="little" selected>Little-Endian (Intel)</option></select></div>
+          </div>
+
+          <div class="grid g2" style="margin-top:14px">
+            <div><label class="f">Ana Ekran Terimi (görünen ad)</label><input class="in" id="p-disp" placeholder="BATARYA ŞARJ YÜZDESİ" oninput="suggestVar()"></div>
+            <div><label class="f">STM Değişken Adı (kod)</label><input class="in" id="p-var" placeholder="batarya_sarj_durumu"></div>
+          </div>
+
+          <div class="grid g4" style="margin-top:14px">
+            <div><label class="f">Min</label><input class="in" id="p-min" type="number" value="0"></div>
+            <div><label class="f">Max</label><input class="in" id="p-max" type="number" value="100"></div>
+            <div><label class="f">Ölçek (×)</label><input class="in" id="p-scale" type="number" step="any" value="1"></div>
+            <div><label class="f">Offset (+)</label><input class="in" id="p-off" type="number" step="any" value="0"></div>
+          </div>
+
+          <div class="grid g4" style="margin-top:14px">
+            <div><label class="f">Birim</label><input class="in" id="p-unit" placeholder="%  /  °C  /  km/h"></div>
+            <div><label class="f">Gösterge Tipi</label><select class="in" id="p-widget">
+              <option value="gauge">Gauge (ibre)</option><option value="label">Label (etiket)</option>
+              <option value="status">Durum (açık/kapalı)</option><option value="counter">Sayaç</option></select></div>
+            <div><label class="f">Buffer Sıklığı</label><select class="in" id="p-buf">
+              <option value="fast">⚡ Hızlı — 2 Hz</option><option value="medium">⏱ Orta — 1 Hz</option>
+              <option value="slow" selected>🌡 Yavaş — 1/dk</option><option value="veryslow">⌚ Çok Yavaş — 1/saat</option></select></div>
+            <div><label class="f">&nbsp;</label><button class="btn pri" style="width:100%" onclick="defineParam()">✓ Tanımla</button></div>
+          </div>
+          <div class="warnbar" id="p-warn"></div>
+          <div class="okbar" id="p-ok"></div>
+        </div>
+
+        <div class="card">
+          <h3 id="p-listttl">Tanımlı Parametreler</h3>
+          <div class="scroller">
+          <table><thead><tr><th>Ana Ekran Terimi</th><th>STM Değişken</th><th>Node/PDO</th><th>Konum</th><th>Tip</th><th>Gösterge</th><th>Buffer</th><th></th></tr></thead>
+            <tbody id="p-list"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ STM32 KODU ============ -->
+      <section class="tab" id="t-kod">
+        <h2 class="pt">STM32 Kod Üreteci</h2>
+        <p class="pdesc">Seçilen araç tipinin tüm CAN parametrelerinden; sinyal struct'ı, COB-ID'ye göre CAN parse, ölçekleme ve sunucuya gönderilecek HTTP payload kodunu otomatik üretir.</p>
+        <div class="card">
+          <div class="row">
+            <div style="flex:1;min-width:220px"><label class="f">Araç Tipi</label><select class="in" id="k-vtype"></select></div>
+            <button class="btn pri" onclick="genCode()">⚙ Kod Üret</button>
+            <button class="btn" onclick="copyCode()">📋 Kopyala</button>
+            <button class="btn" onclick="downloadCode()">⬇ .c indir</button>
+          </div>
+          <div class="note">Üretilen kod CubeIDE projenizdeki <b>can_app.c</b> mantığına entegre edilir. <code>Ot_OnCanRx(cobId,d,dlc)</code> her CAN RX kesmesinde çağrılır; <code>Ot_BuildPayload()</code> SIM800L ile <code>veri_al.php</code>/VM'ye gönderilecek string'i üretir.</div>
+          <textarea class="code" id="k-out" spellcheck="false" readonly></textarea>
+        </div>
+      </section>
+
+      <!-- ============ GÖRÜNÜRLÜK ============ -->
+      <section class="tab" id="t-gorunur">
+        <h2 class="pt">Görünürlük / Yetki</h2>
+        <p class="pdesc">Müşteri oturum açtığında hangi ekranları ve parametreleri görebileceğini seç. (Sunucu-taraflı yetki matrisi <code>musteri_api.php</code> ile zorlanır; burada görünüm tercihleri tutulur.)</p>
+        <div class="card">
+          <div class="row" style="margin-bottom:14px">
+            <div style="flex:1;min-width:240px"><label class="f">Firma</label><select class="in" id="v-cust" onchange="renderVisibility()"></select></div>
+          </div>
+          <div class="grid g2">
+            <div>
+              <label class="f">Görünür Ekranlar (menüler)</label>
+              <div id="v-views"></div>
+            </div>
+            <div>
+              <label class="f">Görünür Parametreler</label>
+              <div id="v-params" class="scroller"></div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:14px"><button class="btn pri" onclick="saveVisibility()">Kaydet</button>
+            <span class="muted" id="v-saved" style="align-self:center"></span></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+/* ====================================================================
+   OmniTrace Yönetim Paneli — yapılandırma + STM32 kod üreteci
+   Veri: localStorage (ot_admin_cfg). Dışa/İçe JSON aktarım var.
+   Sunucu (MySQL) kalıcılığı + musteri_api entegrasyonu sonraki adım.
+   ==================================================================== */
+const GATE_PASS = "1234";   // TODO: sunucu-taraflı admin anahtarına taşı
+const VIEWS = [["fleet","Filo"],["vehicles","Araçlar"],["analytics","Analitik"],
+  ["alerts","Uyarılar"],["drivers","Sürücüler"],["maintenance","Bakım"],["map","Harita"],["settings","Ayarlar"]];
+const TYPE_BITS = {bool:1,u8:8,u16:16,u32:32,s8:8,s16:16,s32:32,f32:32};
+
+/* ---------- Gate ---------- */
+function tryGate(){
+  const v=document.getElementById('gpass').value;
+  if(v===GATE_PASS){ sessionStorage.setItem('ot_admin_ok','1'); openApp(); }
+  else { document.getElementById('gerr').textContent='Hatalı şifre'; }
+}
+document.getElementById('gpass').addEventListener('keydown',e=>{if(e.key==='Enter')tryGate();});
+function openApp(){ document.getElementById('gate').style.display='none'; document.getElementById('app').style.display='block'; renderAll(); }
+function logout(){ sessionStorage.removeItem('ot_admin_ok'); location.reload(); }
+if(sessionStorage.getItem('ot_admin_ok')==='1') openApp();
+
+/* ---------- Veri modeli ---------- */
+const CFG_KEY='ot_admin_cfg_v1';
+let cfg = load();
+function load(){ try{const s=JSON.parse(localStorage.getItem(CFG_KEY)); if(s&&s.customers) return s;}catch(e){}
+  return {customers:[], vtypes:[], params:[], visibility:{}}; }
+function save(){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+const uid = ()=> Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- Navigasyon ---------- */
+function go(tab){
+  document.querySelectorAll('.side a').forEach(a=>a.classList.toggle('active',a.dataset.tab===tab));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.remove('show'));
+  document.getElementById('t-'+tab).classList.add('show');
+  if(tab==='tipler') fillCustSelect('vt-cust');
+  if(tab==='param'){ fillCustSelect('p-cust'); onParamScope(); }
+  if(tab==='kod') fillVTypeSelect('k-vtype');
+  if(tab==='gorunur'){ fillCustSelect('v-cust'); renderVisibility(); }
+}
+function renderAll(){ renderCustomers(); renderVTypes(); }
+
+/* ---------- Firmalar ---------- */
+function addCustomer(){
+  const id=val('c-id').trim(), name=val('c-name').trim(), pass=val('c-pass').trim();
+  if(!id||!name){ alert('Müşteri ID ve ad zorunlu'); return; }
+  if(cfg.customers.some(c=>c.id===id)){ alert('Bu ID zaten var'); return; }
+  cfg.customers.push({id,name,pass,views:VIEWS.map(v=>v[0])}); save(); renderCustomers();
+  set('c-id','');set('c-name','');set('c-pass','');
+}
+function delCustomer(id){
+  if(!confirm('Firma ve bağlı araç tipleri/parametreleri silinsin mi?'))return;
+  cfg.customers=cfg.customers.filter(c=>c.id!==id);
+  const vts=cfg.vtypes.filter(v=>v.custId===id).map(v=>v.id);
+  cfg.vtypes=cfg.vtypes.filter(v=>v.custId!==id);
+  cfg.params=cfg.params.filter(p=>!vts.includes(p.vtId));
+  delete cfg.visibility[id]; save(); renderAll();
+}
+function renderCustomers(){
+  const tb=document.getElementById('c-list');
+  tb.innerHTML = cfg.customers.length ? cfg.customers.map(c=>{
+    const nvt=cfg.vtypes.filter(v=>v.custId===c.id).length;
+    const np=cfg.params.filter(p=>cfg.vtypes.find(v=>v.id===p.vtId&&v.custId===c.id)).length;
+    return `<tr><td><b>${esc(c.id)}</b></td><td>${esc(c.name)}</td><td>${nvt}</td><td>${np}</td>
+      <td style="text-align:right"><button class="btn sm dan" onclick="delCustomer('${c.id}')">Sil</button></td></tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty">Henüz firma yok</td></tr>';
+}
+
+/* ---------- Araç tipleri ---------- */
+function addVType(){
+  const custId=val('vt-cust'), name=val('vt-name').trim(), rate=val('vt-rate'), fd=val('vt-fd');
+  if(!custId){ alert('Önce firma ekleyin/seçin'); return; }
+  if(!name){ alert('Araç tipi adı zorunlu'); return; }
+  cfg.vtypes.push({id:uid(),custId,name,rate:+rate,fd}); save(); renderVTypes(); set('vt-name','');
+}
+function delVType(id){
+  if(!confirm('Araç tipi ve parametreleri silinsin mi?'))return;
+  cfg.vtypes=cfg.vtypes.filter(v=>v.id!==id);
+  cfg.params=cfg.params.filter(p=>p.vtId!==id); save(); renderVTypes();
+}
+function renderVTypes(){
+  const tb=document.getElementById('vt-list');
+  tb.innerHTML = cfg.vtypes.length ? cfg.vtypes.map(v=>{
+    const c=cfg.customers.find(x=>x.id===v.custId);
+    const np=cfg.params.filter(p=>p.vtId===v.id).length;
+    return `<tr><td>${esc(c?c.name:'—')}</td><td><b>${esc(v.name)}</b></td><td>${v.rate} kbps</td>
+      <td>${v.fd==='fd'?'CAN-FD':'Klasik'}</td><td>${np}</td>
+      <td style="text-align:right"><button class="btn sm dan" onclick="delVType('${v.id}')">Sil</button></td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty">Henüz araç tipi yok</td></tr>';
+}
+
+/* ---------- Select doldurucular ---------- */
+function fillCustSelect(id){
+  const el=document.getElementById(id); const cur=el.value;
+  el.innerHTML=cfg.customers.map(c=>`<option value="${c.id}">${esc(c.name)} (${esc(c.id)})</option>`).join('')
+    || '<option value="">— firma yok —</option>';
+  if(cur)el.value=cur;
+}
+function fillVTypeSelect(id, custId){
+  const el=document.getElementById(id); const cur=el.value;
+  let list=cfg.vtypes; if(custId)list=list.filter(v=>v.custId===custId);
+  el.innerHTML=list.map(v=>{const c=cfg.customers.find(x=>x.id===v.custId);
+    return `<option value="${v.id}">${esc(v.name)} · ${esc(c?c.name:'')}</option>`;}).join('')
+    || '<option value="">— araç tipi yok —</option>';
+  if(cur)el.value=cur;
+}
+
+/* ---------- CAN Parametre builder ---------- */
+function onParamScope(){
+  fillVTypeSelect('p-vtype', val('p-cust'));
+  const vt=cfg.vtypes.find(v=>v.id===val('p-vtype'));
+  set('p-rate', vt? vt.rate+' kbps · '+(vt.fd==='fd'?'CAN-FD (64B)':'Klasik CAN (8B)') : '—');
+  renderGrid(); renderParamList();
+}
+function curVT(){ return cfg.vtypes.find(v=>v.id===val('p-vtype')); }
+function maxBytes(){ const vt=curVT(); return vt&&vt.fd==='fd'?64:8; }
+function cob(node,pdo){ const base={1:0x180,2:0x280,3:0x380,4:0x480}[pdo]; return base+(+node); }
+function onTypeChange(){ const t=val('p-type'); if(TYPE_BITS[t]) set('p-len', TYPE_BITS[t]); renderGrid(); }
+function suggestVar(){
+  if(document.getElementById('p-var').dataset.touched)return;
+  const s=val('p-disp').toLocaleLowerCase('tr').replace(/ı/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g')
+    .replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  set('p-var', s);
+}
+document.getElementById('p-var').addEventListener('input',function(){this.dataset.touched='1';});
+
+function occupiedBits(excludeId){
+  const vt=val('p-vtype'), node=+val('p-node'), pdo=val('p-pdo');
+  const map={};
+  cfg.params.filter(p=>p.vtId===vt&&p.node===node&&p.pdo===pdo&&p.id!==excludeId).forEach(p=>{
+    for(let i=0;i<p.len;i++) map[p.byte*8+p.bit+i]=p.disp;
+  });
+  return map;
+}
+function selBits(){
+  const byte=+val('p-byte'),bit=+val('p-bit'),len=+val('p-len');
+  const arr=[]; const start=byte*8+bit; for(let i=0;i<len;i++)arr.push(start+i); return arr;
+}
+function renderGrid(){
+  set('p-cob','0x'+cob(val('p-node'),val('p-pdo')).toString(16).toUpperCase());
+  const tbl=document.getElementById('bitgrid'); if(!tbl)return;
+  const nB=maxBytes(), occ=occupiedBits(window._editId||null), sel=new Set(selBits());
+  let conflict=false;
+  let html='<tr><th></th>'; for(let b=7;b>=0;b--)html+=`<th>bit ${b}</th>`; html+='</tr>';
+  for(let by=0;by<nB;by++){
+    html+=`<tr><td class="bytelbl">Byte ${by}</td>`;
+    for(let b=7;b>=0;b--){
+      const abs=by*8+b; let cls='bitcell';
+      const isOcc=occ[abs]!==undefined, isSel=sel.has(abs);
+      if(isSel&&isOcc){cls+=' conf';conflict=true;}
+      else if(isSel)cls+=' sel';
+      else if(isOcc)cls+=' occ';
+      const title=isOcc?occ[abs]:'';
+      html+=`<td class="${cls}" title="${esc(title)}" onclick="pickCell(${by},${b})">${abs}</td>`;
+    }
+    html+='</tr>';
+  }
+  tbl.innerHTML=html;
+  const w=document.getElementById('p-warn');
+  if(conflict){w.style.display='block';w.textContent='⚠ Seçilen alan başka bir parametreyle çakışıyor (kırmızı). Konumu/uzunluğu değiştirin.';}
+  else w.style.display='none';
+}
+function pickCell(by,bit){
+  const occ=occupiedBits(window._editId||null);
+  if(occ[by*8+bit]!==undefined && !selBits().includes(by*8+bit)){ /* dolu hücreye tıklama: yine de başlangıç yap */ }
+  set('p-byte',by); set('p-bit',bit); renderGrid();
+}
+function defineParam(){
+  const vt=val('p-vtype'); if(!vt){alert('Önce firma+araç tipi seçin');return;}
+  const disp=val('p-disp').trim(), v=val('p-var').trim();
+  if(!disp||!v){ pwarn('Ana ekran terimi ve STM değişken adı zorunlu'); return; }
+  if(!/^[a-z_][a-z0-9_]*$/.test(v)){ pwarn('STM değişken adı geçersiz (a-z, 0-9, _ ; rakamla başlamaz)'); return; }
+  // çakışma kontrolü
+  const occ=occupiedBits(window._editId||null), sel=selBits();
+  if(sel.some(b=>occ[b]!==undefined)){ pwarn('Çakışma var — kaydedilemez'); return; }
+  if(cfg.params.some(p=>p.vtId===vt&&p.var===v&&p.id!==window._editId)){ pwarn('Bu STM değişken adı bu araç tipinde zaten var'); return; }
+  const obj={ id: window._editId||uid(), vtId:vt,
+    node:+val('p-node'), pdo:val('p-pdo'), cob:cob(val('p-node'),val('p-pdo')),
+    byte:+val('p-byte'), bit:+val('p-bit'), len:+val('p-len'),
+    type:val('p-type'), endian:val('p-endian'),
+    disp, var:v, min:+val('p-min'), max:+val('p-max'),
+    scale:+val('p-scale'), off:+val('p-off'), unit:val('p-unit').trim(),
+    widget:val('p-widget'), buf:val('p-buf') };
+  if(window._editId){ const i=cfg.params.findIndex(p=>p.id===window._editId); cfg.params[i]=obj; window._editId=null; }
+  else cfg.params.push(obj);
+  save(); renderParamList(); renderGrid();
+  const ok=document.getElementById('p-ok'); ok.style.display='block'; ok.textContent='✓ "'+disp+'" tanımlandı — ana ekranda gösterilecek.';
+  setTimeout(()=>ok.style.display='none',2600);
+  document.getElementById('p-var').dataset.touched=''; set('p-disp','');set('p-var','');
+}
+function pwarn(m){ const w=document.getElementById('p-warn'); w.style.display='block'; w.textContent='⚠ '+m; }
+function editParam(id){
+  const p=cfg.params.find(x=>x.id===id); if(!p)return; window._editId=id;
+  set('p-node',p.node);set('p-pdo',p.pdo);set('p-type',p.type);set('p-byte',p.byte);set('p-bit',p.bit);
+  set('p-len',p.len);set('p-endian',p.endian);set('p-disp',p.disp);set('p-var',p.var);
+  document.getElementById('p-var').dataset.touched='1';
+  set('p-min',p.min);set('p-max',p.max);set('p-scale',p.scale);set('p-off',p.off);set('p-unit',p.unit);
+  set('p-widget',p.widget);set('p-buf',p.buf); renderGrid();
+  document.getElementById('p-builder').scrollIntoView({behavior:'smooth'});
+}
+function delParam(id){ cfg.params=cfg.params.filter(p=>p.id!==id); save(); renderParamList(); renderGrid(); }
+function renderParamList(){
+  const vt=val('p-vtype'); const tb=document.getElementById('p-list');
+  const list=cfg.params.filter(p=>p.vtId===vt);
+  document.getElementById('p-listttl').textContent='Tanımlı Parametreler ('+list.length+')';
+  const bufL={fast:'⚡2Hz',medium:'⏱1Hz',slow:'🌡1/dk',veryslow:'⌚1/saat'};
+  tb.innerHTML = list.length ? list.map(p=>`<tr>
+    <td><b>${esc(p.disp)}</b>${p.unit?` <span class="muted">${esc(p.unit)}</span>`:''}</td>
+    <td><code>${esc(p.var)}</code></td>
+    <td>N${p.node}/PDO${p.pdo}<br><span class="muted">0x${p.cob.toString(16).toUpperCase()}</span></td>
+    <td>byte ${p.byte}.${p.bit} · ${p.len}b<br><span class="muted">${p.endian==='big'?'BE':'LE'} ${p.type}</span></td>
+    <td>${p.type}</td>
+    <td><span class="pill ${p.widget}">${p.widget}</span></td>
+    <td>${bufL[p.buf]||p.buf}</td>
+    <td style="text-align:right;white-space:nowrap">
+      <button class="btn sm" onclick="editParam('${p.id}')">Düzenle</button>
+      <button class="btn sm dan" onclick="delParam('${p.id}')">Sil</button></td></tr>`).join('')
+    : '<tr><td colspan="8" class="empty">Bu araç tipi için parametre yok</td></tr>';
+}
+
+/* ---------- STM32 kod üreteci ---------- */
+function genCode(){
+  const vt=cfg.vtypes.find(v=>v.id===val('k-vtype')); if(!vt){ set('k-out','// Önce araç tipi seçin'); return; }
+  const c=cfg.customers.find(x=>x.id===vt.custId);
+  const ps=cfg.params.filter(p=>p.vtId===vt.id);
+  const ctype={bool:'uint8_t',u8:'uint8_t',u16:'uint16_t',u32:'uint32_t',s8:'int8_t',s16:'int16_t',s32:'int32_t',f32:'float'};
+  const engType=p=>(p.scale!==1||p.off!==0||p.type==='f32')?'float':ctype[p.type];
+  const date=new Date().toISOString().slice(0,10);
+  let o=`/* ============================================================================
+ * OmniTrace — Otomatik üretilen CAN parse + telemetri katmanı
+ * Firma      : ${c?c.name:'-'} (${vt.custId})
+ * Arac tipi  : ${vt.name}
+ * CAN        : ${vt.rate} kbps · ${vt.fd==='fd'?'CAN-FD (64 byte)':'Klasik CAN (8 byte)'}
+ * Uretim     : ${date}  ·  Parametre sayisi: ${ps.length}
+ * Kullanim   : CubeIDE projenize ekleyin. Ot_OnCanRx() her CAN RX kesmesinde,
+ *              Ot_BuildPayload() gonderim aninda cagrilir.
+ * ============================================================================ */
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+
+/* ---- CAN init notu: bitrate = ${vt.rate} kbps -------------------------------
+   FDCAN/bxCAN prescaler+seg degerlerini ${vt.rate}kbps olacak sekilde ayarlayin. */
+
+/* ---- Sinyal degerleri (muhendislik birimi) ---- */
+typedef struct {
+`;
+  ps.forEach(p=>{ const decl=`${engType(p)} ${p.var};`;
+    o+=`  ${decl.padEnd(34)} /* ${p.disp} [${p.min}..${p.max}]${p.unit?' '+p.unit:''} */\n`; });
+  o+=`} Ot_Signals_t;
+Ot_Signals_t ot;
+
+/* ---- Yardimcilar ---- */
+static uint32_t ot_u(const uint8_t *d, uint8_t b0, uint8_t nbytes, uint8_t big){
+  uint32_t v = 0;
+  for (uint8_t i = 0; i < nbytes; i++){ uint8_t idx = big ? (b0 + i) : (b0 + nbytes - 1 - i); v = (v << 8) | d[idx]; }
+  return v;
+}
+static uint32_t ot_bit(const uint8_t *d, uint8_t byte, uint8_t bit, uint8_t len){
+  return (uint32_t)((d[byte] >> bit) & ((1u << len) - 1));
+}
+
+/* ---- CAN RX: COB-ID'ye gore parse + olcekle ---- */
+void Ot_OnCanRx(uint32_t cobId, const uint8_t *d, uint8_t dlc){
+  switch (cobId){
+`;
+  // grup: cob-id
+  const byCob={}; ps.forEach(p=>{(byCob[p.cob]=byCob[p.cob]||[]).push(p);});
+  Object.keys(byCob).forEach(cobId=>{
+    const node=byCob[cobId][0].node, pdo=byCob[cobId][0].pdo;
+    o+=`    case 0x${(+cobId).toString(16).toUpperCase()}: /* Node ${node} · TPDO${pdo} */\n`;
+    byCob[cobId].forEach(p=>{
+      const big = p.endian==='big' ? 1:0;
+      let raw;
+      if(p.len<8 && (p.bit!==0 || p.len!==8)) raw=`ot_bit(d, ${p.byte}, ${p.bit}, ${p.len})`;
+      else raw=`ot_u(d, ${p.byte}, ${Math.ceil(p.len/8)}, ${big})`;
+      o+=`      { `;
+      if(p.type==='f32'){ o+=`union { uint32_t u; float f; } cv; cv.u = ${raw}; float r = cv.f;`; }
+      else if(p.type[0]==='s'){ const w=TYPE_BITS[p.type]; o+=`int32_t r = (int${w}_t)${raw};`; }
+      else o+=`uint32_t r = ${raw};`;
+      const eng = (p.scale!==1||p.off!==0) ? `r * ${p.scale}f + ${p.off}f` : `r`;
+      o+=` ot.${p.var} = ${eng}; }\n`;
+    });
+    o+=`      break;\n`;
+  });
+  o+=`    default: break;
+  }
+}
+
+/* ---- Sunucuya gonderilecek HTTP payload (veri_al.php / VM) ---- */
+int Ot_BuildPayload(char *buf, int n){
+  return snprintf(buf, n,
+`;
+  const fmtOf=p=>engType(p)==='float'?'%.2f':( p.type[0]==='s'?'%ld':'%lu');
+  o+='    "'+ps.map(p=>`${p.var}=${fmtOf(p)}`).join('&')+'"';
+  if(ps.length) o+=',\n    '+ps.map(p=>{
+      const t=engType(p); return t==='float'?`ot.${p.var}`:(p.type[0]==='s'?`(long)ot.${p.var}`:`(unsigned long)ot.${p.var}`);
+    }).join(', ');
+  o+=`);\n}\n`;
+  // buffer katmanlari ozeti
+  o+=`\n/* ---- Gonderim sikligi (buffer katmanlari) ----\n`;
+  const bufL={fast:'2 Hz (her ~0.5sn)',medium:'1 Hz (her sn)',slow:'1/dk',veryslow:'1/saat'};
+  ['fast','medium','slow','veryslow'].forEach(b=>{
+    const ll=ps.filter(p=>p.buf===b); if(ll.length) o+=`   ${bufL[b]} : ${ll.map(p=>p.var).join(', ')}\n`;
+  });
+  o+=`   Oneri: en hizli katmani periyodik gonderin; yavaslar kendi periyotlarinda. */\n`;
+  set('k-out',o);
+}
+function copyCode(){ const t=document.getElementById('k-out'); t.select(); document.execCommand('copy'); }
+function downloadCode(){ const vt=cfg.vtypes.find(v=>v.id===val('k-vtype'));
+  dl((vt?vt.name.replace(/\s+/g,'_'):'omnitrace')+'_can.c', document.getElementById('k-out').value, 'text/x-c'); }
+
+/* ---------- Görünürlük ---------- */
+function renderVisibility(){
+  const cid=val('v-cust'); const c=cfg.customers.find(x=>x.id===cid); if(!c){document.getElementById('v-views').innerHTML='';document.getElementById('v-params').innerHTML='';return;}
+  const vis=cfg.visibility[cid]||{views:c.views||VIEWS.map(v=>v[0]), params:null};
+  document.getElementById('v-views').innerHTML=VIEWS.map(([k,l])=>
+    `<label class="chk"><input type="checkbox" data-v="${k}" ${vis.views.includes(k)?'checked':''}> ${l}</label>`).join('');
+  const ps=cfg.params.filter(p=>cfg.vtypes.find(v=>v.id===p.vtId&&v.custId===cid));
+  document.getElementById('v-params').innerHTML = ps.length ? ps.map(p=>
+    `<label class="chk"><input type="checkbox" data-p="${p.id}" ${(!vis.params||vis.params.includes(p.id))?'checked':''}> ${esc(p.disp)} <span class="muted">(${esc(p.var)})</span></label>`).join('')
+    : '<div class="empty">Bu firmada parametre yok</div>';
+}
+function saveVisibility(){
+  const cid=val('v-cust'); if(!cid)return;
+  const views=[...document.querySelectorAll('#v-views input:checked')].map(i=>i.dataset.v);
+  const params=[...document.querySelectorAll('#v-params input:checked')].map(i=>i.dataset.p);
+  cfg.visibility[cid]={views,params}; save();
+  const s=document.getElementById('v-saved'); s.textContent='✓ kaydedildi'; setTimeout(()=>s.textContent='',2000);
+}
+
+/* ---------- JSON aktarım ---------- */
+function exportJson(){ dl('omnitrace-config.json', JSON.stringify(cfg,null,2), 'application/json'); }
+function importJson(e){ const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{ try{const j=JSON.parse(r.result); if(!j.customers)throw 0; cfg=j; save(); renderAll();
+    alert('Yapılandırma içe aktarıldı'); }catch(x){ alert('Geçersiz JSON'); } }; r.readAsText(f); e.target.value=''; }
+
+/* ---------- yardımcı ---------- */
+function val(id){ return document.getElementById(id).value; }
+function set(id,v){ document.getElementById(id).value=v; }
+function dl(name,content,type){ const b=new Blob([content],{type}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
+</script>
+</body>
+</html>

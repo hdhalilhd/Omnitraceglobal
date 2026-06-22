@@ -172,6 +172,16 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-21 | **Müşteri–Cihaz yetki matrisi (güvenlik) — BACKEND** kuruldu, canlıda test edildi | `hostinger/musteri_*.php` | ✅ |
 | 2026-06-21 | **Çift-mod giriş — FRONTEND** (demo vs müşteri) canlıya alındı + push | `omnitrace/telemetry.html` | ✅ |
 | 2026-06-22 | **Yönetim paneli** (müşteri ekle/sil + cihaz ata + device_id) canlıya alındı | `hostinger/musteri_admin.html` | ✅ |
+| 2026-06-23 | **Admin Yapılandırma Konsolu** (firma/araç-tipi + CAN parametre builder + STM32 kod üreteci + görünürlük) canlıya alındı | `hostinger/admin.html` | ✅ |
+
+### Admin Yapılandırma Konsolu (2026-06-23) — `admin.html`
+**`https://omnitraceglobal.com/admin.html`** (noindex, gate şifresi `1234` — client-side, ileride sunucuya taşınacak). Amaç: **çok-firmalı kurulum sihirbazı** — her yeni müşteri/araç için CAN parametrelerini görsel tanımla, STM32 kodunu otomatik üret.
+- **Sekmeler:** Firmalar (müşteri ID+ad+şifre) · Araç Tipleri (ad + CAN bitrate 125/250/500/1000 + Klasik/FD) · **CAN Parametreleri** · STM32 Kodu · Görünürlük.
+- **CAN Parametre builder (çekirdek):** Node ID + PDO → COB-ID otomatik (0x180/280/380/480 + node). **Byte/bit haritası** (8 veya 64 byte): hücre tıkla → başlangıç; **sarı=seçili, yeşil=boş, kırmızı=dolu/çakışma** (çakışmada Tanımla bloke). Alanlar: ana ekran terimi (ör. BATARYA ŞARJ YÜZDESİ) + STM değişken adı (auto-slug, ör. batarya_sarj_durumu) + tip (bool/u8/u16/u32/s8/s16/s32/float32) + endian (BE/LE) + min/max + ölçek/offset + birim + **gösterge tipi** (gauge/label/status/counter) + **buffer sıklığı** (2Hz/1Hz/1dk/1saat). "Tanımla" → parametre listesine + ana ekran adayı.
+- **STM32 kod üreteci:** Seçili araç tipinin parametrelerinden `Ot_Signals_t` struct + `Ot_OnCanRx(cobId,d,dlc)` (COB-ID'ye göre bit/byte çıkarma, endian, signed/float, ölçek) + `Ot_BuildPayload()` (veri_al.php/VM için `var=deger&...` string) + buffer katman özeti üretir. Kopyala / `.c indir`.
+- **Görünürlük:** firma bazında görünür ekranlar + parametreler seçimi (sunucu yetkisi `musteri_api` ile zorlanır, burada görünüm tercihi).
+- **Kalıcılık (v1):** `localStorage` (`ot_admin_cfg_v1`) + JSON dışa/içe aktar. **SIRADAKİ:** MySQL tabloları (`arac_tipleri`, `can_parametreleri`) + `musteri_api.php`'ye `admin_aractipi_*`/`admin_param_*` endpoint'leri; telemetry.html'e "Admin" menü linki (animasyona dokunmadan); tanımlı parametrelerin telemetry.html'de otomatik widget olarak render'ı.
+- **Deploy:** sadece `admin.html` FTP ile public_html'e (animasyonlu `index.html` ezilmedi). Canlı doğrulama: admin.html 200 + gate ✅ · ana sayfa 179KB animasyonlu sağlam ✅.
 
 ### Yönetim paneli (2026-06-22)
 **`musteri_admin.html`** — görsel panel: `https://omnitraceglobal.com/musteri_admin.html` (noindex). Admin anahtarı (gate, session'da) ile açılır; tüm işlemler `musteri_api.php` admin endpoint'leriyle.

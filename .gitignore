@@ -19,6 +19,9 @@ hostinger/secrets.php
 # STM32 derleme çıktıları (CubeIDE Debug/)
 firmware/stm32/Debug/
 
+# Yerel tasarım önizlemeleri (canlıya gitmez, push edilmez)
+mockup/
+
 # Prisma
 backend/prisma/*.db
 
