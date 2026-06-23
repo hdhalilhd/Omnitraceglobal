@@ -5,61 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>OmniTrace — Yönetim / Yapılandırma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0f141b; --panel:#161d27; --panel2:#1d2733; --line:#2a3645; --line2:#222d3a;
-  --txt:#e7edf4; --muted:#8c9bad; --acc:#19c3a4; --acc2:#0ea88c; --acc-d:#0c5;
-  --yellow:#f5c518; --green:#1f9d57; --green-c:#16331f; --red:#e5484d; --red-c:#3a1a1c;
-  --or:#f47216; --blue:#3b82f6; --shadow:0 6px 24px rgba(0,0,0,.35);
+  --crimson:#C0151F; --crimson-d:#8C0F17; --crimson-h:#A6121B; --crimson-l:#fbeaea;
+  --bg:#EAF0F7; --panel:#ffffff; --panel2:#f4f7fb; --line:#dbe3ee; --line2:#eef2f8;
+  --txt:#1b2738; --muted:#64748b; --muted2:#94a3b8;
+  --acc:#C0151F; --acc2:#A6121B; --acc-d:#8C0F17;
+  --yellow:#d97706; --green:#16a34a; --green-c:#e7f7ee; --red:#dc2626; --red-c:#fde8e8;
+  --or:#ea580c; --blue:#2563eb; --shadow:0 1px 3px rgba(16,24,40,.07),0 8px 24px rgba(23,42,72,.05);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:"Segoe UI",system-ui,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:14px}
+body{font-family:"Inter","Segoe UI",system-ui,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;
+  background-image:linear-gradient(rgba(148,168,196,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.13) 1px,transparent 1px);background-size:42px 42px}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit}
-a{color:var(--acc)}
+a{color:var(--crimson)}
 
 /* ===== GATE ===== */
-#gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#16202c,#0b0f15)}
+#gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#fff,#e9eef5 70%,#f6dede);
+  background-image:linear-gradient(rgba(148,168,196,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(148,168,196,.13) 1px,transparent 1px);background-size:42px 42px}
 #gate .box{width:340px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:var(--shadow);text-align:center}
-#gate .lg{font-size:26px;font-weight:800;letter-spacing:.5px;margin-bottom:4px}
-#gate .lg span{color:var(--acc)}
+#gate .lg{font-family:"Space Grotesk","Segoe UI",sans-serif;font-size:26px;font-weight:800;letter-spacing:.3px;margin-bottom:4px}
+#gate .lg span{color:var(--crimson)}
 #gate .sub{color:var(--muted);font-size:12.5px;margin-bottom:22px}
-#gate input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#0d131a;color:#fff;font-size:18px;text-align:center;letter-spacing:6px}
-#gate button{width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;background:var(--acc);color:#04201a;font-weight:800;font-size:15px}
+#gate input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--txt);font-size:18px;text-align:center;letter-spacing:6px}
+#gate input:focus{outline:none;border-color:var(--crimson)}
+#gate button{width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--crimson),var(--crimson-d));color:#fff;font-weight:800;font-size:15px}
 #gate .err{color:var(--red);font-size:12.5px;height:16px;margin-top:8px}
 
 /* ===== SHELL ===== */
 #app{display:none;min-height:100vh}
-.top{display:flex;align-items:center;gap:14px;padding:0 20px;height:58px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
-.top .brand{font-weight:800;font-size:17px}.top .brand span{color:var(--acc)}
-.top .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
+.top{display:flex;align-items:center;gap:14px;padding:0 20px;height:58px;background:linear-gradient(135deg,var(--crimson),var(--crimson-d));position:sticky;top:0;z-index:30;box-shadow:0 6px 22px rgba(140,15,23,.28)}
+.top .brand{font-family:"Space Grotesk","Segoe UI",sans-serif;font-weight:800;font-size:17px;color:#fff}.top .brand span{color:#fff;opacity:.85}
+.top .tag{font-size:11px;color:#fff;background:#ffffff22;border:1px solid #ffffff36;padding:3px 9px;border-radius:999px}
 .top .right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.btn{padding:8px 13px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:13px;font-weight:600}
-.btn:hover{border-color:var(--acc)}
-.btn.pri{background:var(--acc);color:#04201a;border-color:var(--acc);font-weight:800}
-.btn.pri:hover{filter:brightness(1.08)}
-.btn.dan{color:#ffb4b6;border-color:#5a2c2e;background:#26171a}
+.btn{padding:8px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--txt);font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--crimson);color:var(--crimson)}
+.btn.pri{background:linear-gradient(135deg,var(--crimson),var(--crimson-d));color:#fff;border-color:var(--crimson);font-weight:700}
+.btn.pri:hover{filter:brightness(1.07);color:#fff}
+.btn.dan{color:#dc2626;border-color:#fecaca;background:#fef2f2}
+.btn.dan:hover{background:#fee2e2;color:#dc2626}
 .btn.sm{padding:5px 9px;font-size:12px}
+/* topbar (kırmızı zemin) butonları beyaz çerçeveli */
+.top .btn{background:#ffffff1f;border:1px solid #ffffff3a;color:#fff}
+.top .btn:hover{background:#ffffff33;color:#fff}
+.top .btn.pri{background:#fff;color:var(--crimson);border-color:#fff}
+.top .btn.dan{background:#ffffff1f;color:#ffd9da;border-color:#ffffff3a}
+.top input{width:140px;padding:7px 10px;border-radius:9px;border:1px solid #ffffff3a;background:#ffffff1f;color:#fff;font-size:12.5px}
+.top input::placeholder{color:#ffffffaa}
 .layout{display:flex;min-height:calc(100vh - 58px)}
 .side{width:210px;background:var(--panel);border-right:1px solid var(--line);padding:12px 10px;flex:none}
-.side a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;margin-bottom:2px}
+.side a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;margin-bottom:2px;border-left:3px solid transparent}
 .side a .i{width:20px;text-align:center}
 .side a:hover{background:var(--panel2);color:var(--txt)}
-.side a.active{background:#10302a;color:var(--acc)}
+.side a.active{background:var(--crimson-l);color:var(--crimson);border-left-color:var(--crimson)}
 .main{flex:1;padding:24px;min-width:0;max-width:1180px}
-h2.pt{font-size:20px;margin:0 0 4px}
+h2.pt{font-family:"Space Grotesk","Segoe UI",sans-serif;font-size:20px;margin:0 0 4px}
 .pdesc{color:var(--muted);font-size:13px;margin:0 0 20px}
 .tab{display:none}.tab.show{display:block}
 
 /* ===== Kart / form ===== */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:var(--shadow)}
 .card h3{margin:0 0 14px;font-size:15px}
 .grid{display:grid;gap:14px}
 .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
 label.f{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.in,select.in,textarea.in{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:#0d131a;color:#fff;font-size:13.5px}
-.in:focus{outline:none;border-color:var(--acc)}
+.in,select.in,textarea.in{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--txt);font-size:13.5px}
+.in:focus{outline:none;border-color:var(--crimson);box-shadow:0 0 0 3px rgba(192,21,31,.1)}
+.in:disabled{background:#f1f5f9;color:var(--muted)}
 .hint{font-size:11.5px;color:var(--muted);margin-top:5px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 
@@ -67,10 +83,10 @@ label.f{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;border-bottom:1px solid var(--line)}
 td{padding:9px 10px;border-bottom:1px solid var(--line2)}
-tr:hover td{background:#121922}
+tr:hover td{background:#f8fafc}
 .pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.pill.gauge{background:#10302a;color:var(--acc)} .pill.label{background:#1a2433;color:#8fb6ff}
-.pill.status{background:#2a2410;color:#f5c518} .pill.counter{background:#2a1726;color:#e879c6}
+.pill.gauge{background:var(--crimson-l);color:var(--crimson)} .pill.label{background:#eef2ff;color:#3730a3}
+.pill.status{background:#fef3c7;color:#b45309} .pill.counter{background:#fce7f3;color:#be185d}
 .empty{color:var(--muted);text-align:center;padding:26px;font-size:13px}
 
 /* ===== BYTE/BIT GRID ===== */
@@ -78,24 +94,25 @@ tr:hover td{background:#121922}
 .bitgrid{border-collapse:separate;border-spacing:3px;width:auto}
 .bitgrid th{border:none;padding:4px 6px;font-size:10px;color:var(--muted)}
 .bitcell{width:34px;height:30px;border-radius:6px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;
-  background:var(--green-c);color:#5fae7c;border:1px solid #234a30;user-select:none;transition:.08s}
-.bitcell:hover{filter:brightness(1.25)}
-.bitcell.sel{background:var(--yellow);color:#3a2c00;border-color:#caa00f}
-.bitcell.occ{background:var(--red-c);color:#ff9ea0;border-color:#5a2c2e;cursor:not-allowed}
-.bitcell.conf{background:var(--red);color:#fff;border-color:#ff6b6e;animation:pulse .6s infinite alternate}
-@keyframes pulse{to{filter:brightness(1.3)}}
+  background:#e7f7ee;color:#16a34a;border:1px solid #bbf7d0;user-select:none;transition:.08s}
+.bitcell:hover{filter:brightness(.97)}
+.bitcell.sel{background:#fde68a;color:#92400e;border-color:#f59e0b}
+.bitcell.occ{background:#fde8e8;color:#b91c1c;border-color:#fecaca;cursor:not-allowed}
+.bitcell.conf{background:var(--red);color:#fff;border-color:#b91c1c;animation:pulse .6s infinite alternate}
+@keyframes pulse{to{filter:brightness(1.15)}}
 .legend{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .legend i{display:inline-block;width:13px;height:13px;border-radius:4px;vertical-align:-2px;margin-right:5px}
 .bytelbl{font-size:10px;color:var(--muted);font-weight:700;padding-right:6px;white-space:nowrap}
 
 /* ===== STM kod ===== */
-.code{width:100%;min-height:420px;background:#0a0e13;border:1px solid var(--line);border-radius:10px;color:#cfe3d6;
+.code{width:100%;min-height:420px;background:#0d1422;border:1px solid #1f2b3e;border-radius:10px;color:#cfe3f5;
   font-family:"Cascadia Code",Consolas,monospace;font-size:12px;line-height:1.55;padding:14px;white-space:pre;overflow:auto}
-.note{padding:11px 14px;border-radius:10px;background:#13202b;border:1px solid #1d3a44;color:#9fc7d4;font-size:12.5px;margin-top:14px}
-.warnbar{padding:10px 13px;border-radius:9px;background:var(--red-c);border:1px solid #5a2c2e;color:#ffb4b6;font-size:12.5px;margin-top:10px;display:none}
-.okbar{padding:10px 13px;border-radius:9px;background:#10302a;border:1px solid #1d5c47;color:#7fe3c0;font-size:12.5px;margin-top:10px;display:none}
-.chk{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:#0d131a;border:1px solid var(--line);margin-bottom:6px;font-size:13px}
-.chk input{width:16px;height:16px;accent-color:var(--acc)}
+.note{padding:11px 14px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:12.5px;margin-top:14px}
+.note code{background:#fff;border:1px solid #fed7aa;border-radius:4px;padding:1px 5px}
+.warnbar{padding:10px 13px;border-radius:9px;background:var(--red-c);border:1px solid #fecaca;color:#b91c1c;font-size:12.5px;margin-top:10px;display:none}
+.okbar{padding:10px 13px;border-radius:9px;background:var(--green-c);border:1px solid #bbf7d0;color:#15803d;font-size:12.5px;margin-top:10px;display:none}
+.chk{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid var(--line);margin-bottom:6px;font-size:13px}
+.chk input{width:16px;height:16px;accent-color:var(--crimson)}
 .muted{color:var(--muted)}
 .scroller{max-height:340px;overflow:auto}
 @media(max-width:820px){.side{width:64px}.side a span.t{display:none}.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
@@ -135,6 +152,7 @@ tr:hover td{background:#121922}
   <div class="layout">
     <nav class="side">
       <a class="active" data-tab="firmalar" onclick="go('firmalar')"><span class="i">🏢</span><span class="t">Firmalar</span></a>
+      <a data-tab="cihazlar" onclick="go('cihazlar')"><span class="i">🔑</span><span class="t">Cihazlar / ID</span></a>
       <a data-tab="tipler" onclick="go('tipler')"><span class="i">🚜</span><span class="t">Araç Tipleri</span></a>
       <a data-tab="param" onclick="go('param')"><span class="i">🧩</span><span class="t">CAN Parametreleri</span></a>
       <a data-tab="kod" onclick="go('kod')"><span class="i">💾</span><span class="t">STM32 Kodu</span></a>
@@ -160,6 +178,28 @@ tr:hover td{background:#121922}
           <h3>Tanımlı Firmalar</h3>
           <table><thead><tr><th>ID</th><th>Ad</th><th>Araç Tipi</th><th>Parametre</th><th></th></tr></thead>
             <tbody id="c-list"></tbody></table>
+        </div>
+      </section>
+
+      <!-- ============ CİHAZLAR / device_id ============ -->
+      <section class="tab" id="t-cihazlar">
+        <h2 class="pt">Cihazlar / device_id</h2>
+        <p class="pdesc">Sistem <b>benzersiz, sıralı olmayan</b> bir device_id üretir. Kopyalayıp STM32 firmware'ine gömün; cihaz bu ID ile veri gönderince ilgili firmanın panelinde canlı görünür. <span class="muted">(Firma sunucuda olmalı — önce sağ üstten <b>☁ Sunucuya Kaydet</b>.)</span></p>
+        <div class="card">
+          <h3>Yeni Cihaz Üret</h3>
+          <div class="grid g3">
+            <div><label class="f">Firma</label><select class="in" id="d-cust"></select></div>
+            <div><label class="f">Cihaz Adı (ops.)</label><input class="in" id="d-ad" placeholder="Forklift 1"></div>
+            <div><label class="f">Şase No (ops.)</label><input class="in" id="d-sase" placeholder="304MB..."></div>
+          </div>
+          <div class="row" style="margin-top:14px"><button class="btn pri" onclick="genDevice()">🎲 device_id Üret + Ata</button></div>
+          <div class="okbar" id="d-res" style="display:none"></div>
+        </div>
+        <div class="card">
+          <h3>Tanımlı Cihazlar</h3>
+          <div class="row" style="margin-bottom:10px"><button class="btn sm" onclick="loadDevices()">↻ Listeyi Yenile</button></div>
+          <table><thead><tr><th>device_id (STM32)</th><th>Ad / Şase</th><th>Firma</th><th></th></tr></thead>
+            <tbody id="d-list"><tr><td colspan="4" class="empty">"Listeyi Yenile" ile yükleyin</td></tr></tbody></table>
         </div>
       </section>
 
@@ -345,6 +385,7 @@ function go(tab){
   document.querySelectorAll('.side a').forEach(a=>a.classList.toggle('active',a.dataset.tab===tab));
   document.querySelectorAll('.tab').forEach(s=>s.classList.remove('show'));
   document.getElementById('t-'+tab).classList.add('show');
+  if(tab==='cihazlar'){ loadDeviceTab(); }
   if(tab==='tipler') fillCustSelect('vt-cust');
   if(tab==='param'){ fillCustSelect('p-cust'); onParamScope(); }
   if(tab==='kod') fillVTypeSelect('k-vtype');
@@ -640,6 +681,56 @@ function saveVisibility(){
   cfg.visibility[cid]={views,params}; save();
   const s=document.getElementById('v-saved'); s.textContent='✓ kaydedildi'; setTimeout(()=>s.textContent='',2000);
 }
+
+/* ---------- Cihazlar / device_id (musteri_api: araclar + musteri_cihaz) ---------- */
+async function loadDeviceTab(){
+  const sel=document.getElementById('d-cust'); if(!sel)return;
+  if(!akey()){ sel.innerHTML='<option value="">— önce admin anahtarı girin —</option>';
+    document.getElementById('d-list').innerHTML='<tr><td colspan="4" class="empty">Önce sağ üstten admin anahtarını girin</td></tr>'; return; }
+  try{
+    const j=await apiAdmin('admin_liste',{});
+    const cs=j.musteriler||[];
+    sel.innerHTML = cs.length
+      ? cs.map(c=>`<option value="${esc(c.kod)}">${esc(c.kod)}${c.ad?' — '+esc(c.ad):''}</option>`).join('')
+      : '<option value="">— firma yok (Firmalar sekmesinden ekleyip Sunucuya Kaydet) —</option>';
+  }catch(e){ if(e.message!=='no key') sel.innerHTML='<option value="">'+esc(e.message)+'</option>'; }
+  loadDevices();
+}
+async function genDevice(){
+  const kod=val('d-cust'); if(!kod){ alert('Önce firma ekleyin/seçin'); return; }
+  const ad=val('d-ad').trim(), sase=val('d-sase').trim();
+  try{
+    const j=await apiAdmin('admin_cihaz_uret',{kod,ad,sase_no:sase});
+    const box=document.getElementById('d-res'); box.style.display='block';
+    box.innerHTML='Üretilen device_id — STM32\'ye gömün: '+
+      '<b style="font-size:20px;font-family:Consolas,monospace;color:#166534">'+j.device_id+'</b> '+
+      '<button class="btn sm" style="margin-left:8px" onclick="copyText(\''+j.device_id+'\',this)">📋 Kopyala</button>'+
+      '<div class="muted" style="margin-top:6px;font-size:11.5px">Firma: '+esc(kod)+(ad?' · '+esc(ad):'')+'</div>';
+    set('d-ad','');set('d-sase',''); loadDevices();
+  }catch(e){ if(e.message!=='no key') alert(/bulunamadi/i.test(e.message)?'Bu firma sunucuda yok — önce "☁ Sunucuya Kaydet" deyin.':('Hata: '+e.message)); }
+}
+async function loadDevices(){
+  const tb=document.getElementById('d-list'); if(!tb)return;
+  if(!akey()){ tb.innerHTML='<tr><td colspan="4" class="empty">Önce sağ üstten admin anahtarını girin</td></tr>'; return; }
+  try{
+    const j=await apiAdmin('admin_cihaz_liste',{});
+    const list=j.cihazlar||[];
+    tb.innerHTML = list.length ? list.map(d=>{
+      const name=[d.ad,d.sase_no].filter(Boolean).map(esc).join(' · ')||'<span class="muted">—</span>';
+      const owner=d.musteriler?esc(d.musteriler):'<span class="muted">atanmamış</span>';
+      return '<tr><td><b style="color:var(--crimson);font-family:Consolas,monospace">'+d.device_id+'</b> '+
+        '<button class="btn sm" onclick="copyText(\''+d.device_id+'\',this)">kopyala</button></td>'+
+        '<td>'+name+'</td><td>'+owner+'</td>'+
+        '<td style="text-align:right"><button class="btn sm dan" onclick="delDevice('+d.device_id+')">Sil</button></td></tr>';
+    }).join('') : '<tr><td colspan="4" class="empty">Henüz cihaz yok</td></tr>';
+  }catch(e){ if(e.message!=='no key') tb.innerHTML='<tr><td colspan="4" class="empty">'+esc(e.message)+'</td></tr>'; }
+}
+async function delDevice(dev){
+  if(!confirm('device_id '+dev+' tamamen silinsin mi?'))return;
+  try{ await apiAdmin('admin_cihaz_sil',{device_id:dev}); loadDevices(); }catch(e){ if(e.message!=='no key')alert(e.message); }
+}
+function copyText(t,btn){ if(navigator.clipboard)navigator.clipboard.writeText(String(t));
+  if(btn){ const o=btn.textContent; btn.textContent='✓'; setTimeout(()=>btn.textContent=o,1200); } }
 
 /* ---------- JSON aktarım ---------- */
 function exportJson(){ dl('omnitrace-config.json', JSON.stringify(cfg,null,2), 'application/json'); }
