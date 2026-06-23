@@ -177,6 +177,13 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-22 | **Otomatik device_id üretimi** (sıralı olmayan, tahmin edilemez) panele eklendi | `musteri_admin.html`, `musteri_api.php` | ✅ |
 | 2026-06-23 | **Admin Yapılandırma Konsolu** (firma/araç-tipi + CAN parametre builder + STM32 kod üreteci + görünürlük) canlıya alındı | `hostinger/admin.html` | ✅ |
 | 2026-06-23 | **MySQL otomatik tablo sistemi** + admin.html sunucu senkronu (Sunucuya Kaydet/Yükle) | `musteri_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
+| 2026-06-23 | **admin.html homepage kırmızı temasına çevrildi + device_id sekmesi**; `musteri_admin.html` silindi (tek panel) | `hostinger/admin.html` | ✅ |
+
+### admin.html tema birleştirme + device_id (2026-06-23)
+**Tek yönetim paneli artık `admin.html`** (eski `musteri_admin.html` repodan+canlıdan **silindi**).
+- **Tema:** koyu teal → **ana sayfayla aynı kırmızı "TrackLink"**: kırmızı topbar gradient (#C0151F→#8C0F17), #EAF0F7 ızgara zemin, beyaz gölgeli kartlar, kırmızı aktif sekme/odak, Space Grotesk + Inter font. Tüm `<style>` bloğu yeniden yazıldı (sınıf adları/yapı korundu → JS bozulmadı). bit-grid hücreleri açık temaya uyarlandı (yeşil=boş, sarı=seçili, kırmızı=dolu), kod alanı koyu navy kaldı.
+- **Yeni "Cihazlar / ID" sekmesi:** firma dropdown'u **sunucudan** (`admin_liste` → musteriler) dolar → otomatik **device_id üret** (`admin_cihaz_uret`, sıralı olmayan) + büyük göster + kopyala; cihaz listesi (`admin_cihaz_liste`) kopyala/sil ile. Bu, silinen musteri_admin.html'in device_id üretimini admin.html'e taşır. STM32'ye gömülecek sayı buradan kopyalanır.
+- **Canlı doğrulama (Playwright):** topbar gradient rgb(192,21,31) ✅ · body #EAF0F7 ✅ · Cihazlar sekmesi sunucudan CUST-001/CUST-002 yükledi ✅ · device_id üretildi (550645908, rastgele) ✅ · 0 pageerror ✅ · musteri_admin.html → 404 ✅.
 
 ### MySQL otomatik tablo sistemi + sunucu senkronu (2026-06-23)
 admin.html artık localStorage + **sunucu (MySQL) kalıcılığı** ile çalışır → tanımlar tüm cihaz/oturumlara yayılır.
