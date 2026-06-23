@@ -137,6 +137,69 @@ try {
       $pdo->prepare("DELETE FROM musteriler WHERE id=?")->execute([$m['id']]);
       out(200, ['status' => 'success', 'message' => "Musteri silindi: $kod"]);
     }
+    /* ── Admin Yapılandırma Konsolu: tüm cfg'yi oku ── */
+    if ($action === 'admin_cfg_yukle') {
+      $custs = $pdo->query("SELECT kod AS id, ad AS name FROM musteriler ORDER BY kod")->fetchAll();
+      $vts = $pdo->query("SELECT cid AS id, musteri_kod AS custId, ad AS name, bitrate AS rate, can_tipi AS fd FROM arac_tipleri")->fetchAll();
+      foreach ($vts as &$v) { $v['rate'] = (int)$v['rate']; } unset($v);
+      $params = $pdo->query("SELECT cid AS id, vt_cid AS vtId, node, pdo, cob, byte_i AS `byte`, bit_i AS `bit`, uzunluk AS len,
+                  tip AS type, endian, disp, degisken AS `var`, min_d AS `min`, max_d AS `max`, olcek AS scale, ofset AS `off`,
+                  birim AS unit, widget, buffer AS buf FROM can_parametreleri")->fetchAll();
+      foreach ($params as &$p) {
+        foreach (['node','cob','byte','bit','len'] as $k) $p[$k] = (int)$p[$k];
+        foreach (['min','max','scale','off'] as $k) $p[$k] = (float)$p[$k];
+      } unset($p);
+      $vis = new stdClass();
+      foreach ($pdo->query("SELECT musteri_kod, views, params FROM firma_gorunurluk")->fetchAll() as $r) {
+        $vis->{$r['musteri_kod']} = ['views' => json_decode($r['views'] ?: '[]', true),
+                                     'params' => json_decode(($r['params'] === null ? 'null' : $r['params']), true)];
+      }
+      out(200, ['status' => 'success', 'cfg' => ['customers' => $custs, 'vtypes' => $vts, 'params' => $params, 'visibility' => $vis]]);
+    }
+    /* ── Admin Yapılandırma Konsolu: tüm cfg'yi yaz (tam değiştir) ── */
+    if ($action === 'admin_cfg_kaydet') {
+      $cfg = inp($body, 'cfg');
+      if (!is_array($cfg)) out(400, ['status' => 'error', 'message' => 'cfg (JSON) gerekli']);
+      $pdo->beginTransaction();
+      /* müşteriler → musteriler (upsert; silme YOK — silme admin_musteri_sil ile) */
+      foreach (($cfg['customers'] ?? []) as $c) {
+        $kod = trim((string)($c['id'] ?? '')); if ($kod === '') continue;
+        $ad = (string)($c['name'] ?? ''); $pass = (string)($c['pass'] ?? '');
+        if ($pass !== '') {
+          $pdo->prepare("INSERT INTO musteriler (kod,sifre_hash,ad) VALUES (?,?,?)
+                         ON DUPLICATE KEY UPDATE ad=VALUES(ad), sifre_hash=VALUES(sifre_hash)")
+              ->execute([$kod, password_hash($pass, PASSWORD_DEFAULT), $ad]);
+        } else {
+          $pdo->prepare("INSERT INTO musteriler (kod,sifre_hash,ad) VALUES (?,?,?)
+                         ON DUPLICATE KEY UPDATE ad=VALUES(ad)")
+              ->execute([$kod, password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT), $ad]);
+        }
+      }
+      /* araç tipleri + parametreler → tam değiştir (admin tüm seti tutar) */
+      $pdo->exec("DELETE FROM arac_tipleri");
+      $iv = $pdo->prepare("INSERT INTO arac_tipleri (cid,musteri_kod,ad,bitrate,can_tipi) VALUES (?,?,?,?,?)");
+      foreach (($cfg['vtypes'] ?? []) as $v)
+        $iv->execute([$v['id'], $v['custId'] ?? '', $v['name'] ?? '', (int)($v['rate'] ?? 250), $v['fd'] ?? 'classic']);
+      $pdo->exec("DELETE FROM can_parametreleri");
+      $ip = $pdo->prepare("INSERT INTO can_parametreleri
+        (cid,vt_cid,node,pdo,cob,byte_i,bit_i,uzunluk,tip,endian,disp,degisken,min_d,max_d,olcek,ofset,birim,widget,buffer)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+      foreach (($cfg['params'] ?? []) as $p)
+        $ip->execute([$p['id'], $p['vtId'] ?? '', (int)$p['node'], (string)$p['pdo'], (int)$p['cob'],
+          (int)$p['byte'], (int)$p['bit'], (int)$p['len'], (string)$p['type'], (string)$p['endian'],
+          (string)$p['disp'], (string)$p['var'], (float)$p['min'], (float)$p['max'], (float)$p['scale'],
+          (float)$p['off'], (string)($p['unit'] ?? ''), (string)$p['widget'], (string)$p['buf']]);
+      /* görünürlük → tam değiştir */
+      $pdo->exec("DELETE FROM firma_gorunurluk");
+      $ig = $pdo->prepare("INSERT INTO firma_gorunurluk (musteri_kod,views,params) VALUES (?,?,?)");
+      foreach (($cfg['visibility'] ?? []) as $kod => $vv)
+        $ig->execute([$kod, json_encode($vv['views'] ?? [], JSON_UNESCAPED_UNICODE),
+                      json_encode($vv['params'] ?? null, JSON_UNESCAPED_UNICODE)]);
+      $pdo->commit();
+      out(200, ['status' => 'success', 'message' => 'Yapilandirma sunucuya kaydedildi',
+                'sayim' => ['firma' => count($cfg['customers'] ?? []), 'arac_tipi' => count($cfg['vtypes'] ?? []), 'parametre' => count($cfg['params'] ?? [])]]);
+    }
+
     out(400, ['status' => 'error', 'message' => 'Bilinmeyen admin islemi']);
   }
 

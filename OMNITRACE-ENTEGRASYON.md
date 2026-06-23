@@ -1,5 +1,7 @@
 # OmniTrace — Veri Entegrasyonu & Çalışma Notları
 
+**Sürüm: v1** · son güncelleme 2026-06-23 (admin yapılandırma konsolu + MySQL kalıcılık tamam)
+
 > Bu dosya **her işlemde güncellenir**. Amaç: bu repodaki canlı veri-alma sistemini (STM32 +
 > SIM800L → sanal sunucu → site) bozmadan, **bizim animasyonlu OmniTrace sitemize** entegre etmek.
 > Başkası repoya baktığında en güncel durumu buradan okuyabilmeli.
@@ -173,6 +175,14 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-21 | **Çift-mod giriş — FRONTEND** (demo vs müşteri) canlıya alındı + push | `omnitrace/telemetry.html` | ✅ |
 | 2026-06-22 | **Yönetim paneli** (müşteri ekle/sil + cihaz ata + device_id) canlıya alındı | `hostinger/musteri_admin.html` | ✅ |
 | 2026-06-23 | **Admin Yapılandırma Konsolu** (firma/araç-tipi + CAN parametre builder + STM32 kod üreteci + görünürlük) canlıya alındı | `hostinger/admin.html` | ✅ |
+| 2026-06-23 | **MySQL otomatik tablo sistemi** + admin.html sunucu senkronu (Sunucuya Kaydet/Yükle) | `musteri_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
+
+### MySQL otomatik tablo sistemi + sunucu senkronu (2026-06-23)
+admin.html artık localStorage + **sunucu (MySQL) kalıcılığı** ile çalışır → tanımlar tüm cihaz/oturumlara yayılır.
+- **Yeni tablolar** (`musteri_kurulum.php` ile tek seferde, `CREATE TABLE IF NOT EXISTS`): `arac_tipleri`(cid,musteri_kod,ad,bitrate,can_tipi) · `can_parametreleri`(cid,vt_cid,node,pdo,cob,byte_i,bit_i,uzunluk,tip,endian,disp,degisken,min_d,max_d,olcek,ofset,birim,widget,buffer) · `firma_gorunurluk`(musteri_kod,views,params). Kurulum çalıştırıldı, 3 tablo oluştu ✅.
+- **Yeni API** (`musteri_api.php`, admin_key korumalı): `admin_cfg_yukle` → {customers,vtypes,params,visibility} (kolon→JS anahtarı alias) · `admin_cfg_kaydet` → transaction: müşteriler upsert (musteriler, parola hash) + arac_tipleri/can_parametreleri/firma_gorunurluk **tam değiştir**. ⚠ API `action`'ı **URL query'den** (`$_GET`) okur; admin_key+cfg JSON gövdede.
+- **admin.html:** sağ üstte "admin anahtarı" alanı (musteri_secret.php → $ADMIN_KEY) + **☁ Sunucuya Kaydet / ⤓ Sunucudan Yükle**. JSON dışa/içe aktar korundu.
+- **Canlı test:** kurulum 200 + 3 tablo ✅ · login parse ✅ · `admin_cfg_yukle` yanlış key→401 "admin_key gecersiz" ✅ (gerçek key ile DB round-trip kullanıcı tarafından test edilecek). index.html ezilmedi (hedefli FTP).
 
 ### Admin Yapılandırma Konsolu (2026-06-23) — `admin.html`
 **`https://omnitraceglobal.com/admin.html`** (noindex, gate şifresi `1234` — client-side, ileride sunucuya taşınacak). Amaç: **çok-firmalı kurulum sihirbazı** — her yeni müşteri/araç için CAN parametrelerini görsel tanımla, STM32 kodunu otomatik üret.

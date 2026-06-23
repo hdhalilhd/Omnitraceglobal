@@ -43,6 +43,39 @@ try {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
   echo "araclar (cihaz kutugu) tablosu hazir.\n";
 
+  /* ── Admin Yapılandırma Konsolu tabloları (admin.html) ── */
+  $pdo->exec("CREATE TABLE IF NOT EXISTS arac_tipleri (
+    cid VARCHAR(24) PRIMARY KEY,
+    musteri_kod VARCHAR(40) NOT NULL,
+    ad VARCHAR(128) NOT NULL,
+    bitrate INT NOT NULL DEFAULT 250,
+    can_tipi VARCHAR(10) NOT NULL DEFAULT 'classic',
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY k_kod (musteri_kod)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  echo "arac_tipleri tablosu hazir.\n";
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS can_parametreleri (
+    cid VARCHAR(24) PRIMARY KEY,
+    vt_cid VARCHAR(24) NOT NULL,
+    node INT NOT NULL, pdo VARCHAR(2) NOT NULL, cob INT NOT NULL,
+    byte_i INT NOT NULL, bit_i INT NOT NULL, uzunluk INT NOT NULL,
+    tip VARCHAR(8) NOT NULL, endian VARCHAR(8) NOT NULL,
+    disp VARCHAR(160) NOT NULL, degisken VARCHAR(64) NOT NULL,
+    min_d DOUBLE DEFAULT 0, max_d DOUBLE DEFAULT 0, olcek DOUBLE DEFAULT 1, ofset DOUBLE DEFAULT 0,
+    birim VARCHAR(24) DEFAULT '', widget VARCHAR(16) DEFAULT 'gauge', buffer VARCHAR(16) DEFAULT 'slow',
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY k_vt (vt_cid)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  echo "can_parametreleri tablosu hazir.\n";
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS firma_gorunurluk (
+    musteri_kod VARCHAR(40) PRIMARY KEY,
+    views TEXT, params TEXT,
+    updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  echo "firma_gorunurluk tablosu hazir.\n";
+
   /* örnek müşteri — yoksa oluştur */
   $kod = "CUST-001"; $parola = "Demo#2026";
   $st = $pdo->prepare("SELECT id FROM musteriler WHERE kod=?"); $st->execute([$kod]);
