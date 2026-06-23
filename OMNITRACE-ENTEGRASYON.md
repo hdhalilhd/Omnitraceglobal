@@ -179,6 +179,16 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-23 | **MySQL otomatik tablo sistemi** + admin.html sunucu senkronu (Sunucuya Kaydet/Yükle) | `musteri_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
 | 2026-06-23 | **admin.html homepage kırmızı temasına çevrildi + device_id sekmesi**; `musteri_admin.html` silindi (tek panel) | `hostinger/admin.html` | ✅ |
 | 2026-06-24 | **CİHAZ KİMLİK GÜVENLİĞİ**: whitelist + per-device HMAC + replay koruma (ingest sertleştirildi) | `veri_al.php`, `guvenlik_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
+| 2026-06-24 | **STM32 codegen → HMAC imzalı** (Ot_BuildPayload + gömülü SHA-256/HMAC + device_id/key + ts) | `hostinger/admin.html` | ✅ |
+
+### STM32 kod üreteci → HMAC imzalı payload (2026-06-24)
+admin.html "STM32 Kodu" sekmesi artık `veri_al.php` güvenlik sözleşmesine uygun **imzalı** kod üretir:
+- Üretilen C'ye eklendi: `#define OT_DEVICE_ID` + `#define OT_DEVICE_KEY` (Cihazlar sekmesinden gömülür) · kompakt **SHA-256 + HMAC-SHA256** (haricî kütüphane yok) · `extern Ot_UnixTime()` hook'u (SIM800L AT+CCLK/RTC → UNIX zaman).
+- `Ot_BuildPayload()` → `DEVICE_ID=..&ts=..&<alanlar>&sig=HMAC_SHA256(OT_DEVICE_KEY, "&sig"ten önceki query)` (sig sonda). `Ot_OnCanRx` parse mantığı korundu.
+- **Doğruluk kanıtı:** C SHA-256/HMAC'in birebir JS portu → SHA256("")/("abc") test vektörleri ✅ + 3 gerçekçi mesajda HMAC = node crypto (= PHP `hash_hmac`) **birebir aynı** ✅. Yani üretilen imza `veri_al.php` doğrulamasından geçer.
+- **Bonus fix:** admin.html'de oturum açıkken reload'da "Cannot access 'cfg'" (TDZ) hatası vardı — auto-open script sonuna alındı, düzeldi.
+- Canlı codegen testi (Playwright): tüm parçalar üretiliyor, 0 pageerror ✅.
+- **SIRADAKİ (cutover):** gerçek device için panelden device_id+key üret → firmware'e göm (Ot_UnixTime'ı bağla) → `SERVER_HOST=omnitraceglobal.com` → okuma yolunu (musteri_api/vm_proxy) Hostinger `standart`'a al (o an kontrollü, 2sn akış kesilmez).
 
 ### Cihaz kimlik güvenliği — whitelist + HMAC + anti-replay (2026-06-24)
 **Sorun:** SIM800L düz HTTP (port 80) → device_id açık metin, sniff'lenebilir; eski `veri_al.php` herhangi bir id'yi kabul ediyordu. **Çözüm (sunucu-taraflı, atlanamaz):**
