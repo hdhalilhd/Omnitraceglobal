@@ -702,10 +702,15 @@ async function genDevice(){
   try{
     const j=await apiAdmin('admin_cihaz_uret',{kod,ad,sase_no:sase});
     const box=document.getElementById('d-res'); box.style.display='block';
-    box.innerHTML='Üretilen device_id — STM32\'ye gömün: '+
-      '<b style="font-size:20px;font-family:Consolas,monospace;color:#166534">'+j.device_id+'</b> '+
-      '<button class="btn sm" style="margin-left:8px" onclick="copyText(\''+j.device_id+'\',this)">📋 Kopyala</button>'+
-      '<div class="muted" style="margin-top:6px;font-size:11.5px">Firma: '+esc(kod)+(ad?' · '+esc(ad):'')+'</div>';
+    box.innerHTML=
+      '<div style="margin-bottom:8px">📟 <b>DEVICE_ID</b> (açık kimlik): '+
+        '<b style="font-size:18px;font-family:Consolas,monospace;color:#166534">'+j.device_id+'</b> '+
+        '<button class="btn sm" onclick="copyText(\''+j.device_id+'\',this)">📋</button></div>'+
+      '<div>🔑 <b>DEVICE_KEY</b> (GİZLİ anahtar — firmware\'e göm, kimseyle paylaşma): '+
+        '<b style="font-family:Consolas,monospace;color:var(--crimson)">'+esc(j.device_key)+'</b> '+
+        '<button class="btn sm" onclick="copyText(\''+j.device_key+'\',this)">📋</button></div>'+
+      '<div class="muted" style="margin-top:8px;font-size:11.5px">Firma: '+esc(kod)+(ad?' · '+esc(ad):'')+
+        ' — İkisini de STM32 firmware\'ine gömün; cihaz veriyi bu anahtarla HMAC imzalayıp gönderir.</div>';
     set('d-ad','');set('d-sase',''); loadDevices();
   }catch(e){ if(e.message!=='no key') alert(/bulunamadi/i.test(e.message)?'Bu firma sunucuda yok — önce "☁ Sunucuya Kaydet" deyin.':('Hata: '+e.message)); }
 }
@@ -718,10 +723,14 @@ async function loadDevices(){
     tb.innerHTML = list.length ? list.map(d=>{
       const name=[d.ad,d.sase_no].filter(Boolean).map(esc).join(' · ')||'<span class="muted">—</span>';
       const owner=d.musteriler?esc(d.musteriler):'<span class="muted">atanmamış</span>';
+      const keyBtn = d.device_key
+        ? '<button class="btn sm" title="Gizli anahtarı kopyala (firmware)" onclick="copyText(\''+esc(d.device_key)+'\',this)">🔑 anahtar</button>'
+        : '<span class="muted" style="font-size:11px">anahtar yok</span>';
       return '<tr><td><b style="color:var(--crimson);font-family:Consolas,monospace">'+d.device_id+'</b> '+
         '<button class="btn sm" onclick="copyText(\''+d.device_id+'\',this)">kopyala</button></td>'+
         '<td>'+name+'</td><td>'+owner+'</td>'+
-        '<td style="text-align:right"><button class="btn sm dan" onclick="delDevice('+d.device_id+')">Sil</button></td></tr>';
+        '<td style="text-align:right;white-space:nowrap">'+keyBtn+' '+
+        '<button class="btn sm dan" onclick="delDevice('+d.device_id+')">Sil</button></td></tr>';
     }).join('') : '<tr><td colspan="4" class="empty">Henüz cihaz yok</td></tr>';
   }catch(e){ if(e.message!=='no key') tb.innerHTML='<tr><td colspan="4" class="empty">'+esc(e.message)+'</td></tr>'; }
 }

@@ -178,6 +178,14 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-23 | **Admin Yapılandırma Konsolu** (firma/araç-tipi + CAN parametre builder + STM32 kod üreteci + görünürlük) canlıya alındı | `hostinger/admin.html` | ✅ |
 | 2026-06-23 | **MySQL otomatik tablo sistemi** + admin.html sunucu senkronu (Sunucuya Kaydet/Yükle) | `musteri_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
 | 2026-06-23 | **admin.html homepage kırmızı temasına çevrildi + device_id sekmesi**; `musteri_admin.html` silindi (tek panel) | `hostinger/admin.html` | ✅ |
+| 2026-06-24 | **CİHAZ KİMLİK GÜVENLİĞİ**: whitelist + per-device HMAC + replay koruma (ingest sertleştirildi) | `veri_al.php`, `guvenlik_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
+
+### Cihaz kimlik güvenliği — whitelist + HMAC + anti-replay (2026-06-24)
+**Sorun:** SIM800L düz HTTP (port 80) → device_id açık metin, sniff'lenebilir; eski `veri_al.php` herhangi bir id'yi kabul ediyordu. **Çözüm (sunucu-taraflı, atlanamaz):**
+- **Per-device gizli anahtar:** `araclar.device_key` (32-hex, `random_bytes(16)`), `admin_cihaz_uret`'te üretilir, panelde gösterilir (id=açık kimlik, key=GİZLİ — hatta hiç gönderilmez). `araclar.last_ts` replay için. Migration: `guvenlik_kurulum.php` (idempotent ALTER + standart zengin kolon garantisi).
+- **Sertleştirilmiş `veri_al.php` (GET):** istek `…&sig=HMAC_SHA256(device_key, "&sig"ten önceki query)`; sig **sonda**. Kapılar: (1) device_id `araclar`'da yoksa **403**; (2) HMAC tutmazsa **401** (id kopyalansa bile anahtarsız imza üretilemez); (3) ts ±300sn dışı veya `<= last_ts` → **401** (replay). Geçerliyse standart'a yazar + last_ts ilerletir.
+- **Canlı test (curl, gerçek HMAC):** geçerli→200 ✅ · replay→401 ✅ · bozuk imza→401 ✅ · kayıtsız device→403 ✅ · geri okuma (Hostinger veri_oku)→değerler doğru ✅ · panel device_key gösterimi ✅.
+- **⚠ Okuma yolu (2sn poll) DEĞİŞMEDİ** — hardened ingest additive; firmware `SERVER_HOST` Hostinger'a çevrilene kadar mevcut VM akışı aynen sürer. **SIRADAKİ:** STM32 codegen'e HMAC-SHA256 (Ot_BuildPayload imzalı) + ts; sonra cutover (SERVER_HOST=omnitraceglobal.com) + okuma yolunu Hostinger'a alma.
 
 ### admin.html tema birleştirme + device_id (2026-06-23)
 **Tek yönetim paneli artık `admin.html`** (eski `musteri_admin.html` repodan+canlıdan **silindi**).

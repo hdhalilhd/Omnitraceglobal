@@ -108,13 +108,16 @@ try {
         if (!$chk->fetch()) { $dev = $cand; break; }
       }
       if (!$dev) out(500, ['status' => 'error', 'message' => 'device_id uretilemedi, tekrar deneyin']);
-      $pdo->prepare("INSERT INTO araclar (device_id,ad,sase_no,model) VALUES (?,?,?,?)")
-          ->execute([$dev, $ad, $sase, $model]);
+      $dkey = bin2hex(random_bytes(16));   // 32 hane GİZLİ anahtar — HMAC için, hatta hiç çıkmaz
+      $pdo->prepare("INSERT INTO araclar (device_id,ad,sase_no,model,device_key) VALUES (?,?,?,?,?)")
+          ->execute([$dev, $ad, $sase, $model, $dkey]);
       $pdo->prepare("INSERT IGNORE INTO musteri_cihaz (musteri_id,device_id) VALUES (?,?)")->execute([$m['id'], $dev]);
-      out(200, ['status' => 'success', 'device_id' => $dev, 'message' => "device_id uretildi: $dev ($kod)"]);
+      out(200, ['status' => 'success', 'device_id' => $dev, 'device_key' => $dkey,
+                'message' => "device_id uretildi: $dev ($kod)"]);
     }
     if ($action === 'admin_cihaz_liste') {
-      $rows = $pdo->query("SELECT a.device_id,a.ad,a.sase_no,a.model,
+      /* device_key admin'e döner (firmware'e gömmek için; admin_key korumalı) */
+      $rows = $pdo->query("SELECT a.device_id,a.ad,a.sase_no,a.model,a.device_key,
                 GROUP_CONCAT(m.kod ORDER BY m.kod) AS musteriler
               FROM araclar a
               LEFT JOIN musteri_cihaz mc ON mc.device_id=a.device_id
