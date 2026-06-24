@@ -116,6 +116,16 @@ tr:hover td{background:#f8fafc}
 .muted{color:var(--muted)}
 .scroller{max-height:340px;overflow:auto}
 @media(max-width:820px){.side{width:64px}.side a span.t{display:none}.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+/* ===== Admin anahtarı popup ===== */
+.kmodal{position:fixed;inset:0;z-index:200;display:none;place-items:center;background:rgba(16,24,40,.45);backdrop-filter:blur(3px)}
+.kmodal .kbox{width:380px;max-width:92vw;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(16,24,40,.3);padding:24px}
+.kmodal h3{margin:0 0 4px;font-size:16px}
+.kmodal p{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.kmodal input[type=password]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--txt);font-size:14px}
+.kmodal input[type=password]:focus{outline:none;border-color:var(--crimson);box-shadow:0 0 0 3px rgba(192,21,31,.1)}
+.kmrem{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin:12px 0 16px}
+.kmrem input{width:15px;height:15px;accent-color:var(--crimson)}
+.kmbtns{display:flex;justify-content:flex-end;gap:10px}
 </style>
 </head>
 <body>
@@ -131,14 +141,25 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- ============ ADMIN ANAHTARI POPUP (sadece kaydederken) ============ -->
+<div id="keyModal" class="kmodal">
+  <div class="kbox">
+    <h3>🔑 Admin Anahtarı</h3>
+    <p>Bu işlem değişiklikleri <b>sunucuya kaydeder</b>. <code>musteri_secret.php</code> içindeki ADMIN_KEY'i girin.</p>
+    <input id="kmInput" type="password" placeholder="admin anahtarı" autocomplete="off"
+      onkeydown="if(event.key==='Enter')keyModalOk();">
+    <label class="kmrem"><input type="checkbox" id="kmRemember" checked> Bu oturumda hatırla (tekrar sorma)</label>
+    <div class="kmbtns"><button class="btn" onclick="keyModalCancel()">İptal</button>
+      <button class="btn pri" onclick="keyModalOk()">Onayla</button></div>
+  </div>
+</div>
+
 <!-- ===================== APP ===================== -->
 <div id="app">
   <div class="top">
     <div class="brand">Omni<span>Trace</span></div>
     <span class="tag">Yapılandırma Konsolu</span>
     <div class="right">
-      <input id="akey" type="password" placeholder="admin anahtarı" title="musteri_secret.php içindeki ADMIN_KEY"
-        style="width:140px;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:#0d131a;color:#fff;font-size:12.5px">
       <button class="btn sm pri" onclick="cloudSave()">☁ Sunucuya Kaydet</button>
       <button class="btn sm" onclick="cloudLoad()">⤓ Sunucudan Yükle</button>
       <span style="width:1px;height:22px;background:var(--line)"></span>
@@ -188,7 +209,7 @@ tr:hover td{background:#f8fafc}
         <div class="card">
           <h3>Yeni Cihaz Üret</h3>
           <div class="grid g3">
-            <div><label class="f">Firma</label><select class="in" id="d-cust"></select></div>
+            <div><label class="f">Firma</label><select class="in" id="d-cust" onchange="renderDeviceList()"></select></div>
             <div><label class="f">Cihaz Adı (ops.)</label><input class="in" id="d-ad" placeholder="Forklift 1"></div>
             <div><label class="f">Şase No (ops.)</label><input class="in" id="d-sase" placeholder="304MB..."></div>
           </div>
@@ -367,8 +388,7 @@ function tryGate(){
   else { document.getElementById('gerr').textContent='Hatalı şifre'; }
 }
 document.getElementById('gpass').addEventListener('keydown',e=>{if(e.key==='Enter')tryGate();});
-function openApp(){ document.getElementById('gate').style.display='none'; document.getElementById('app').style.display='block';
-  const k=sessionStorage.getItem('ot_akey'); if(k)document.getElementById('akey').value=k; renderAll(); }
+function openApp(){ document.getElementById('gate').style.display='none'; document.getElementById('app').style.display='block'; renderAll(); }
 function logout(){ sessionStorage.removeItem('ot_admin_ok'); location.reload(); }
 /* (oturum açıkken auto-open script SONUNDA — cfg init'ten sonra; TDZ hatasını önler) */
 
@@ -747,21 +767,39 @@ function saveVisibility(){
 }
 
 /* ---------- Cihazlar / device_id (musteri_api: araclar + musteri_cihaz) ---------- */
-async function loadDeviceTab(){
-  const sel=document.getElementById('d-cust'); if(!sel)return;
-  if(!akey()){ sel.innerHTML='<option value="">— önce admin anahtarı girin —</option>';
-    document.getElementById('d-list').innerHTML='<tr><td colspan="4" class="empty">Önce sağ üstten admin anahtarını girin</td></tr>'; return; }
-  try{
-    const j=await apiAdmin('admin_liste',{});
-    const cs=j.musteriler||[];
-    sel.innerHTML = cs.length
-      ? cs.map(c=>`<option value="${esc(c.kod)}">${esc(c.kod)}${c.ad?' — '+esc(c.ad):''}</option>`).join('')
-      : '<option value="">— firma yok (Firmalar sekmesinden ekleyip Sunucuya Kaydet) —</option>';
-  }catch(e){ if(e.message!=='no key') sel.innerHTML='<option value="">'+esc(e.message)+'</option>'; }
-  loadDevices();
+let DEVLIST=null;   // sunucudan TÜM cihazlar (cache); ekranda firmaya göre client-side filtrelenir
+function loadDeviceTab(){
+  fillCustSelect('d-cust');                              /* LOCAL cfg.customers — anahtar gerekmez */
+  const box=document.getElementById('d-res'); if(box) box.style.display='none';
+  if(sessionStorage.getItem('ot_akey')) loadDevices();   /* anahtar zaten varsa otomatik yükle+filtrele */
+  else { DEVLIST=null; renderDeviceList(); }              /* yoksa ipucu — popup YOK (üret/yenile'de sorulur) */
+}
+async function loadDevices(){
+  try{ const j=await apiAdmin('admin_cihaz_liste',{}); DEVLIST=j.cihazlar||[]; }
+  catch(e){ if(e.message==='no key'){ DEVLIST=null; renderDeviceList(); return; }
+    document.getElementById('d-list').innerHTML='<tr><td colspan="4" class="empty">'+esc(e.message)+'</td></tr>'; return; }
+  renderDeviceList();
+}
+/* Seçili firmanın cihazlarını gösterir (firma değişince otomatik yeniden çizilir) */
+function renderDeviceList(){
+  const tb=document.getElementById('d-list'); if(!tb)return;
+  const kod=val('d-cust');
+  if(DEVLIST===null){ tb.innerHTML='<tr><td colspan="4" class="empty">Cihazları görmek için "↻ Listeyi Yenile" — anahtar sorulur</td></tr>'; return; }
+  const list=DEVLIST.filter(d=> kod && d.musteriler && d.musteriler.split(',').indexOf(kod)>=0 );
+  tb.innerHTML = list.length ? list.map(d=>{
+    const name=[d.ad,d.sase_no].filter(Boolean).map(esc).join(' · ')||'<span class="muted">—</span>';
+    const keyBtn = d.device_key
+      ? '<button class="btn sm" title="Gizli anahtarı kopyala (firmware)" onclick="copyText(\''+esc(d.device_key)+'\',this)">🔑 anahtar</button>'
+      : '<span class="muted" style="font-size:11px">anahtar yok</span>';
+    return '<tr><td><b style="color:var(--crimson);font-family:Consolas,monospace">'+d.device_id+'</b> '+
+      '<button class="btn sm" onclick="copyText(\''+d.device_id+'\',this)">kopyala</button></td>'+
+      '<td>'+name+'</td><td>'+esc(kod)+'</td>'+
+      '<td style="text-align:right;white-space:nowrap">'+keyBtn+' '+
+      '<button class="btn sm dan" onclick="delDevice('+d.device_id+')">Sil</button></td></tr>';
+  }).join('') : '<tr><td colspan="4" class="empty">'+(kod?'Bu firmaya tanımlı cihaz yok — "device_id Üret + Ata" ile ekleyin':'Önce firma seçin')+'</td></tr>';
 }
 async function genDevice(){
-  const kod=val('d-cust'); if(!kod){ alert('Önce firma ekleyin/seçin'); return; }
+  const kod=val('d-cust'); if(!kod){ alert('Önce firma seçin (Firmalar sekmesinden ekleyip kaydedin)'); return; }
   const ad=val('d-ad').trim(), sase=val('d-sase').trim();
   try{
     const j=await apiAdmin('admin_cihaz_uret',{kod,ad,sase_no:sase});
@@ -775,28 +813,9 @@ async function genDevice(){
         '<button class="btn sm" onclick="copyText(\''+j.device_key+'\',this)">📋</button></div>'+
       '<div class="muted" style="margin-top:8px;font-size:11.5px">Firma: '+esc(kod)+(ad?' · '+esc(ad):'')+
         ' — İkisini de STM32 firmware\'ine gömün; cihaz veriyi bu anahtarla HMAC imzalayıp gönderir.</div>';
-    set('d-ad','');set('d-sase',''); loadDevices();
+    set('d-ad','');set('d-sase','');
+    await loadDevices();
   }catch(e){ if(e.message!=='no key') alert(/bulunamadi/i.test(e.message)?'Bu firma sunucuda yok — önce "☁ Sunucuya Kaydet" deyin.':('Hata: '+e.message)); }
-}
-async function loadDevices(){
-  const tb=document.getElementById('d-list'); if(!tb)return;
-  if(!akey()){ tb.innerHTML='<tr><td colspan="4" class="empty">Önce sağ üstten admin anahtarını girin</td></tr>'; return; }
-  try{
-    const j=await apiAdmin('admin_cihaz_liste',{});
-    const list=j.cihazlar||[];
-    tb.innerHTML = list.length ? list.map(d=>{
-      const name=[d.ad,d.sase_no].filter(Boolean).map(esc).join(' · ')||'<span class="muted">—</span>';
-      const owner=d.musteriler?esc(d.musteriler):'<span class="muted">atanmamış</span>';
-      const keyBtn = d.device_key
-        ? '<button class="btn sm" title="Gizli anahtarı kopyala (firmware)" onclick="copyText(\''+esc(d.device_key)+'\',this)">🔑 anahtar</button>'
-        : '<span class="muted" style="font-size:11px">anahtar yok</span>';
-      return '<tr><td><b style="color:var(--crimson);font-family:Consolas,monospace">'+d.device_id+'</b> '+
-        '<button class="btn sm" onclick="copyText(\''+d.device_id+'\',this)">kopyala</button></td>'+
-        '<td>'+name+'</td><td>'+owner+'</td>'+
-        '<td style="text-align:right;white-space:nowrap">'+keyBtn+' '+
-        '<button class="btn sm dan" onclick="delDevice('+d.device_id+')">Sil</button></td></tr>';
-    }).join('') : '<tr><td colspan="4" class="empty">Henüz cihaz yok</td></tr>';
-  }catch(e){ if(e.message!=='no key') tb.innerHTML='<tr><td colspan="4" class="empty">'+esc(e.message)+'</td></tr>'; }
 }
 async function delDevice(dev){
   if(!confirm('device_id '+dev+' tamamen silinsin mi?'))return;
@@ -813,15 +832,36 @@ function importJson(e){ const f=e.target.files[0]; if(!f)return; const r=new Fil
 
 /* ---------- Sunucu (MySQL) senkronizasyonu ---------- */
 const API='https://omnitraceglobal.com/musteri_api.php';
-function akey(){ return document.getElementById('akey').value.trim() || sessionStorage.getItem('ot_akey') || ''; }
+function akey(){ return sessionStorage.getItem('ot_akey') || ''; }
+/* Admin anahtarı popup'ı: oturumda yoksa modal açar, kullanıcı girince döner.
+   "Bu oturumda hatırla" işaretliyse session'a yazılır → tekrar sorulmaz. */
+let _keyResolve=null;
+function ensureKey(){
+  return new Promise(resolve=>{
+    const have=sessionStorage.getItem('ot_akey'); if(have){ resolve(have); return; }
+    _keyResolve=resolve;
+    const m=document.getElementById('keyModal'); m.style.display='grid';
+    const inp=document.getElementById('kmInput'); inp.value=''; setTimeout(()=>inp.focus(),60);
+  });
+}
+function keyModalOk(){
+  const v=document.getElementById('kmInput').value.trim(); if(!v){ document.getElementById('kmInput').focus(); return; }
+  if(document.getElementById('kmRemember').checked) sessionStorage.setItem('ot_akey',v);
+  document.getElementById('keyModal').style.display='none';
+  const r=_keyResolve; _keyResolve=null; if(r)r(v);
+}
+function keyModalCancel(){
+  document.getElementById('keyModal').style.display='none';
+  const r=_keyResolve; _keyResolve=null; if(r)r('');
+}
 async function apiAdmin(action, extra){
-  const k=akey(); if(!k){ alert('Önce sağ üstten "admin anahtarı"nı girin (musteri_secret.php → $ADMIN_KEY).'); throw new Error('no key'); }
-  sessionStorage.setItem('ot_akey',k);
+  const k = await ensureKey(); if(!k) throw new Error('no key');
   /* API action'i URL query'den okur ($_GET); admin_key+cfg gövdede gider */
   const r=await fetch(API+'?action='+encodeURIComponent(action),{method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(Object.assign({admin_key:k},extra||{}))});
   let j={}; try{ j=await r.json(); }catch(e){}
+  if(r.status===401){ sessionStorage.removeItem('ot_akey'); throw new Error('Admin anahtarı geçersiz — tekrar deneyin'); }
   if(!r.ok||j.status!=='success') throw new Error(j.message||('HTTP '+r.status));
   return j;
 }

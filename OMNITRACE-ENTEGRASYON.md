@@ -180,6 +180,12 @@ geofence, mevcut görünümler, mobil reflow, i18n. Eklenen kod tamamen **opsiyo
 | 2026-06-23 | **admin.html homepage kırmızı temasına çevrildi + device_id sekmesi**; `musteri_admin.html` silindi (tek panel) | `hostinger/admin.html` | ✅ |
 | 2026-06-24 | **CİHAZ KİMLİK GÜVENLİĞİ**: whitelist + per-device HMAC + replay koruma (ingest sertleştirildi) | `veri_al.php`, `guvenlik_kurulum.php`, `musteri_api.php`, `admin.html` | ✅ |
 | 2026-06-24 | **STM32 codegen → HMAC imzalı** (Ot_BuildPayload + gömülü SHA-256/HMAC + device_id/key + ts) | `hostinger/admin.html` | ✅ |
+| 2026-06-24 | **admin UX:** Cihazlar firmaya göre filtre + admin anahtarı başta değil (kaydederken popup) | `hostinger/admin.html` | ✅ |
+
+### admin.html UX düzeltmeleri (2026-06-24)
+- **Cihazlar sekmesi firmaya göre filtre:** Önce tüm cihazlar görünüyordu; artık `DEVLIST` cache + `renderDeviceList()` seçili firmanın (`d-cust`) cihazlarını gösterir (`d.musteriler` içinde kod var mı). Firma dropdown'u **local cfg.customers**'tan dolar (anahtar gerekmez); `onchange` ile firma değişince **otomatik** filtrelenir.
+- **Admin anahtarı başta DEĞİL:** Topbar'daki `#akey` input kaldırıldı. `ensureKey()` promise'i — anahtar oturumda yoksa **modal popup** açar (#keyModal, "bu oturumda hatırla" varsayılan açık). `apiAdmin` → `await ensureKey()`. Yani gate (1234) ile gir, işlemleri yap; anahtar sadece **sunucu işlemi** (device üret, Sunucuya Kaydet/Yükle) anında sorulur. 401'de session anahtarı temizlenir (yanlış anahtar → tekrar sorar).
+- Canlı test (Playwright): firma dropdown local'den ✅ · CUST-001→sadece device1, CUST-002→sadece device2 ✅ · Cihazlar sekmesinde popup çıkmaz, Üret'te çıkar ✅ · popup onayı sonrası üretim ✅ · 0 pageerror.
 
 ### STM32 kod üreteci → HMAC imzalı payload (2026-06-24)
 admin.html "STM32 Kodu" sekmesi artık `veri_al.php` güvenlik sözleşmesine uygun **imzalı** kod üretir:
